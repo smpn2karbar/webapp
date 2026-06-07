@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Happy Numbers Arena - IFP Tactile Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { 
@@ -20,7 +21,7 @@
         /* Header & Panel Kontrol */
         header { 
             text-align: center; 
-            padding: 10px; 
+            padding: 12px; 
             background: #2d3748; 
             border-radius: 8px; 
             margin-bottom: 8px; 
@@ -120,20 +121,18 @@
             margin-top: 5px; 
             font-style: italic; 
         }
-        .info-misi strong { 
-            color: #48bb78; 
-        }
         #global-msg { 
-            background: #e53e3e; 
+            background: #38a169; 
             color: #fff; 
-            padding: 8px; 
-            border-radius: 5px; 
-            font-size: 14px; 
+            padding: 10px; 
+            border-radius: 6px; 
+            font-size: 15px; 
             display: none; 
-            margin-top: 5px; 
+            margin-top: 6px; 
             text-align: center; 
             font-weight: bold; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 2px dashed #ffffff;
         }
 
         /* Arena Permainan 2 Player */
@@ -147,7 +146,7 @@
             flex: 1; 
             background: #2d3748; 
             border-radius: 12px; 
-            padding: 10px; 
+            padding: 12px; 
             display: flex; 
             flex-direction: column; 
             border: 4px solid #4a5568; 
@@ -156,12 +155,6 @@
         }
         #p1-side { border-color: #3182ce; }
         #p2-side { border-color: #e53e3e; }
-        
-        /* Highlight Player Aktif/Menunggu */
-        .player-side.waiting-turn {
-            opacity: 0.6;
-            border-style: dashed;
-        }
         
         .player-title { 
             text-align: center; 
@@ -175,15 +168,15 @@
 
         .start-badge { 
             text-align: center; 
-            font-size: 26px; 
+            font-size: 28px; 
             font-weight: bold; 
             background: #1a202c; 
-            padding: 4px; 
+            padding: 6px; 
             border-radius: 6px; 
             margin-bottom: 8px; 
         }
-        #p1-start { color: #3182ce; border: 1px solid #3182ce; }
-        #p2-start { color: #e53e3e; border: 1px solid #e53e3e; }
+        #p1-start { color: #3182ce; border: 2px solid #3182ce; }
+        #p2-start { color: #e53e3e; border: 2px solid #e53e3e; }
 
         /* Log / Papan Tulis Langkah */
         .log-container { 
@@ -210,11 +203,6 @@
             background: #22543d; 
             font-weight: bold; 
         }
-        .log-entry.wait {
-            border-left-color: #a0aec0;
-            background: #4a5568;
-            font-style: italic;
-        }
 
         /* Alur Kerja Tiga Input Matematika */
         .math-interface { 
@@ -232,7 +220,6 @@
             font-size: 15px; 
         }
         
-        /* Input diformat read-only dari keyboard fisik agar dipaksa pakai tombol layar */
         .num-input { 
             width: 100px; 
             padding: 8px 4px; 
@@ -253,7 +240,7 @@
             border-color: #ecc94b; 
             background-color: #feebc8; 
             box-shadow: 0 0 8px #ecc94b;
-        } /* Menandai kolom mana yang sedang diketik */
+        }
         .num-input.error { 
             border-color: #e53e3e; 
             background-color: #fff5f5; 
@@ -322,22 +309,6 @@
             color: #718096; 
             cursor: not-allowed; 
         }
-
-        /* Overlay Status Menunggu Ronde Baru */
-        .waiting-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(26, 32, 44, 0.85);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #ecc94b;
-            z-index: 10;
-        }
     </style>
 </head>
 <body>
@@ -364,7 +335,7 @@
             <button id="btnFullscreen" class="btn-action" onclick="toggleFullscreen()">💻 Fullscreen</button>
         </div>
         
-        <div class="info-misi" id="infoMisi">Ketuk salah satu kotak input di bawah, lalu gunakan keypad layar untuk memasukkan rumus!</div>
+        <div class="info-misi" id="infoMisi">Kedua pemain mendapat angka berbeda tetapi memiliki total langkah penyelesaian yang sama persis (Fair Play). Siapa cepat dia menang!</div>
         <div id="global-msg"></div>
     </header>
 
@@ -404,11 +375,6 @@
                     <button id="p1-btn" class="btn-proses" style="flex: 2;" onclick="eksekusiLangkah(1)" disabled>Simpan Langkah</button>
                 </div>
             </div>
-            <!-- Dynamic overlay waiting state -->
-            <div id="p1-waiting-overlay" class="waiting-overlay" style="display: none;">
-                <span>Menunggu Player 2...</span>
-                <span style="font-size: 13px; font-weight: normal; margin-top: 5px;">Langkah Anda telah disimpan.</span>
-            </div>
         </div>
 
         <!-- PLAYER 2 -->
@@ -446,32 +412,46 @@
                     <button id="p2-btn" class="btn-proses" style="flex: 2;" onclick="eksekusiLangkah(2)" disabled>Simpan Langkah</button>
                 </div>
             </div>
-            <!-- Dynamic overlay waiting state -->
-            <div id="p2-waiting-overlay" class="waiting-overlay" style="display: none;">
-                <span>Menunggu Player 1...</span>
-                <span style="font-size: 13px; font-weight: normal; margin-top: 5px;">Langkah Anda telah disimpan.</span>
-            </div>
         </div>
     </div>
 
 <script>
+    // Setiap entri dijamin memiliki jumlah rantai kalkulasi yang sama persis ke target!
     const databaseHappy = {
         happy: {
-            mudah:  [ {p1: "19", p2: "10"}, {p1: "7", p2: "23"}, {p1: "28", p2: "68"} ],
-            sedang: [ {p1: "13", p2: "31"}, {p1: "79", p2: "97"}, {p1: "49", p2: "94"} ],
-            sulit:  [ {p1: "167", p2: "263"}, {p1: "373", p2: "383"}, {p1: "473", p2: "593"} ]
+            mudah:  [ 
+                {p1: "13", p2: "31"}, // 2 langkah ke 1 (13->10->1 vs 31->10->1)
+                {p1: "68", p2: "86"}  // 2 langkah ke 1 (68->100->1 vs 86->100->1)
+            ],
+            sedang: [ 
+                {p1: "23", p2: "32"}, // 3 langkah ke 1 (23->13->10->1 vs 32->13->10->1)
+                {p1: "28", p2: "82"}  // 3 langkah ke 1 (28->68->100->1 vs 82->68->100->1)
+            ],
+            sulit:  [ 
+                {p1: "19", p2: "91"}, // 4 langkah ke 1 (19->82->68->100->1 vs 91->82->68->100->1)
+                {p1: "49", p2: "94"}  // 4 langkah ke 1 (49->97->130->10->1 vs 94->97->130->10->1)
+            ]
         },
         unhappy: {
-            mudah:  [ {p1: "4", p2: "16"}, {p1: "20", p2: "37"}, {p1: "58", p2: "89"} ],
-            sedang: [ {p1: "145", p2: "42"}, {p1: "2", p2: "3"}, {p1: "5", p2: "6"} ],
-            sulit:  [ {p1: "11", p2: "12"}, {p1: "14", p2: "15"}, {p1: "21", p2: "22"} ]
+            mudah:  [ 
+                {p1: "11", p2: "24"}, // 2 langkah ke 4 (11->2->4 vs 24->20->4)
+                {p1: "110", p2: "42"} // 2 langkah ke 4 (110->2->4 vs 42->20->4)
+            ],
+            sedang: [ 
+                {p1: "145", p2: "311"}, // 3 langkah ke 4 (145->42->20->4 vs 311->11->2->4)
+                {p1: "224", p2: "131"}  // 3 langkah ke 4 (224->24->20->4 vs 131->11->2->4)
+            ],
+            sulit:  [ 
+                {p1: "89", p2: "179"}, // 4 langkah ke 4 (89->145->42->20->4 vs 179->131->11->2->4)
+                {p1: "98", p2: "971"}  // 4 langkah ke 4 (98->145->42->20->4 vs 971->131->11->2->4)
+            ]
         }
     };
 
     let modeDipilih = "happy";
     let kesulitanDipilih = "mudah";
     
-    // Status Permainan
+    // Status Permainan Independen
     let p1AngkaSaatIni = "";
     let p2AngkaSaatIni = "";
     let p1Langkah = 0;
@@ -479,14 +459,6 @@
     let gameAktif = false;
     let targetFinis = "1";
 
-    // Antrean Turn/Ronde untuk menjamin keadilan (Fair Play)
-    // Siswa harus menyelesaikan langkah di nomor ronde yang sama
-    let p1SelesaiRondeIni = false;
-    let p2SelesaiRondeIni = false;
-    let logTempP1 = null; // Menyimpan data langkah ronde berjalan
-    let logTempP2 = null;
-
-    // Variabel penyimpan ID input mana yang sedang aktif dipilih siswa
     let p1InputFokus = "";
     let p2InputFokus = "";
 
@@ -515,10 +487,6 @@
         p2AngkaSaatIni = opsiTerpilih.p2;
         p1Langkah = 0;
         p2Langkah = 0;
-        p1SelesaiRondeIni = false;
-        p2SelesaiRondeIni = false;
-        logTempP1 = null;
-        logTempP2 = null;
         gameAktif = true;
 
         document.getElementById('p1-start').innerText = opsiTerpilih.p1;
@@ -534,11 +502,6 @@
         aktifkanForm(1, true);
         aktifkanForm(2, true);
         
-        // Sembunyikan overlay tunggu jika ada sisa game sebelumnya
-        document.getElementById('p1-waiting-overlay').style.display = 'none';
-        document.getElementById('p2-waiting-overlay').style.display = 'none';
-        
-        // Enable reset button
         document.getElementById('btnReset').disabled = false;
     }
 
@@ -548,10 +511,6 @@
         p2AngkaSaatIni = "";
         p1Langkah = 0;
         p2Langkah = 0;
-        p1SelesaiRondeIni = false;
-        p2SelesaiRondeIni = false;
-        logTempP1 = null;
-        logTempP2 = null;
 
         document.getElementById('p1-start').innerText = "??";
         document.getElementById('p2-start').innerText = "??";
@@ -575,18 +534,11 @@
         document.getElementById("p2-in2").value = "";
         document.getElementById("p2-in3").value = "";
 
-        document.getElementById('p1-waiting-overlay').style.display = 'none';
-        document.getElementById('p2-waiting-overlay').style.display = 'none';
-
         hideError();
     }
 
     function setFokusInput(player, inputId) {
         if (!gameAktif) return;
-        
-        // Cek jika player tersebut sedang dalam status menunggu player lain
-        if (player === 1 && p1SelesaiRondeIni) return;
-        if (player === 2 && p2SelesaiRondeIni) return;
 
         // Hapus tanda aktif lama
         if (player === 1) {
@@ -679,73 +631,37 @@
         if (userIn3 !== solutionIn3) { in3.classList.add('error'); valid = false; }
 
         if (!valid) {
-            showError(`Ada bagian penguadratan atau penjumlahan Player ${player} yang masih belum tepat!`);
+            showError(`Formula Player ${player} belum tepat!`);
             return;
         }
 
-        // Jika validasi sukses, simpan data langkah sementara pemain tersebut
+        // Jika validasi sukses, simpan langkah secara langsung (Adu Kecepatan Real-time!)
         let logFormatText = `${userIn1} = ${userIn2} = ${userIn3}`;
         
         if (player === 1) {
             p1Langkah++;
             p1AngkaSaatIni = solutionIn3;
-            logTempP1 = { langkah: p1Langkah, teks: logFormatText, hasil: solutionIn3 };
-            p1SelesaiRondeIni = true;
+            tambahLog(1, p1Langkah, logFormatText, solutionIn3);
             
-            // Nonaktifkan input P1 untuk sementara
-            aktifkanForm(1, false);
-            if (p1InputFokus) document.getElementById(p1InputFokus).classList.remove('active-focus');
-            document.getElementById('p1-waiting-overlay').style.display = 'flex';
+            if (solutionIn3 === targetFinis) {
+                // Player 1 menang instan karena mencapai target duluan!
+                deklarasiHasilAkhir("P1", "PLAYER 1 (BIRU) BERHASIL MENANG!");
+            } else {
+                // Kosongkan dan siapkan untuk langkah berikutnya secepatnya
+                aktifkanForm(1, true);
+                setFokusInput(1, 'p1-in1');
+            }
         } else {
             p2Langkah++;
             p2AngkaSaatIni = solutionIn3;
-            logTempP2 = { langkah: p2Langkah, teks: logFormatText, hasil: solutionIn3 };
-            p2SelesaiRondeIni = true;
+            tambahLog(2, p2Langkah, logFormatText, solutionIn3);
             
-            // Nonaktifkan input P2 untuk sementara
-            aktifkanForm(2, false);
-            if (p2InputFokus) document.getElementById(p2InputFokus).classList.remove('active-focus');
-            document.getElementById('p2-waiting-overlay').style.display = 'flex';
-        }
-
-        // Cek apakah kedua pemain telah menyelesaikan ronde yang sama (Fair Play Sync)
-        evaluasiRonde();
-    }
-
-    function evaluasiRonde() {
-        if (p1SelesaiRondeIni && p2SelesaiRondeIni) {
-            // Kedua pemain telah memasukkan jawabannya pada ronde ini
-            // Tambahkan ke log tampilan utama secara bersamaan
-            tambahLog(1, logTempP1.langkah, logTempP1.teks, logTempP1.hasil);
-            tambahLog(2, logTempP2.langkah, logTempP2.teks, logTempP2.hasil);
-
-            let p1MencapaiTarget = (logTempP1.hasil === targetFinis);
-            let p2MencapaiTarget = (logTempP2.hasil === targetFinis);
-
-            // Bersihkan overlay tunggu
-            document.getElementById('p1-waiting-overlay').style.display = 'none';
-            document.getElementById('p2-waiting-overlay').style.display = 'none';
-
-            if (p1MencapaiTarget && p2MencapaiTarget) {
-                // Skenario Seri (Dua-duanya mencapai target pada ronde/jumlah langkah yang sama)
-                deklarasiHasilAkhir("SERI", "Kedua pemain berhasil menyelesaikan game pada ronde yang sama! Luar biasa!");
-            } else if (p1MencapaiTarget) {
-                // Player 1 Menang
-                deklarasiHasilAkhir("P1", "PLAYER 1 BERHASIL MENANG!");
-            } else if (p2MencapaiTarget) {
-                // Player 2 Menang
-                deklarasiHasilAkhir("P2", "PLAYER 2 BERHASIL MENANG!");
+            if (solutionIn3 === targetFinis) {
+                // Player 2 menang instan karena mencapai target duluan!
+                deklarasiHasilAkhir("P2", "PLAYER 2 (MERAH) BERHASIL MENANG!");
             } else {
-                // Lanjutkan ke ronde berikutnya
-                p1SelesaiRondeIni = false;
-                p2SelesaiRondeIni = false;
-                logTempP1 = null;
-                logTempP2 = null;
-
-                aktifkanForm(1, true);
+                // Kosongkan dan siapkan untuk langkah berikutnya secepatnya
                 aktifkanForm(2, true);
-
-                setFokusInput(1, 'p1-in1');
                 setFokusInput(2, 'p2-in1');
             }
         }
@@ -784,30 +700,21 @@
         aktifkanForm(1, false);
         aktifkanForm(2, false);
         
-        // Hapus status focus indicator
         if (p1InputFokus) document.getElementById(p1InputFokus).classList.remove('active-focus');
         if (p2InputFokus) document.getElementById(p2InputFokus).classList.remove('active-focus');
 
         const errorDiv = document.getElementById('global-msg');
-        
-        if (pemenang === "SERI") {
-            errorDiv.innerText = `🤝 GAME SERI (DRAW): ${pesan} 🤝`;
-            errorDiv.style.background = "#3182ce"; // Biru netral
-        } else {
-            errorDiv.innerText = `🎉 MATCH OVER: ${pesan} 🎉`;
-            errorDiv.style.background = "#38a169"; // Hijau sukses
-        }
-        
+        errorDiv.innerText = `🎉 MATCH OVER: ${pesan} 🎉`;
+        errorDiv.style.background = "#38a169"; // Hijau sukses
         errorDiv.style.display = 'block';
     }
 
-    // Fitur Fullscreen Universal
     function toggleFullscreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().then(() => {
                 document.getElementById('btnFullscreen').innerText = "❌ Keluar Fullscreen";
             }).catch(err => {
-                alert(`Gagal mengaktifkan mode fullscreen: ${err.message}`);
+                // Silent fallback
             });
         } else {
             document.exitFullscreen().then(() => {
@@ -816,7 +723,6 @@
         }
     }
 
-    // Monitor perubahan status fullscreen (misal ditekan ESC pada keyboard fisik)
     document.addEventListener('fullscreenchange', () => {
         if (!document.fullscreenElement) {
             document.getElementById('btnFullscreen').innerText = "💻 Fullscreen";
