@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy Numbers Arena - IFP Tactile Edition</title>
+    <title>Happy Numbers & Kaprekar Arena - IFP Tactile Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { 
             margin: 0; 
             padding: 10px; 
-            background-color: #1a202c; 
+            background-color: #111827; 
             color: #fff; 
             height: 100vh; 
             display: flex; 
@@ -18,20 +18,22 @@
             overflow: hidden; 
         }
         
-        /* Header & Panel Kontrol */
         header { 
             text-align: center; 
             padding: 12px; 
-            background: #2d3748; 
+            background: #1f2937; 
             border-radius: 8px; 
             margin-bottom: 8px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4); 
+            border: 1px solid #374151;
         }
         h1 { 
             margin: 0 0 6px 0; 
             font-size: 20px; 
-            color: #f6e05e; 
+            color: #f59e0b; 
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5); 
+            font-weight: 800;
+            letter-spacing: 1px;
         }
         
         .control-panel { 
@@ -39,10 +41,11 @@
             justify-content: center; 
             gap: 12px; 
             align-items: center; 
-            background: #1a202c; 
+            background: #111827; 
             padding: 8px; 
             border-radius: 6px; 
             flex-wrap: wrap;
+            border: 1px solid #374151;
         }
         .control-group { 
             display: flex; 
@@ -52,32 +55,32 @@
         .control-label { 
             font-weight: bold; 
             font-size: 13px; 
-            color: #a0aec0; 
+            color: #9ca3af; 
         }
         
         .btn-toggle { 
             padding: 6px 12px; 
             font-size: 12px; 
             font-weight: bold; 
-            border: 2px solid #4a5568; 
-            background: #2d3748; 
-            color: #e2e8f0; 
+            border: 2px solid #4b5563; 
+            background: #1f2937; 
+            color: #f3f4f6; 
             border-radius: 5px; 
             cursor: pointer; 
             transition: all 0.2s ease;
         }
         .btn-toggle:hover {
-            background-color: #4a5568;
+            background-color: #4b5563;
         }
         .btn-toggle.active { 
-            background: #3182ce; 
-            border-color: #2b6cb0; 
-            box-shadow: 0 0 8px rgba(49, 130, 206, 0.5); 
+            background: #2563eb; 
+            border-color: #3b82f6; 
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.6); 
         }
-        .btn-difficulty.active { 
-            background: #dd6b20; 
-            border-color: #c05621; 
-            box-shadow: 0 0 8px rgba(221, 107, 32, 0.5); 
+        .btn-toggle.btn-difficulty.active { 
+            background: #ea580c; 
+            border-color: #f97316; 
+            box-shadow: 0 0 8px rgba(234, 88, 12, 0.6); 
         }
         
         .btn-action {
@@ -93,36 +96,36 @@
             transform: scale(0.95);
         }
         #btnMulai { 
-            background-color: #38a169; 
+            background-color: #16a34a; 
             color: white; 
         }
         #btnMulai:hover {
-            background-color: #2f855a;
+            background-color: #15803d;
         }
         #btnReset {
-            background-color: #718096;
+            background-color: #4b5563;
             color: white;
         }
         #btnReset:hover {
-            background-color: #4a5568;
+            background-color: #374151;
         }
         #btnFullscreen {
-            background-color: #4a5568;
-            color: #f6e05e;
-            border: 1px solid #f6e05e;
+            background-color: #1f2937;
+            color: #fbbf24;
+            border: 1px solid #fbbf24;
         }
         #btnFullscreen:hover {
-            background-color: #2d3748;
+            background-color: #111827;
         }
 
         .info-misi { 
             font-size: 13px; 
-            color: #e2e8f0; 
+            color: #d1d5db; 
             margin-top: 5px; 
             font-style: italic; 
         }
         #global-msg { 
-            background: #38a169; 
+            background: #16a34a; 
             color: #fff; 
             padding: 10px; 
             border-radius: 6px; 
@@ -135,7 +138,6 @@
             border: 2px dashed #ffffff;
         }
 
-        /* Arena Permainan 2 Player */
         .game-arena { 
             display: flex; 
             flex: 1; 
@@ -144,17 +146,17 @@
         }
         .player-side { 
             flex: 1; 
-            background: #2d3748; 
+            background: #1f2937; 
             border-radius: 12px; 
             padding: 12px; 
             display: flex; 
             flex-direction: column; 
-            border: 4px solid #4a5568; 
+            border: 4px solid #4b5563; 
             position: relative;
             transition: all 0.3s ease;
         }
-        #p1-side { border-color: #3182ce; }
-        #p2-side { border-color: #e53e3e; }
+        #p1-side { border-color: #2563eb; }
+        #p2-side { border-color: #dc2626; }
         
         .player-title { 
             text-align: center; 
@@ -163,25 +165,25 @@
             font-weight: bold; 
             letter-spacing: 1px;
         }
-        #p1-side .player-title { color: #63b3ed; }
-        #p2-side .player-title { color: #feb2b2; }
+        #p1-side .player-title { color: #60a5fa; }
+        #p2-side .player-title { color: #f87171; }
 
         .start-badge { 
             text-align: center; 
             font-size: 28px; 
             font-weight: bold; 
-            background: #1a202c; 
+            background: #111827; 
             padding: 6px; 
             border-radius: 6px; 
             margin-bottom: 8px; 
         }
-        #p1-start { color: #3182ce; border: 2px solid #3182ce; }
-        #p2-start { color: #e53e3e; border: 2px solid #e53e3e; }
+        #p1-start { color: #60a5fa; border: 2px solid #2563eb; }
+        #p2-start { color: #f87171; border: 2px solid #dc2626; }
 
         /* Log / Papan Tulis Langkah */
         .log-container { 
             flex: 1; 
-            background: #1a202c; 
+            background: #111827; 
             border-radius: 8px; 
             padding: 8px; 
             overflow-y: auto; 
@@ -189,61 +191,64 @@
             font-family: 'Courier New', Courier, monospace; 
             font-size: 13px; 
             min-height: 80px; 
-            border: 1px solid #4a5568;
+            border: 1px solid #4b5563;
         }
         .log-entry { 
-            background: #2d3748; 
+            background: #1f2937; 
             padding: 4px 6px; 
             margin-bottom: 4px; 
             border-radius: 4px; 
-            border-left: 3px solid #ecc94b; 
+            border-left: 3px solid #fbbf24; 
         }
         .log-entry.win { 
-            border-left-color: #38a169; 
-            background: #22543d; 
+            border-left-color: #16a34a; 
+            background: #14532d; 
             font-weight: bold; 
         }
 
-        /* Alur Kerja Tiga Input Matematika */
         .math-interface { 
-            background: #232d3f; 
+            background: #111827; 
             padding: 10px; 
             border-radius: 8px; 
-            border: 1px solid #4a5568; 
+            border: 1px solid #4b5563; 
         }
         .formula-row { 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            gap: 4px; 
+            gap: 6px; 
             margin-bottom: 8px; 
-            font-size: 15px; 
+            font-size: 16px; 
+            font-weight: bold;
+        }
+        .formula-row span {
+            color: #fbbf24;
         }
         
         .num-input { 
-            width: 100px; 
+            width: 110px; 
             padding: 8px 4px; 
             font-size: 14px; 
             text-align: center; 
             font-weight: bold; 
             border-radius: 5px; 
-            border: 2px solid #718096; 
+            border: 2px solid #4b5563; 
             background: #fff; 
             color: #000; 
             cursor: pointer;
         }
         .num-input:focus { 
-            border-color: #ecc94b; 
+            border-color: #f59e0b; 
             outline: none; 
         }
         .num-input.active-focus { 
-            border-color: #ecc94b; 
-            background-color: #feebc8; 
-            box-shadow: 0 0 8px #ecc94b;
+            border-color: #f59e0b; 
+            background-color: #fef3c7; 
+            box-shadow: 0 0 8px #f59e0b;
         }
         .num-input.error { 
-            border-color: #e53e3e; 
-            background-color: #fff5f5; 
+            border-color: #dc2626; 
+            background-color: #fee2e2; 
             animation: shake 0.3s;
         }
         
@@ -253,7 +258,6 @@
             75% { transform: translateX(4px); }
         }
         
-        /* Papan Keypad Sentuh IFP */
         .ifp-keypad { 
             display: grid; 
             grid-template-columns: repeat(6, 1fr); 
@@ -264,7 +268,7 @@
             padding: 12px 0; 
             font-size: 16px; 
             font-weight: bold; 
-            background: #4a5568; 
+            background: #374151; 
             border: none; 
             color: white; 
             border-radius: 4px; 
@@ -274,19 +278,19 @@
             touch-action: manipulation;
         }
         .key-btn:active { 
-            background: #718096; 
+            background: #4b5563; 
         }
         .key-btn.symbol { 
-            background: #2b6cb0; 
+            background: #1d4ed8; 
         }
         .key-btn.symbol:active {
-            background: #2b5cb0;
+            background: #1e40af;
         }
         .key-btn.clear { 
-            background: #c53030; 
+            background: #991b1b; 
         }
         .key-btn.clear:active {
-            background: #9b2c2c;
+            background: #7f1d1d;
         }
 
         .btn-proses { 
@@ -294,7 +298,7 @@
             padding: 12px; 
             font-size: 14px; 
             font-weight: bold; 
-            background: #805ad5; 
+            background: #6d28d9; 
             border: none; 
             color: white; 
             border-radius: 5px; 
@@ -302,11 +306,11 @@
             touch-action: manipulation;
         }
         .btn-proses:active {
-            background: #6b46c1;
+            background: #5b21b6;
         }
         .btn-proses:disabled, .key-btn:disabled { 
-            background: #2d3748; 
-            color: #718096; 
+            background: #1f2937; 
+            color: #4b5563; 
             cursor: not-allowed; 
         }
     </style>
@@ -314,15 +318,31 @@
 <body>
 
     <header>
-        <h1>HAPPY NUMBERS COMPETE CENTER (TACTILE IFP VERSION)</h1>
+        <h1>HAPPY NUMBERS & KAPREKAR ARENA (TACTILE IFP VERSION)</h1>
         
         <div class="control-panel">
+            <!-- Game Category Selection -->
             <div class="control-group">
-                <span class="control-label">MODE GAME:</span>
+                <span class="control-label">KATEGORI:</span>
+                <button class="btn-toggle active" id="catHappy" onclick="setCategory('happy')">HAPPY NUMBERS</button>
+                <button class="btn-toggle" id="catKaprekar" onclick="setCategory('kaprekar')">KAPREKAR CONSTANT</button>
+            </div>
+
+            <!-- Happy Game Modes -->
+            <div class="control-group" id="group-modes-happy">
+                <span class="control-label">MODE:</span>
                 <button class="btn-toggle active" id="modeHappy" onclick="setGameMode('happy')">HAPPY (➔ 1)</button>
                 <button class="btn-toggle" id="modeUnhappy" onclick="setGameMode('unhappy')">UNHAPPY (➔ 4)</button>
             </div>
+
+            <!-- Kaprekar Game Modes -->
+            <div class="control-group hidden" id="group-modes-kaprekar">
+                <span class="control-label">DIGIT:</span>
+                <button class="btn-toggle" id="modeKap3" onclick="setGameMode('kap3')">3 DIGIT (➔ 495)</button>
+                <button class="btn-toggle" id="modeKap4" onclick="setGameMode('kap4')">4 DIGIT (➔ 6174)</button>
+            </div>
             
+            <!-- Difficulty -->
             <div class="control-group">
                 <span class="control-label">KESULITAN:</span>
                 <button class="btn-toggle btn-difficulty active" id="diff-mudah" onclick="setDifficulty('mudah')">MUDAH</button>
@@ -349,10 +369,10 @@
             <div class="math-interface">
                 <div class="formula-row">
                     <input type="text" id="p1-in1" class="num-input" placeholder="Pangkat (^)" readonly onclick="setFokusInput(1, 'p1-in1')">
-                    <span>=</span>
+                    <span id="p1-sep1">=</span>
                     <input type="text" id="p1-in2" class="num-input" placeholder="Kuadrat (+)" readonly onclick="setFokusInput(1, 'p1-in2')">
-                    <span>=</span>
-                    <input type="text" id="p1-in3" class="num-input" style="width: 75px;" placeholder="Hasil" readonly onclick="setFokusInput(1, 'p1-in3')">
+                    <span id="p1-sep2">=</span>
+                    <input type="text" id="p1-in3" class="num-input" style="width: 80px;" placeholder="Hasil" readonly onclick="setFokusInput(1, 'p1-in3')">
                 </div>
                 
                 <div class="ifp-keypad">
@@ -386,10 +406,10 @@
             <div class="math-interface">
                 <div class="formula-row">
                     <input type="text" id="p2-in1" class="num-input" placeholder="Pangkat (^)" readonly onclick="setFokusInput(2, 'p2-in1')">
-                    <span>=</span>
+                    <span id="p2-sep1">=</span>
                     <input type="text" id="p2-in2" class="num-input" placeholder="Kuadrat (+)" readonly onclick="setFokusInput(2, 'p2-in2')">
-                    <span>=</span>
-                    <input type="text" id="p2-in3" class="num-input" style="width: 75px;" placeholder="Hasil" readonly onclick="setFokusInput(2, 'p2-in3')">
+                    <span id="p2-sep2">=</span>
+                    <input type="text" id="p2-in3" class="num-input" style="width: 80px;" placeholder="Hasil" readonly onclick="setFokusInput(2, 'p2-in3')">
                 </div>
                 
                 <div class="ifp-keypad">
@@ -416,48 +436,75 @@
     </div>
 
 <script>
-    // Setiap entri dijamin memiliki jumlah rantai kalkulasi yang sama persis ke target!
+    // Database Happy/Unhappy (di-upgrade agar asimetris & presisi langkah)
     const databaseHappy = {
         happy: {
             mudah:  [ 
-                {p1: "13", p2: "68"},   // 2 langkah ke 1 (13->10->1 vs 68->100->1)
-                {p1: "23", p2: "28"},   // 3 langkah ke 1 (23->13->10->1 vs 28->68->100->1)
-                {p1: "129", p2: "97"},  // 3 langkah ke 1 (129->86->100->1 vs 97->130->10->1)
-                {p1: "103", p2: "31"}   // 2 langkah ke 1 (103->10->1 vs 31->10->1)
+                {p1: "13", p2: "68"},   // 2 langkah ke 1
+                {p1: "23", p2: "28"},   // 3 langkah ke 1
+                {p1: "103", p2: "31"}   // 2 langkah ke 1
             ],
             sedang: [ 
-                {p1: "19", p2: "44"},   // 4 langkah ke 1 (19->82->68->100->1 vs 44->32->13->10->1)
-                {p1: "49", p2: "188"},  // 4 langkah ke 1 (49->97->130->10->1 vs 188->129->86->100->1)
-                {p1: "7", p2: "133"},   // 5 langkah ke 1 (7->49->97->130->10->1 vs 133->19->82->68->100->1)
-                {p1: "139", p2: "236"}  // 5 langkah ke 1 (139->91->82->68->100->1 vs 236->49->97->130->10->1)
+                {p1: "19", p2: "44"},   // 4 langkah ke 1
+                {p1: "49", p2: "188"},  // 4 langkah ke 1
+                {p1: "7", p2: "133"}    // 5 langkah ke 1
             ],
             sulit:  [ 
-                {p1: "356", p2: "469"},  // 6 langkah ke 1 (356->70->49->97->130->10->1 vs 469->133->19->82->68->100->1)
-                {p1: "379", p2: "649"},  // 6 langkah ke 1 (379->139->91->82->68->100->1 vs 649->133->19->82->68->100->1)
-                {p1: "694", p2: "739"}   // 6 langkah ke 1 (694->133->19->82->68->100->1 vs 739->139->91->82->68->100->1)
+                {p1: "356", p2: "469"},  // 6 langkah ke 1
+                {p1: "379", p2: "649"}   // 6 langkah ke 1
             ]
         },
         unhappy: {
             mudah:  [ 
-                {p1: "11", p2: "24"},   // 2 langkah ke 4 (11->2->4 vs 24->20->4)
-                {p1: "110", p2: "42"},  // 2 langkah ke 4 (110->2->4 vs 42->20->4)
-                {p1: "145", p2: "311"}, // 3 langkah ke 4 (145->42->20->4 vs 311->11->2->4)
-                {p1: "224", p2: "131"}  // 3 langkah ke 4 (224->24->20->4 vs 131->11->2->4)
+                {p1: "11", p2: "24"},   // 2 langkah ke 4
+                {p1: "110", p2: "42"},  // 2 langkah ke 4
+                {p1: "145", p2: "311"}  // 3 langkah ke 4
             ],
             sedang: [ 
-                {p1: "89", p2: "179"},  // 4 langkah ke 4 (89->145->42->20->4 vs 179->131->11->2->4)
-                {p1: "449", p2: "98"},  // 4 langkah ke 4 (449->113->11->2->4 vs 98->145->42->20->4)
-                {p1: "58", p2: "977"},  // 5 langkah ke 4 (58->89->145->42->20->4 vs 977->179->131->11->2->4)
-                {p1: "85", p2: "941"}   // 5 langkah ke 4 (85->89->145->42->20->4 vs 941->98->145->42->20->4)
+                {p1: "89", p2: "179"},  // 4 langkah ke 4
+                {p1: "449", p2: "98"},  // 4 langkah ke 4
+                {p1: "58", p2: "977"}   // 5 langkah ke 4
             ],
             sulit:  [ 
-                {p1: "37", p2: "92"},   // 6 langkah ke 4 (37->58->89->145->42->20->4 vs 92->85->89->145->42->20->4)
-                {p1: "16", p2: "52"},   // 7 langkah ke 4 (16->37->58->89->145->42->20->4 vs 52->29->85->89->145->42->20->4)
-                {p1: "61", p2: "83"}    // 7 langkah ke 4 (61->37->58->89->145->42->20->4 vs 83->73->58->89->145->42->20->4)
+                {p1: "37", p2: "92"},   // 6 langkah ke 4
+                {p1: "16", p2: "52"}    // 7 langkah ke 4
             ]
         }
     };
 
+    // Database Kaprekar (Fully balanced step counts, no anagrams/reverses)
+    const databaseKaprekar = {
+        3: { // Target 495
+            mudah:  [ 
+                {p1: "541", p2: "831"},   // 3 langkah ke 495
+                {p1: "652", p2: "942"}    // 3 langkah ke 495
+            ],
+            sedang: [ 
+                {p1: "421", p2: "860"},   // 4 langkah ke 495
+                {p1: "532", p2: "971"}    // 4 langkah ke 495
+            ],
+            sulit:  [ 
+                {p1: "322", p2: "877"},   // 6 langkah ke 495
+                {p1: "211", p2: "766"}    // 6 langkah ke 495
+            ]
+        },
+        4: { // Target 6174
+            mudah:  [ 
+                {p1: "3524", p2: "5433"}, // 3 langkah ke 6174
+                {p1: "6433", p2: "6544"}  // 3 langkah ke 6174
+            ],
+            sedang: [ 
+                {p1: "7454", p2: "8766"}, // 4 langkah ke 6174
+                {p1: "2111", p2: "3222"}  // 5 langkah ke 6174
+            ],
+            sulit:  [ 
+                {p1: "6331", p2: "7442"}, // 6 langkah ke 6174
+                {p1: "6753", p2: "3987"}  // 7 langkah ke 6174
+            ]
+        }
+    };
+
+    let kategoriDipilih = "happy";
     let modeDipilih = "happy";
     let kesulitanDipilih = "mudah";
     
@@ -472,12 +519,37 @@
     let p1InputFokus = "";
     let p2InputFokus = "";
 
+    function setCategory(cat) {
+        if (gameAktif) return;
+        kategoriDipilih = cat;
+        document.getElementById('catHappy').classList.toggle('active', cat === 'happy');
+        document.getElementById('catKaprekar').classList.toggle('active', cat === 'kaprekar');
+        
+        if (cat === 'happy') {
+            document.getElementById('group-modes-happy').classList.remove('hidden');
+            document.getElementById('group-modes-kaprekar').classList.add('hidden');
+            setGameMode('happy');
+        } else {
+            document.getElementById('group-modes-happy').classList.add('hidden');
+            document.getElementById('group-modes-kaprekar').classList.remove('hidden');
+            setGameMode('kap3');
+        }
+        updateUIForCategory();
+    }
+
     function setGameMode(mode) {
         if (gameAktif) return;
         modeDipilih = mode;
-        targetFinis = (mode === "happy") ? "1" : "4";
-        document.getElementById('modeHappy').classList.toggle('active', mode === 'happy');
-        document.getElementById('modeUnhappy').classList.toggle('active', mode === 'unhappy');
+        
+        if (kategoriDipilih === "happy") {
+            targetFinis = (mode === "happy") ? "1" : "4";
+            document.getElementById('modeHappy').classList.toggle('active', mode === 'happy');
+            document.getElementById('modeUnhappy').classList.toggle('active', mode === 'unhappy');
+        } else {
+            targetFinis = (mode === "kap3") ? "495" : "6174";
+            document.getElementById('modeKap3').classList.toggle('active', mode === 'kap3');
+            document.getElementById('modeKap4').classList.toggle('active', mode === 'kap4');
+        }
     }
 
     function setDifficulty(diff) {
@@ -488,10 +560,44 @@
         document.getElementById('diff-sulit').classList.toggle('active', diff === 'sulit');
     }
 
+    function updateUIForCategory() {
+        let isHappy = (kategoriDipilih === "happy");
+        let infoMisi = document.getElementById('infoMisi');
+        
+        if (isHappy) {
+            infoMisi.innerText = "Kedua pemain mendapat angka berbeda tetapi memiliki total langkah penyelesaian yang sama persis (Fair Play). Siapa cepat dia menang!";
+        } else {
+            infoMisi.innerText = "Urutkan digit dari besar ke kecil (Desc), kurangi dengan urutan kecil ke besar (Asc) untuk mencapai Konstanta Kaprekar!";
+        }
+
+        // Update separators
+        document.getElementById('p1-sep1').innerText = isHappy ? '=' : '-';
+        document.getElementById('p1-sep2').innerText = isHappy ? '=' : '=';
+        document.getElementById('p2-sep1').innerText = isHappy ? '=' : '-';
+        document.getElementById('p2-sep2').innerText = isHappy ? '=' : '=';
+        
+        // Update placeholders
+        document.getElementById('p1-in1').placeholder = isHappy ? 'Pangkat (^)' : 'Besar (Desc)';
+        document.getElementById('p1-in2').placeholder = isHappy ? 'Kuadrat (+)' : 'Kecil (Asc)';
+        document.getElementById('p1-in3').placeholder = isHappy ? 'Hasil' : 'Selisih (-)';
+        
+        document.getElementById('p2-in1').placeholder = isHappy ? 'Pangkat (^)' : 'Besar (Desc)';
+        document.getElementById('p2-in2').placeholder = isHappy ? 'Kuadrat (+)' : 'Kecil (Asc)';
+        document.getElementById('p2-in3').placeholder = isHappy ? 'Hasil' : 'Selisih (-)';
+    }
+
     function mulaiPertandingan() {
         hideError();
-        const kumpulanData = databaseHappy[modeDipilih][kesulitanDipilih];
-        const opsiTerpilih = kumpulanData[Math.floor(Math.random() * kumpulanData.length)];
+        let opsiTerpilih;
+        
+        if (kategoriDipilih === "happy") {
+            const kumpulanData = databaseHappy[modeDipilih][kesulitanDipilih];
+            opsiTerpilih = kumpulanData[Math.floor(Math.random() * kumpulanData.length)];
+        } else {
+            let numDigits = (modeDipilih === 'kap3') ? 3 : 4;
+            const kumpulanData = databaseKaprekar[numDigits][kesulitanDipilih];
+            opsiTerpilih = kumpulanData[Math.floor(Math.random() * kumpulanData.length)];
+        }
 
         p1AngkaSaatIni = opsiTerpilih.p1;
         p2AngkaSaatIni = opsiTerpilih.p2;
@@ -591,8 +697,10 @@
         for(let i=0; i<=9; i++) { 
             document.getElementById(`p${player}-k${i}`).disabled = !status; 
         }
-        document.getElementById(`p${player}-ks1`).disabled = !status;
-        document.getElementById(`p${player}-ks2`).disabled = !status;
+        
+        let isHappy = (kategoriDipilih === "happy");
+        document.getElementById(`p${player}-ks1`).disabled = !status || !isHappy;
+        document.getElementById(`p${player}-ks2`).disabled = !status || !isHappy;
         
         if (status) {
             document.getElementById(`p${player}-in1`).value = "";
@@ -617,60 +725,86 @@
         in2.classList.remove('error');
         in3.classList.remove('error');
 
-        let digits = angkaSaatIni.split('');
-
-        // 1. Kunci Jawaban Input 1 (Jabaran Pangkat, e.g., "1^2+9^2" atau "7^2")
-        let solutionIn1 = digits.map(d => `${d}^2`).join('+');
-        let solutionIn1Alt = digits.map(d => `${d}^2`).join(' + ');
-
-        // 2. Kunci Jawaban Input 2 (Hasil Kuadrat Individu, e.g., "1+81" atau "49")
-        let solutionIn2 = digits.map(d => Math.pow(parseInt(d), 2)).join('+');
-        let solutionIn2Alt = digits.map(d => Math.pow(parseInt(d), 2)).join(' + ');
-
-        // 3. Kunci Jawaban Input 3 (Total Akhir Penjumlahan, e.g., "82" atau "49")
-        let solutionIn3 = digits.reduce((sum, d) => sum + Math.pow(parseInt(d), 2), 0).toString();
-
         let userIn1 = in1.value.trim();
         let userIn2 = in2.value.trim();
         let userIn3 = in3.value.trim();
 
+        let nextNumber = "";
+        let logFormatText = "";
         let valid = true;
 
-        if (userIn1 !== solutionIn1 && userIn1 !== solutionIn1Alt) { in1.classList.add('error'); valid = false; }
-        if (userIn2 !== solutionIn2 && userIn2 !== solutionIn2Alt) { in2.classList.add('error'); valid = false; }
-        if (userIn3 !== solutionIn3) { in3.classList.add('error'); valid = false; }
+        if (kategoriDipilih === "happy") {
+            let digits = angkaSaatIni.split('');
 
-        if (!valid) {
-            showError(`Formula Player ${player} belum tepat!`);
-            return;
+            // 1. Kunci Jawaban Input 1 (Jabaran Pangkat, e.g., "1^2+9^2" atau "7^2")
+            let solutionIn1 = digits.map(d => `${d}^2`).join('+');
+            let solutionIn1Alt = digits.map(d => `${d}^2`).join(' + ');
+
+            // 2. Kunci Jawaban Input 2 (Hasil Kuadrat Individu, e.g., "1+81" atau "49")
+            let solutionIn2 = digits.map(d => Math.pow(parseInt(d), 2)).join('+');
+            let solutionIn2Alt = digits.map(d => Math.pow(parseInt(d), 2)).join(' + ');
+
+            // 3. Kunci Jawaban Input 3 (Total Akhir Penjumlahan, e.g., "82" atau "49")
+            let solutionIn3 = digits.reduce((sum, d) => sum + Math.pow(parseInt(d), 2), 0).toString();
+
+            if (userIn1 !== solutionIn1 && userIn1 !== solutionIn1Alt) { in1.classList.add('error'); valid = false; }
+            if (userIn2 !== solutionIn2 && userIn2 !== solutionIn2Alt) { in2.classList.add('error'); valid = false; }
+            if (userIn3 !== solutionIn3) { in3.classList.add('error'); valid = false; }
+
+            if (!valid) {
+                showError(`Formula Player ${player} belum tepat!`);
+                return;
+            }
+
+            nextNumber = solutionIn3;
+            logFormatText = `${userIn1} = ${userIn2} = ${userIn3}`;
+
+        } else {
+            // Kaprekar Mode
+            let digitLength = (modeDipilih === 'kap3') ? 3 : 4;
+            let paddedNum = angkaSaatIni.padStart(digitLength, '0');
+            let sortedDesc = paddedNum.split('').sort((a,b)=>b-a).join('');
+            let sortedAsc = paddedNum.split('').sort((a,b)=>a-b).join('');
+            let diffNum = (parseInt(sortedDesc) - parseInt(sortedAsc)).toString().padStart(digitLength, '0');
+
+            // Cocokkan input (Mendukung input dengan / tanpa leading zeros agar anak-anak tidak kesulitan)
+            let isDescValid = (userIn1 === sortedDesc || parseInt(userIn1) === parseInt(sortedDesc));
+            let isAscValid = (userIn2 === sortedAsc || parseInt(userIn2) === parseInt(sortedAsc));
+            let isDiffValid = (userIn3 === diffNum || parseInt(userIn3) === parseInt(diffNum));
+
+            if (!isDescValid) { in1.classList.add('error'); valid = false; }
+            if (!isAscValid) { in2.classList.add('error'); valid = false; }
+            if (!isDiffValid) { in3.classList.add('error'); valid = false; }
+
+            if (!valid) {
+                showError(`Langkah Kaprekar Player ${player} belum tepat! Urutkan digit dari terbesar ke terkecil (Desc), terkecil ke terbesar (Asc), lalu hitung selisihnya.`);
+                return;
+            }
+
+            nextNumber = diffNum;
+            logFormatText = `${userIn1} - ${userIn2} = ${userIn3}`;
         }
 
-        // Jika validasi sukses, simpan langkah secara langsung (Adu Kecepatan Real-time!)
-        let logFormatText = `${userIn1} = ${userIn2} = ${userIn3}`;
-        
+        // Skenario Adu Kecepatan Murni: Siapa cepat mencapai target langsung menang!
         if (player === 1) {
             p1Langkah++;
-            p1AngkaSaatIni = solutionIn3;
-            tambahLog(1, p1Langkah, logFormatText, solutionIn3);
+            p1AngkaSaatIni = nextNumber;
+            tambahLog(1, p1Langkah, logFormatText, nextNumber);
             
-            if (solutionIn3 === targetFinis) {
-                // Player 1 menang instan karena mencapai target duluan!
+            if (nextNumber === targetFinis) {
                 deklarasiHasilAkhir("P1", "PLAYER 1 (BIRU) BERHASIL MENANG!");
             } else {
-                // Kosongkan dan siapkan untuk langkah berikutnya secepatnya
                 aktifkanForm(1, true);
                 setFokusInput(1, 'p1-in1');
             }
         } else {
             p2Langkah++;
-            p2AngkaSaatIni = solutionIn3;
-            tambahLog(2, p2Langkah, logFormatText, solutionIn3);
+            p2AngkaSaatIni = nextNumber;
+            tambahLog(2, p2Langkah, logFormatText, nextNumber);
             
-            if (solutionIn3 === targetFinis) {
-                // Player 2 menang instan karena mencapai target duluan!
+            if (nextNumber === targetFinis) {
                 deklarasiHasilAkhir("P2", "PLAYER 2 (MERAH) BERHASIL MENANG!");
             } else {
-                // Kosongkan dan siapkan untuk langkah berikutnya secepatnya
                 aktifkanForm(2, true);
                 setFokusInput(2, 'p2-in1');
             }
@@ -684,7 +818,12 @@
         
         if (hasilAkhir === targetFinis) {
             entry.className += ' win';
-            let labelStatus = (modeDipilih === "happy") ? "HAPPY!" : "LOOP DETECTED!";
+            let labelStatus = "";
+            if (kategoriDipilih === "happy") {
+                labelStatus = (modeDipilih === "happy") ? "HAPPY!" : "LOOP DETECTED!";
+            } else {
+                labelStatus = "KAPREKAR CONSTANT!";
+            }
             entry.innerText = `Ronde ${langkah}: ${gabunganProses} (🎯 ${labelStatus})`;
         } else {
             entry.innerText = `Ronde ${langkah}: ${gabunganProses}`;
@@ -697,7 +836,7 @@
     function showError(msg) {
         const errorDiv = document.getElementById('global-msg');
         errorDiv.innerText = msg;
-        errorDiv.style.background = "#e53e3e";
+        errorDiv.style.background = "#dc2626";
         errorDiv.style.display = 'block';
     }
 
@@ -715,7 +854,7 @@
 
         const errorDiv = document.getElementById('global-msg');
         errorDiv.innerText = `🎉 MATCH OVER: ${pesan} 🎉`;
-        errorDiv.style.background = "#38a169"; // Hijau sukses
+        errorDiv.style.background = "#16a34a"; // Hijau sukses
         errorDiv.style.display = 'block';
     }
 
