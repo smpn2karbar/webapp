@@ -12,7 +12,7 @@
 
         /* Header & Panel Kontrol */
         header { text-align: center; padding: 10px; background: #1e293b; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: 1px solid #334155; position: relative; }
-        h1 { margin: 0 0 6px 0; font-size: 20px; color: #f59e0b; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); letter-spacing: 1px; }
+        h1 { margin: 0 0 6px 0; font-size: 22px; color: #f59e0b; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); letter-spacing: 1px; }
         
         /* Tombol Layar Penuh */
         .fullscreen-bar { position: absolute; right: 10px; top: 10px; }
@@ -43,37 +43,44 @@
         #p1-side { border-color: #2563eb; }
         #p2-side { border-color: #ef4444; }
         
-        .player-title { text-align: center; font-size: 16px; margin-bottom: 4px; font-weight: bold; }
+        .player-title { text-align: center; font-size: 18px; margin-bottom: 4px; font-weight: bold; }
         #p1-side .player-title { color: #3b82f6; }
         #p2-side .player-title { color: #f87171; }
 
-        .start-badge { text-align: center; font-size: 26px; font-weight: bold; background: #0f172a; padding: 4px; border-radius: 6px; margin-bottom: 8px; letter-spacing: 2px; }
+        .start-badge { text-align: center; font-size: 32px; font-weight: bold; background: #0f172a; padding: 4px; border-radius: 6px; margin-bottom: 8px; letter-spacing: 2px; }
         #p1-start { color: #3b82f6; border: 1px solid #2563eb; }
         #p2-start { color: #f87171; border: 1px solid #ef4444; }
 
         /* Log / Papan Langkah */
-        .log-container { flex: 1; background: #0f172a; border-radius: 8px; padding: 8px; overflow-y: auto; margin-bottom: 8px; font-family: monospace; font-size: 13px; min-height: 80px; border: 1px solid #334155; }
+        .log-container { flex: 1; background: #0f172a; border-radius: 8px; padding: 8px; overflow-y: auto; margin-bottom: 8px; font-family: monospace; font-size: 14px; min-height: 80px; border: 1px solid #334155; }
         .log-entry { background: #1e293b; padding: 4px 6px; margin-bottom: 4px; border-radius: 4px; border-left: 3px solid #f59e0b; }
         .log-entry.win { border-left-color: #10b981; background: #064e3b; font-weight: bold; color: #a7f3d0; }
 
-        /* Alur Kerja Dua Input Matematika (DIREVISI: Ukuran Huruf Diperbesar) */
-        .math-interface { background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155; }
-        .formula-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; font-size: 24px; font-weight: bold; }
+        /* Alur Kerja Dua Input Matematika (DIREVISI: Ukuran Huruf & Lebar Input Diperbesar) */
+        .math-interface { background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; }
+        .formula-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; font-size: 28px; font-weight: bold; }
         
-        .num-input { width: 170px; padding: 10px 4px; font-size: 20px; text-align: center; font-weight: bold; border-radius: 6px; border: 2px solid #475569; background: #fff; color: #000; }
+        .num-input { padding: 10px 4px; font-size: 24px; text-align: center; font-weight: bold; border-radius: 8px; border: 2.5px solid #475569; background: #fff; color: #000; transition: background-color 0.1s, border-color 0.1s; }
         .num-input:focus { border-color: #f59e0b; outline: none; }
         .num-input.active-focus { border-color: #f59e0b; background-color: #fef08a; } 
         .num-input.error { border-color: #ef4444; background-color: #fee2e2; }
         
-        /* Papan Keypad Sentuh IFP (0-9 dan Minus) (DIREVISI: Lebih Taktil) */
-        .ifp-keypad { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px; }
-        .key-btn { padding: 12px 0; font-size: 18px; font-weight: bold; background: #475569; border: none; color: white; border-radius: 4px; cursor: pointer; text-align: center; }
-        .key-btn:active { background: #64748b; }
-        .key-btn.symbol { background: #2563eb; }
-        .key-btn.clear { background: #b91c1c; }
+        /* Lebar spesifik kolom proses vs kolom hasil akhir */
+        input[id$="-in1"] { width: 230px; } /* Kolom proses (e.g. 9651-1569) */
+        input[id$="-in2"] { width: 140px; } /* Kolom hasil akhir (e.g. 8082) */
+        
+        /* Papan Keypad Sentuh IFP (0-9 dan Minus) (DIREVISI: Lebih Taktil & Empuk) */
+        .ifp-keypad { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 8px; }
+        .key-btn { padding: 14px 0; font-size: 20px; font-weight: bold; background: #475569; border: none; color: white; border-radius: 6px; cursor: pointer; text-align: center; box-shadow: 0 3px 0px #334155; transition: transform 0.05s, box-shadow 0.05s; }
+        .key-btn:active { background: #64748b; transform: translateY(2px); box-shadow: 0 1px 0px #334155; }
+        .key-btn.symbol { background: #2563eb; box-shadow: 0 3px 0px #1e40af; }
+        .key-btn.symbol:active { background: #3b82f6; box-shadow: 0 1px 0px #1e40af; }
+        .key-btn.clear { background: #b91c1c; box-shadow: 0 3px 0px #7f1d1d; }
+        .key-btn.clear:active { background: #dc2626; box-shadow: 0 1px 0px #7f1d1d; }
 
-        .btn-proses { width: 100%; padding: 12px; font-size: 16px; font-weight: bold; background: #8b5cf6; border: none; color: white; border-radius: 5px; cursor: pointer; }
-        .btn-proses:disabled, .key-btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; border: 1px solid #334155; }
+        .btn-proses { width: 100%; padding: 14px; font-size: 18px; font-weight: bold; background: #8b5cf6; border: none; color: white; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 0px #6d28d9; transition: transform 0.05s, box-shadow 0.05s; }
+        .btn-proses:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0px #6d28d9; }
+        .btn-proses:disabled, .key-btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; border: 1px solid #334155; box-shadow: none; transform: none; }
 
         /* Fullscreen Mode Styles */
         .game-container:fullscreen {
@@ -135,7 +142,7 @@
                 <div class="formula-row">
                     <input type="text" id="p1-in1" class="num-input" placeholder="Besar - Kecil" readonly onclick="setFokusInput(1, 'p1-in1')">
                     <span>=</span>
-                    <input type="text" id="p1-in2" class="num-input" style="width: 120px;" placeholder="Hasil" readonly onclick="setFokusInput(1, 'p1-in2')">
+                    <input type="text" id="p1-in2" class="num-input" placeholder="Hasil" readonly onclick="setFokusInput(1, 'p1-in2')">
                 </div>
                 
                 <!-- KEYPAD SCREEN PLAYER 1 -->
@@ -168,7 +175,7 @@
                 <div class="formula-row">
                     <input type="text" id="p2-in1" class="num-input" placeholder="Besar - Kecil" readonly onclick="setFokusInput(2, 'p2-in1')">
                     <span>=</span>
-                    <input type="text" id="p2-in2" class="num-input" style="width: 120px;" placeholder="Hasil" readonly onclick="setFokusInput(2, 'p2-in2')">
+                    <input type="text" id="p2-in2" class="num-input" placeholder="Hasil" readonly onclick="setFokusInput(2, 'p2-in2')">
                 </div>
                 
                 <!-- KEYPAD SCREEN PLAYER 2 -->
@@ -194,16 +201,17 @@
 </div>
 
 <script>
+    // Database Angka Acak yang 100% adil dan memiliki jumlah langkah setara
     const databaseKaprekar = {
         3: {
-            mudah:  [ {p1: "352", p2: "219"}, {p1: "841", p2: "732"}, {p1: "615", p2: "423"} ],
-            sedang: [ {p1: "123", p2: "456"}, {p1: "781", p2: "934"}, {p1: "502", p2: "604"} ],
-            sulit:  [ {p1: "981", p2: "873"}, {p1: "421", p2: "610"}, {p1: "532", p2: "743"} ]
+            mudah:  [ {p1: "972", p2: "279"}, {p1: "851", p2: "158"}, {p1: "720", p2: "207"} ], // Pasti tepat 3 langkah
+            sedang: [ {p1: "981", p2: "189"}, {p1: "840", p2: "408"}, {p1: "941", p2: "149"} ], // Pasti tepat 4 langkah
+            sulit:  [ {p1: "998", p2: "899"}, {p1: "887", p2: "788"}, {p1: "332", p2: "233"} ]  // Pasti tepat 6 langkah
         },
         4: {
-            mudah:  [ {p1: "3524", p2: "2198"}, {p1: "8417", p2: "7326"}, {p1: "6159", p2: "4238"} ],
-            sedang: [ {p1: "1234", p2: "5678"}, {p1: "9871", p2: "4321"}, {p1: "5029", p2: "6048"} ],
-            sulit:  [ {p1: "1357", p2: "2468"}, {p1: "9630", p2: "8520"}, {p1: "4111", p2: "2221"} ]
+            mudah:  [ {p1: "3524", p2: "5433"}, {p1: "6433", p2: "6544"}, {p1: "7454", p2: "8766"} ], // Pasti tepat 3 langkah
+            sedang: [ {p1: "1000", p2: "2111"}, {p1: "3222", p2: "4333"}, {p1: "5444", p2: "6555"} ], // Pasti tepat 5 langkah
+            sulit:  [ {p1: "1004", p2: "1024"}, {p1: "1005", p2: "2035"}, {p1: "1035", p2: "1006"} ]  // Pasti tepat 7 langkah
         }
     };
 
@@ -301,25 +309,20 @@
         p1Langkah = 0;
         p2Langkah = 0;
         
-        // Kembalikan teks penanda ke awal
         document.getElementById('p1-start').innerText = (modeDigit === 3) ? "???" : "????";
         document.getElementById('p2-start').innerText = (modeDigit === 3) ? "???" : "????";
         
-        // Kosongkan log pertempuran
         document.getElementById('p1-log').innerHTML = "";
         document.getElementById('p2-log').innerHTML = "";
         
-        // Hapus style fokus
         if (p1InputFokus) document.getElementById(p1InputFokus).classList.remove('active-focus');
         if (p2InputFokus) document.getElementById(p2InputFokus).classList.remove('active-focus');
         p1InputFokus = "";
         p2InputFokus = "";
         
-        // Nonaktifkan form kembali
         aktifkanForm(1, false);
         aktifkanForm(2, false);
         
-        // Kembalikan instruksi utama
         document.getElementById('infoMisi').innerHTML = 'Pilih mode digit dan kesulitan, lalu ketuk "Acak Game & Mulai!".';
         hideError();
     }
