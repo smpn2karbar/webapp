@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaprekar Constant Arena - IFP Tactile Edition with Fullscreen</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; padding: 10px; background-color: #0f172a; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; justify-content: center; align-items: center; }
+        
+        .game-container { background: #0f172a; width: 100%; max-width: 1200px; height: 100%; display: flex; flex-direction: column; padding: 10px; border-radius: 12px; }
+
+        /* Header & Panel Kontrol */
+        header { text-align: center; padding: 10px; background: #1e293b; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: 1px solid #334155; position: relative; }
+        h1 { margin: 0 0 6px 0; font-size: 20px; color: #f59e0b; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); letter-spacing: 1px; }
+        
+        /* Tombol Layar Penuh */
+        .fullscreen-bar { position: absolute; right: 10px; top: 10px; }
+        .btn-fullscreen { background: #475569; color: #f8fafc; border: 1px solid #64748b; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s; }
+        .btn-fullscreen:hover { background: #64748b; }
+
+        .control-panel { display: flex; justify-content: center; gap: 15px; align-items: center; background: #0f172a; padding: 6px; border-radius: 6px; }
+        .control-group { display: flex; align-items: center; gap: 6px; }
+        .control-label { font-weight: bold; font-size: 13px; color: #94a3b8; }
+        
+        .btn-toggle { padding: 6px 12px; font-size: 12px; font-weight: bold; border: 2px solid #475569; background: #1e293b; color: #cbd5e1; border-radius: 5px; cursor: pointer; }
+        .btn-toggle.active { background: #2563eb; border-color: #3b82f6; box-shadow: 0 0 8px rgba(59, 130, 246, 0.5); color: white; }
+        .btn-difficulty.active { background: #dd6b20; border-color: #c05621; box-shadow: 0 0 8px rgba(221, 107, 32, 0.5); color: white; }
+        
+        #btnMulai { padding: 8px 18px; font-size: 13px; font-weight: bold; background-color: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; }
+
+        .info-misi { font-size: 13px; color: #e2e8f0; margin-top: 5px; font-style: italic; }
+        .info-misi strong { color: #10b981; }
+        #global-msg { background: #ef4444; color: #fff; padding: 6px; border-radius: 5px; font-size: 14px; display: none; margin-top: 5px; text-align: center; font-weight: bold; }
+
+        /* Arena Permainan 2 Player */
+        .game-arena { display: flex; flex: 1; gap: 10px; min-height: 0; }
+        .player-side { flex: 1; background: #1e293b; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; border: 4px solid #475569; min-height: 0; }
+        #p1-side { border-color: #2563eb; }
+        #p2-side { border-color: #ef4444; }
+        
+        .player-title { text-align: center; font-size: 16px; margin-bottom: 4px; font-weight: bold; }
+        #p1-side .player-title { color: #3b82f6; }
+        #p2-side .player-title { color: #f87171; }
+
+        .start-badge { text-align: center; font-size: 26px; font-weight: bold; background: #0f172a; padding: 4px; border-radius: 6px; margin-bottom: 8px; letter-spacing: 2px; }
+        #p1-start { color: #3b82f6; border: 1px solid #2563eb; }
+        #p2-start { color: #f87171; border: 1px solid #ef4444; }
+
+        /* Log / Papan Langkah */
+        .log-container { flex: 1; background: #0f172a; border-radius: 8px; padding: 8px; overflow-y: auto; margin-bottom: 8px; font-family: monospace; font-size: 13px; min-height: 80px; border: 1px solid #334155; }
+        .log-entry { background: #1e293b; padding: 4px 6px; margin-bottom: 4px; border-radius: 4px; border-left: 3px solid #f59e0b; }
+        .log-entry.win { border-left-color: #10b981; background: #064e3b; font-weight: bold; color: #a7f3d0; }
+
+        /* Alur Kerja Dua Input Matematika */
+        .math-interface { background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155; }
+        .formula-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px; font-size: 15px; }
+        
+        .num-input { width: 140px; padding: 8px 4px; font-size: 15px; text-align: center; font-weight: bold; border-radius: 5px; border: 2px solid #475569; background: #fff; color: #000; }
+        .num-input:focus { border-color: #f59e0b; outline: none; }
+        .num-input.active-focus { border-color: #f59e0b; background-color: #fef08a; } 
+        .num-input.error { border-color: #ef4444; background-color: #fee2e2; }
+        
+        /* Papan Keypad Sentuh IFP (0-9 dan Minus) */
+        .ifp-keypad { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px; }
+        .key-btn { padding: 10px 0; font-size: 15px; font-weight: bold; background: #475569; border: none; color: white; border-radius: 4px; cursor: pointer; text-align: center; }
+        .key-btn:active { background: #64748b; }
+        .key-btn.symbol { background: #2563eb; }
+        .key-btn.clear { background: #b91c1c; }
+
+        .btn-proses { width: 100%; padding: 10px; font-size: 14px; font-weight: bold; background: #8b5cf6; border: none; color: white; border-radius: 5px; cursor: pointer; }
+        .btn-proses:disabled, .key-btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; border: 1px solid #334155; }
+
+        /* Fullscreen Mode Styles */
+        .game-container:fullscreen {
+            width: 100vw;
+            max-width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            padding: 20px;
+            background-color: #0f172a;
+        }
+        .game-container:fullscreen .game-arena {
+            height: calc(100vh - 160px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container" id="kaprekarArena">
+    <header>
+        <!-- Tombol Layar Penuh -->
+        <div class="fullscreen-bar">
+            <button class="btn-fullscreen" id="btnFullscreen" onclick="toggleFullscreen('kaprekarArena')">
+                <span id="fsIcon">🖥️</span> <span id="fsText">Layar Penuh</span>
+            </button>
+        </div>
+
+        <h1>KAPREKAR CONSTANT ARENA (TACTILE IFP VERSION)</h1>
+        
+        <div class="control-panel">
+            <div class="control-group">
+                <span class="control-label">MODE DIGIT:</span>
+                <button class="btn-toggle active" id="mode3" onclick="setGameMode(3)">3 DIGIT (➔ 495)</button>
+                <button class="btn-toggle" id="mode4" onclick="setGameMode(4)">4 DIGIT (➔ 6174)</button>
+            </div>
+            
+            <div class="control-group">
+                <span class="control-label">KESULITAN:</span>
+                <button class="btn-toggle btn-difficulty active" id="diff-mudah" onclick="setDifficulty('mudah')">MUDAH</button>
+                <button class="btn-toggle btn-difficulty" id="diff-sedang" onclick="setDifficulty('sedang')">SEDANG</button>
+                <button class="btn-toggle btn-difficulty" id="diff-sulit" onclick="setDifficulty('sulit')">SULIT</button>
+            </div>
+            
+            <button id="btnMulai" onclick="mulaiPertandingan()">Acak Game & Mulai!</button>
+        </div>
+        
+        <div class="info-misi" id="infoMisi">Pilih mode digit dan kesulitan, lalu ketuk "Acak Game & Mulai!".</div>
+        <div id="global-msg"></div>
+    </header>
+
+    <div class="game-arena">
+        <!-- PLAYER 1 SISI KIRI -->
+        <div class="player-side" id="p1-side">
+            <div class="player-title">PLAYER 1 (BIRU)</div>
+            <div class="start-badge" id="p1-start">???</div>
+            <div class="log-container" id="p1-log"></div>
+            
+            <div class="math-interface">
+                <div class="formula-row">
+                    <input type="text" id="p1-in1" class="num-input" placeholder="Besar - Kecil" readonly onclick="setFokusInput(1, 'p1-in1')">
+                    <span>=</span>
+                    <input type="text" id="p1-in2" class="num-input" style="width: 100px;" placeholder="Hasil" readonly onclick="setFokusInput(1, 'p1-in2')">
+                </div>
+                
+                <!-- KEYPAD SCREEN PLAYER 1 -->
+                <div class="ifp-keypad">
+                    <button class="key-btn" id="p1-k1" onclick="inputKey(1, '1')" disabled>1</button>
+                    <button class="key-btn" id="p1-k2" onclick="inputKey(1, '2')" disabled>2</button>
+                    <button class="key-btn" id="p1-k3" onclick="inputKey(1, '3')" disabled>3</button>
+                    <button class="key-btn" id="p1-k4" onclick="inputKey(1, '4')" disabled>4</button>
+                    <button class="key-btn" id="p1-k5" onclick="inputKey(1, '5')" disabled>5</button>
+                    <button class="key-btn symbol" id="p1-ks" onclick="inputKey(1, '-')" disabled>-</button>
+                    
+                    <button class="key-btn" id="p1-k6" onclick="inputKey(1, '6')" disabled>6</button>
+                    <button class="key-btn" id="p1-k7" onclick="inputKey(1, '7')" disabled>7</button>
+                    <button class="key-btn" id="p1-k8" onclick="inputKey(1, '8')" disabled>8</button>
+                    <button class="key-btn" id="p1-k9" onclick="inputKey(1, '9')" disabled>9</button>
+                    <button class="key-btn" id="p1-k0" onclick="inputKey(1, '0')" disabled>0</button>
+                    <button class="key-btn clear" id="p1-kc" onclick="clearKey(1)" disabled>⌫</button>
+                </div>
+                <button id="p1-btn" class="btn-proses" onclick="eksekusiLangkah(1)" disabled>Simpan Langkah</button>
+            </div>
+        </div>
+
+        <!-- PLAYER 2 SISI KANAN -->
+        <div class="player-side" id="p2-side">
+            <div class="player-title">PLAYER 2 (MERAH)</div>
+            <div class="start-badge" id="p2-start">???</div>
+            <div class="log-container" id="p2-log"></div>
+            
+            <div class="math-interface">
+                <div class="formula-row">
+                    <input type="text" id="p2-in1" class="num-input" placeholder="Besar - Kecil" readonly onclick="setFokusInput(2, 'p2-in1')">
+                    <span>=</span>
+                    <input type="text" id="p2-in2" class="num-input" style="width: 100px;" placeholder="Hasil" readonly onclick="setFokusInput(2, 'p2-in2')">
+                </div>
+                
+                <!-- KEYPAD SCREEN PLAYER 2 -->
+                <div class="ifp-keypad">
+                    <button class="key-btn" id="p2-k1" onclick="inputKey(2, '1')" disabled>1</button>
+                    <button class="key-btn" id="p2-k2" onclick="inputKey(2, '2')" disabled>2</button>
+                    <button class="key-btn" id="p2-k3" onclick="inputKey(2, '3')" disabled>3</button>
+                    <button class="key-btn" id="p2-k4" onclick="inputKey(2, '4')" disabled>4</button>
+                    <button class="key-btn" id="p2-k5" onclick="inputKey(2, '5')" disabled>5</button>
+                    <button class="key-btn symbol" id="p2-ks" onclick="inputKey(2, '-')" disabled>-</button>
+                    
+                    <button class="key-btn" id="p2-k6" onclick="inputKey(2, '6')" disabled>6</button>
+                    <button class="key-btn" id="p2-k7" onclick="inputKey(2, '7')" disabled>7</button>
+                    <button class="key-btn" id="p2-k8" onclick="inputKey(2, '8')" disabled>8</button>
+                    <button class="key-btn" id="p2-k9" onclick="inputKey(2, '9')" disabled>9</button>
+                    <button class="key-btn" id="p2-k0" onclick="inputKey(2, '0')" disabled>0</button>
+                    <button class="key-btn clear" id="p2-kc" onclick="clearKey(2)" disabled>⌫</button>
+                </div>
+                <button id="p2-btn" class="btn-proses" onclick="eksekusiLangkah(2)" disabled>Simpan Langkah</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const databaseKaprekar = {
+        3: {
+            mudah:  [ {p1: "352", p2: "219"}, {p1: "841", p2: "732"}, {p1: "615", p2: "423"} ],
+            sedang: [ {p1: "123", p2: "456"}, {p1: "781", p2: "934"}, {p1: "502", p2: "604"} ],
+            sulit:  [ {p1: "981", p2: "873"}, {p1: "421", p2: "610"}, {p1: "532", p2: "743"} ]
+        },
+        4: {
+            mudah:  [ {p1: "3524", p2: "2198"}, {p1: "8417", p2: "7326"}, {p1: "6159", p2: "4238"} ],
+            sedang: [ {p1: "1234", p2: "5678"}, {p1: "9871", p2: "4321"}, {p1: "5029", p2: "6048"} ],
+            sulit:  [ {p1: "1357", p2: "2468"}, {p1: "9630", p2: "8520"}, {p1: "4111", p2: "2221"} ]
+        }
+    };
+
+    let modeDigit = 3;
+    let kesulitanDipilih = "mudah";
+    let p1AngkaSaatIni = "";
+    let p2AngkaSaatIni = "";
+    let p1Langkah = 0;
+    let p2Langkah = 0;
+    let gameAktif = false;
+    let angkaTarget = "495";
+
+    let p1InputFokus = "";
+    let p2InputFokus = "";
+
+    function toggleFullscreen(elemId) {
+        const container = document.getElementById(elemId);
+        const fsText = document.getElementById('fsText');
+        const fsIcon = document.getElementById('fsIcon');
+
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().then(() => {
+                fsText.innerText = "Keluar Layar";
+                fsIcon.innerText = "❌";
+            }).catch(err => {
+                const errorDiv = document.getElementById('global-msg');
+                errorDiv.innerHTML = `⚠️ Gagal Layar Penuh! Pastikan iframe Google Sites Anda memiliki izin <strong>allowfullscreen</strong>.`;
+                errorDiv.style.display = 'block';
+            });
+        } else {
+            document.exitFullscreen();
+            fsText.innerText = "Layar Penuh";
+            fsIcon.innerText = "🖥️";
+        }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+        const fsText = document.getElementById('fsText');
+        const fsIcon = document.getElementById('fsIcon');
+        if (!document.fullscreenElement) {
+            fsText.innerText = "Layar Penuh";
+            fsIcon.innerText = "🖥️";
+        }
+    });
+
+    function setGameMode(digit) {
+        if (gameAktif) return;
+        modeDigit = digit;
+        angkaTarget = (digit === 3) ? "495" : "6174";
+        document.getElementById('mode3').classList.toggle('active', digit === 3);
+        document.getElementById('mode4').classList.toggle('active', digit === 4);
+        
+        document.getElementById('p1-start').innerText = (digit === 3) ? "???" : "????";
+        document.getElementById('p2-start').innerText = (digit === 3) ? "???" : "????";
+    }
+
+    function setDifficulty(diff) {
+        if (gameAktif) return;
+        kesulitanDipilih = diff;
+        document.getElementById('diff-mudah').classList.toggle('active', diff === 'mudah');
+        document.getElementById('diff-sedang').classList.toggle('active', diff === 'sedang');
+        document.getElementById('diff-sulit').classList.toggle('active', diff === 'sulit');
+    }
+
+    function mulaiPertandingan() {
+        hideError();
+        const kumpulanData = databaseKaprekar[modeDigit][kesulitanDipilih];
+        const opsiTerpilih = kumpulanData[Math.floor(Math.random() * kumpulanData.length)];
+
+        p1AngkaSaatIni = opsiTerpilih.p1;
+        p2AngkaSaatIni = opsiTerpilih.p2;
+        p1Langkah = 0;
+        p2Langkah = 0;
+        gameAktif = true;
+
+        document.getElementById('infoMisi').innerHTML = `Misi Aktif: <strong>${modeDigit} DIGIT</strong> | Kesulitan: <strong>${kesulitanDipilih.toUpperCase()}</strong> | Target: Angka Gravitasi <strong>${angkaTarget}</strong>`;
+
+        document.getElementById('p1-start').innerText = opsiTerpilih.p1;
+        document.getElementById('p2-start').innerText = opsiTerpilih.p2;
+
+        document.getElementById('p1-log').innerHTML = `<div class='log-entry'>Angka Awal: ${opsiTerpilih.p1}</div>`;
+        document.getElementById('p2-log').innerHTML = `<div class='log-entry'>Angka Awal: ${opsiTerpilih.p2}</div>`;
+
+        setFokusInput(1, 'p1-in1');
+        setFokusInput(2, 'p2-in1');
+
+        aktifkanForm(1, true);
+        aktifkanForm(2, true);
+    }
+
+    function setFokusInput(player, inputId) {
+        if (!gameAktif) return;
+        
+        if (player === 1) {
+            if (p1InputFokus) document.getElementById(p1InputFokus).classList.remove('active-focus');
+            p1InputFokus = inputId;
+        } else {
+            if (p2InputFokus) document.getElementById(p2InputFokus).classList.remove('active-focus');
+            p2InputFokus = inputId;
+        }
+        document.getElementById(inputId).classList.add('active-focus');
+    }
+
+    function inputKey(player, char) {
+        let inputTargetId = (player === 1) ? p1InputFokus : p2InputFokus;
+        if (!inputTargetId) return;
+        
+        let targetElement = document.getElementById(inputTargetId);
+        targetElement.value += char;
+    }
+
+    function clearKey(player) {
+        let inputTargetId = (player === 1) ? p1InputFokus : p2InputFokus;
+        if (!inputTargetId) return;
+        
+        let targetElement = document.getElementById(inputTargetId);
+        let val = targetElement.value;
+        targetElement.value = val.substring(0, val.length - 1);
+    }
+
+    function aktifkanForm(player, status) {
+        document.getElementById(`p${player}-in1`).disabled = !status;
+        document.getElementById(`p${player}-in2`).disabled = !status;
+        document.getElementById(`p${player}-btn`).disabled = !status;
+        document.getElementById(`p${player}-kc`).disabled = !status;
+        document.getElementById(`p${player}-ks`).disabled = !status;
+        
+        for(let i=0; i<=9; i++) { document.getElementById(`p${player}-k${i}`).disabled = !status; }
+        
+        if (status) {
+            document.getElementById(`p${player}-in1`).value = "";
+            document.getElementById(`p${player}-in2`).value = "";
+        }
+    }
+
+    function eksekusiLangkah(player) {
+        if (!gameAktif) return;
+        hideError();
+
+        let angkaSaatIni = (player === 1) ? p1AngkaSaatIni : p2AngkaSaatIni;
+        let in1 = document.getElementById(`p${player}-in1`);
+        let in2 = document.getElementById(`p${player}-in2`);
+
+        in1.classList.remove('error');
+        in2.classList.remove('error');
+
+        let susunanDigit = angkaSaatIni.padStart(modeDigit, '0').split('');
+        let susunanBesar = [...susunanDigit].sort((a, b) => b - a).join('');
+        let susunanKecil = [...susunanDigit].sort((a, b) => a - b).join('');
+        
+        let kunciIn1 = `${susunanBesar}-${susunanKecil}`;
+        let kunciIn2 = (parseInt(susunanBesar) - parseInt(susunanKecil)).toString().padStart(modeDigit, '0');
+
+        let userIn1 = in1.value.trim().replace(/\s+/g, '');
+        let userIn2 = in2.value.trim();
+
+        let valid = true;
+
+        if (userIn1 !== kunciIn1) { in1.classList.add('error'); valid = false; }
+        if (userIn2 !== kunciIn2) { in2.classList.add('error'); valid = false; }
+
+        if (!valid) {
+            showError(`Player ${player}: Susunan Terbesar-Terkecil atau hasil pengurangannya salah!`);
+            return;
+        }
+
+        let logText = `${userIn1} = ${userIn2}`;
+        if (player === 1) {
+            p1Langkah++;
+            p1AngkaSaatIni = kunciIn2;
+            tambahLog(1, p1Langkah, logText, kunciIn2);
+            if (kunciIn2 === angkaTarget) deklarasiMenang(1);
+            else {
+                aktifkanForm(1, true);
+                setFokusInput(1, 'p1-in1');
+            }
+        } else {
+            p2Langkah++;
+            p2AngkaSaatIni = kunciIn2;
+            tambahLog(2, p2Langkah, logText, kunciIn2);
+            if (kunciIn2 === angkaTarget) deklarasiMenang(2);
+            else {
+                aktifkanForm(2, true);
+                setFokusInput(2, 'p2-in1');
+            }
+        }
+    }
+
+    function tambahLog(player, langkah, gabunganProses, hasilAkhir) {
+        let logDiv = document.getElementById(`p${player}-log`);
+        let entry = document.createElement('div');
+        entry.className = 'log-entry';
+        
+        if (hasilAkhir === angkaTarget) {
+            entry.className += ' win';
+            entry.innerText = `Lk ${langkah}: ${gabunganProses} (🎯 TARGET!)`;
+        } else {
+            entry.innerText = `Lk ${langkah}: ${gabunganProses}`;
+        }
+        
+        logDiv.appendChild(entry);
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function showError(msg) {
+        const errorDiv = document.getElementById('global-msg');
+        errorDiv.innerText = msg;
+        errorDiv.style.background = "#ef4444";
+        errorDiv.style.display = 'block';
+    }
+
+    function hideError() {
+        document.getElementById('global-msg').style.display = 'none';
+    }
+
+    function deklarasiMenang(player) {
+        gameAktif = false;
+        aktifkanForm(1, false);
+        aktifkanForm(2, false);
+        
+        if (p1InputFokus) document.getElementById(p1InputFokus).classList.remove('active-focus');
+        if (p2InputFokus) document.getElementById(p2InputFokus).classList.remove('active-focus');
+
+        const errorDiv = document.getElementById('global-msg');
+        errorDiv.innerText = `🎉 PERTANDINGAN SELESAI: PLAYER ${player} BERHASIL MENANG! 🎉`;
+        errorDiv.style.background = "#10b981";
+        errorDiv.style.display = 'block';
+    }
+</script>
+</body>
+</html>
