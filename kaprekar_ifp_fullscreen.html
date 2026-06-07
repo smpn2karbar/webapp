@@ -28,6 +28,10 @@
         .btn-difficulty.active { background: #dd6b20; border-color: #c05621; box-shadow: 0 0 8px rgba(221, 107, 32, 0.5); color: white; }
         
         #btnMulai { padding: 8px 18px; font-size: 13px; font-weight: bold; background-color: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #btnMulai:hover { background-color: #059669; }
+        
+        #btnReset { padding: 8px 18px; font-size: 13px; font-weight: bold; background-color: #ef4444; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 8px; }
+        #btnReset:hover { background-color: #dc2626; }
 
         .info-misi { font-size: 13px; color: #e2e8f0; margin-top: 5px; font-style: italic; }
         .info-misi strong { color: #10b981; }
@@ -52,23 +56,23 @@
         .log-entry { background: #1e293b; padding: 4px 6px; margin-bottom: 4px; border-radius: 4px; border-left: 3px solid #f59e0b; }
         .log-entry.win { border-left-color: #10b981; background: #064e3b; font-weight: bold; color: #a7f3d0; }
 
-        /* Alur Kerja Dua Input Matematika */
+        /* Alur Kerja Dua Input Matematika (DIREVISI: Ukuran Huruf Diperbesar) */
         .math-interface { background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155; }
-        .formula-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px; font-size: 15px; }
+        .formula-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; font-size: 24px; font-weight: bold; }
         
-        .num-input { width: 140px; padding: 8px 4px; font-size: 15px; text-align: center; font-weight: bold; border-radius: 5px; border: 2px solid #475569; background: #fff; color: #000; }
+        .num-input { width: 170px; padding: 10px 4px; font-size: 20px; text-align: center; font-weight: bold; border-radius: 6px; border: 2px solid #475569; background: #fff; color: #000; }
         .num-input:focus { border-color: #f59e0b; outline: none; }
         .num-input.active-focus { border-color: #f59e0b; background-color: #fef08a; } 
         .num-input.error { border-color: #ef4444; background-color: #fee2e2; }
         
-        /* Papan Keypad Sentuh IFP (0-9 dan Minus) */
+        /* Papan Keypad Sentuh IFP (0-9 dan Minus) (DIREVISI: Lebih Taktil) */
         .ifp-keypad { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px; }
-        .key-btn { padding: 10px 0; font-size: 15px; font-weight: bold; background: #475569; border: none; color: white; border-radius: 4px; cursor: pointer; text-align: center; }
+        .key-btn { padding: 12px 0; font-size: 18px; font-weight: bold; background: #475569; border: none; color: white; border-radius: 4px; cursor: pointer; text-align: center; }
         .key-btn:active { background: #64748b; }
         .key-btn.symbol { background: #2563eb; }
         .key-btn.clear { background: #b91c1c; }
 
-        .btn-proses { width: 100%; padding: 10px; font-size: 14px; font-weight: bold; background: #8b5cf6; border: none; color: white; border-radius: 5px; cursor: pointer; }
+        .btn-proses { width: 100%; padding: 12px; font-size: 16px; font-weight: bold; background: #8b5cf6; border: none; color: white; border-radius: 5px; cursor: pointer; }
         .btn-proses:disabled, .key-btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; border: 1px solid #334155; }
 
         /* Fullscreen Mode Styles */
@@ -113,6 +117,7 @@
             </div>
             
             <button id="btnMulai" onclick="mulaiPertandingan()">Acak Game & Mulai!</button>
+            <button id="btnReset" onclick="resetGame()">Reset Arena</button>
         </div>
         
         <div class="info-misi" id="infoMisi">Pilih mode digit dan kesulitan, lalu ketuk "Acak Game & Mulai!".</div>
@@ -130,7 +135,7 @@
                 <div class="formula-row">
                     <input type="text" id="p1-in1" class="num-input" placeholder="Besar - Kecil" readonly onclick="setFokusInput(1, 'p1-in1')">
                     <span>=</span>
-                    <input type="text" id="p1-in2" class="num-input" style="width: 100px;" placeholder="Hasil" readonly onclick="setFokusInput(1, 'p1-in2')">
+                    <input type="text" id="p1-in2" class="num-input" style="width: 120px;" placeholder="Hasil" readonly onclick="setFokusInput(1, 'p1-in2')">
                 </div>
                 
                 <!-- KEYPAD SCREEN PLAYER 1 -->
@@ -163,7 +168,7 @@
                 <div class="formula-row">
                     <input type="text" id="p2-in1" class="num-input" placeholder="Besar - Kecil" readonly onclick="setFokusInput(2, 'p2-in1')">
                     <span>=</span>
-                    <input type="text" id="p2-in2" class="num-input" style="width: 100px;" placeholder="Hasil" readonly onclick="setFokusInput(2, 'p2-in2')">
+                    <input type="text" id="p2-in2" class="num-input" style="width: 120px;" placeholder="Hasil" readonly onclick="setFokusInput(2, 'p2-in2')">
                 </div>
                 
                 <!-- KEYPAD SCREEN PLAYER 2 -->
@@ -289,6 +294,36 @@
         aktifkanForm(2, true);
     }
 
+    function resetGame() {
+        gameAktif = false;
+        p1AngkaSaatIni = "";
+        p2AngkaSaatIni = "";
+        p1Langkah = 0;
+        p2Langkah = 0;
+        
+        // Kembalikan teks penanda ke awal
+        document.getElementById('p1-start').innerText = (modeDigit === 3) ? "???" : "????";
+        document.getElementById('p2-start').innerText = (modeDigit === 3) ? "???" : "????";
+        
+        // Kosongkan log pertempuran
+        document.getElementById('p1-log').innerHTML = "";
+        document.getElementById('p2-log').innerHTML = "";
+        
+        // Hapus style fokus
+        if (p1InputFokus) document.getElementById(p1InputFokus).classList.remove('active-focus');
+        if (p2InputFokus) document.getElementById(p2InputFokus).classList.remove('active-focus');
+        p1InputFokus = "";
+        p2InputFokus = "";
+        
+        // Nonaktifkan form kembali
+        aktifkanForm(1, false);
+        aktifkanForm(2, false);
+        
+        // Kembalikan instruksi utama
+        document.getElementById('infoMisi').innerHTML = 'Pilih mode digit dan kesulitan, lalu ketuk "Acak Game & Mulai!".';
+        hideError();
+    }
+
     function setFokusInput(player, inputId) {
         if (!gameAktif) return;
         
@@ -331,6 +366,11 @@
         if (status) {
             document.getElementById(`p${player}-in1`).value = "";
             document.getElementById(`p${player}-in2`).value = "";
+        } else {
+            document.getElementById(`p${player}-in1`).value = "";
+            document.getElementById(`p${player}-in2`).value = "";
+            document.getElementById(`p${player}-in1`).classList.remove('error');
+            document.getElementById(`p${player}-in2`).classList.remove('error');
         }
     }
 
