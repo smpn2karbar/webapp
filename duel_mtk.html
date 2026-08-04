@@ -315,24 +315,26 @@
     </div>
 
     <script>
-        // --- KONFIGURASI FIREBASE & STORAGE ---
-        const firebaseConfig = {
-  apiKey: "AIzaSyCK4OnHjsrbWxHZKpn8aMhXH71Ebofs4cA",
-  authDomain: "duel-matematika-b47ea.firebaseapp.com",
-  projectId: "duel-matematika-b47ea",
-  storageBucket: "duel-matematika-b47ea.firebasestorage.app",
-  messagingSenderId: "154456696545",
-  appId: "1:154456696545:web:21f063225fc3b19af239a0",
-  measurementId: "G-FMGV94S1V1"
-};
-        
+        // --- KONFIGURASI FIREBASE ANDA ---
+        window.__app_id = "duel-matematika-b47ea";
+        window.__firebase_config = JSON.stringify({
+            apiKey: "AIzaSyCK4OnHjsrbWxHZKpn8aMhXH71Ebofs4cA",
+            authDomain: "duel-matematika-b47ea.firebaseapp.com",
+            projectId: "duel-matematika-b47ea",
+            storageBucket: "duel-matematika-b47ea.firebasestorage.app",
+            messagingSenderId: "154456696545",
+            appId: "1:154456696545:web:21f063225fc3b19af239a0",
+            measurementId: "G-FMGV94S1V1"
+        });
+
+        // --- SISTEM GAME ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'duel-matematika-app';
         let db = null;
         let auth = null;
         let localMatches = []; // Fallback jika offline / standalone
         let cachedMatches = []; // Cache data dari DB
 
-        // Inisialisasi Firebase jika konfigurasi tersedia
+        // Inisialisasi Firebase
         if (typeof __firebase_config !== 'undefined' && __firebase_config) {
             try {
                 const firebaseConfig = JSON.parse(__firebase_config);
