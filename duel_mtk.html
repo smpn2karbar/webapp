@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Duel Matematika ⚔️</title>
+    <!-- Firebase SDK (Compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; user-select: none; margin: 0; padding: 0; }
+        body { background-color: #1a1e29; color: #ffffff; overflow: hidden; height: 100vh; width: 100vw; }
+        
+        /* Modal & Views */
+        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; background: #1a1e29; }
+        .view.active { display: flex; }
+
+        /* Card Container */
+        .card { background: #252b3b; border-radius: 16px; padding: 24px; width: 100%; max-width: 520px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid #343d52; margin-bottom: 15px; }
+        h1 { color: #f39c12; font-size: 2.2rem; text-align: center; margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        h2 { color: #3498db; font-size: 1.4rem; margin-bottom: 15px; text-align: center; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 15px; }
+        label { font-weight: 600; display: block; margin-bottom: 6px; color: #cbd5e1; font-size: 0.95rem; }
+        input[type="text"], input[type="password"], select { width: 100%; padding: 12px; font-size: 1rem; border-radius: 8px; border: 1px solid #3b4252; background: #0f172a; color: #fff; outline: none; transition: border-color 0.2s; }
+        input:focus, select:focus { border-color: #3498db; }
+        
+        /* Buttons */
+        .btn-group { display: flex; gap: 10px; width: 100%; max-width: 520px; margin-top: 10px; }
+        button { flex: 1; padding: 14px; font-size: 1.1rem; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; transition: transform 0.1s, opacity 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        button:active { transform: scale(0.97); }
+        .btn-primary { background: #27ae60; color: white; }
+        .btn-secondary { background: #2980b9; color: white; }
+        .btn-admin { background: #8e44ad; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-warning { background: #d35400; color: white; }
+        .btn-close { background: #7f8c8d; color: white; }
+
+        /* Fullscreen Toggle Button */
+        .fs-btn { position: absolute; top: 15px; right: 15px; z-index: 100; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 12px; border-radius: 8px; font-size: 0.9rem; cursor: pointer; }
+
+        /* Game Screen Layout */
+        #game-screen { flex-direction: row; padding: 0; }
+        .player-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 25px; position: relative; height: 100%; width: 100%; transition: background 0.3s ease; cursor: default; }
+        
+        /* Warna Standar Player */
+        .bg-p1-default { background: linear-gradient(135deg, #c0392b, #8e44ad); }
+        .bg-p2-default { background: linear-gradient(135deg, #2980b9, #16a085); }
+        
+        /* Warna Umpan Balik Jawaban */
+        .bg-correct { background: #27ae60 !important; color: #ffffff !important; } /* Hijau Muda / Terang */
+        .bg-wrong { background: #f1c40f !important; color: #1a1e29 !important; }   /* Kuning Muda / Terang */
+        
+        .player-name { font-size: 1.8rem; font-weight: bold; position: absolute; top: 15px; left: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        .score-display { font-size: 1.5rem; font-weight: bold; position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; }
+        .question { font-size: 3.5rem; font-weight: 800; margin-bottom: 25px; text-align: center; text-shadow: 0 3px 6px rgba(0,0,0,0.4); }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 420px; }
+        .option-btn { background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.6); color: inherit; font-size: 1.8rem; font-weight: bold; padding: 18px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(5px); }
+        .option-btn:active { background: rgba(255,255,255,0.8); color: #111; }
+
+        /* Petunjuk Ketuk Layar saat Delay */
+        .tap-prompt { position: absolute; bottom: 20px; font-size: 1.2rem; font-weight: bold; animation: pulse 1s infinite alternate; display: none; background: rgba(0,0,0,0.5); padding: 6px 16px; border-radius: 20px; }
+        @keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
+
+        /* Timer Global Center */
+        #global-info { position: absolute; z-index: 10; background: #f39c12; color: #111; padding: 8px 20px; font-size: 1.3rem; font-weight: 800; border-radius: 25px; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.4); pointer-events: none; }
+
+        /* Tables & Lists */
+        .table-container { width: 100%; max-height: 250px; overflow-y: auto; margin-bottom: 15px; border-radius: 8px; border: 1px solid #3b4252; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid #2d3748; }
+        th { background: #1e293b; color: #f39c12; position: sticky; top: 0; }
+        tr:nth-child(even) { background: #1a202c; }
+
+        /* Responsive Orientation Logic */
+        @media (orientation: landscape) {
+            #game-screen { flex-direction: row; }
+            #global-info { top: 20px; left: 50%; transform: translateX(-50%); }
+        }
+
+        @media (orientation: portrait) {
+            #game-screen { flex-direction: column; }
+            #player2 { transform: rotate(180deg); } /* Layar atas diputar 180 derajat */
+            #global-info { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+            .question { font-size: 2.8rem; margin-bottom: 15px; }
+            .option-btn { font-size: 1.5rem; padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol Fullscreen Global -->
+    <button class="fs-btn" onclick="toggleFullscreen()">📺 Fullscreen</button>
+
+    <!-- 1. LAYAR MENU UTAMA -->
+    <div id="view-menu" class="view active">
+        <h1>Duel Matematika ⚔️</h1>
+        <div class="card">
+            <h2>Pengaturan Pemain</h2>
+            <div class="form-group">
+                <label>Nama Pemain 1 (Bawah/Kiri):</label>
+                <input type="text" id="p1-name" value="Pemain Merah" placeholder="Nama Pemain 1">
+            </div>
+            <div class="form-group">
+                <label>Nama Pemain 2 (Atas/Kanan):</label>
+                <input type="text" id="p2-name" value="Pemain Biru" placeholder="Nama Pemain 2">
+            </div>
+
+            <h2>Aturan Permainan</h2>
+            <div class="form-group">
+                <label>Mode Duel:</label>
+                <select id="mode">
+                    <option value="waktu">Batas Waktu (Skor Tertinggi)</option>
+                    <option value="soal">Balapan Soal (Tercepat Selesai)</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="waktu-group">
+                <label>Durasi Waktu:</label>
+                <select id="waktu">
+                    <option value="60">1 Menit</option>
+                    <option value="120">2 Menit</option>
+                    <option value="180">3 Menit</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="soal-group" style="display: none;">
+                <label>Target Jumlah Soal:</label>
+                <select id="soal">
+                    <option value="10">10 Soal</option>
+                    <option value="20">20 Soal</option>
+                    <option value="30">30 Soal</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Tingkat Kesulitan:</label>
+                <select id="level">
+                    <option value="mudah">Mudah</option>
+                    <option value="sedang">Sedang</option>
+                    <option value="susah">Susah</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Tantangan Berhitung:</label>
+                <select id="operasi">
+                    <option value="tambah_kurang">Penjumlahan & Pengurangan</option>
+                    <option value="kali_bagi">Perkalian & Pembagian</option>
+                    <option value="pangkat">Perpangkatan (x²)</option>
+                    <option value="campuran">Campuran</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn-primary" style="width:100%; max-width:520px;" onclick="startGame()">⚔️ Mulai Duel Sekarang!</button>
+        
+        <div class="btn-group">
+            <button class="btn-secondary" onclick="openLeaderboard()">🏆 Leaderboard</button>
+            <button class="btn-admin" onclick="openAdminAuth()">⚙️ Admin</button>
+        </div>
+    </div>
+
+    <!-- 2. LAYAR GAME PERMAINAN -->
+    <div id="game-screen" class="view">
+        <div id="global-info">Timer: 00</div>
+        
+        <!-- Pemain 2 (Atas/Kanan) -->
+        <div id="player2" class="player-area bg-p2-default" onclick="handlePlayerTap(2)">
+            <div class="player-name" id="display-p2-name">P2</div>
+            <div class="score-display">Skor: <span id="score2">0</span></div>
+            <div class="question" id="q2">0 + 0</div>
+            <div class="options" id="opt2"></div>
+            <div class="tap-prompt" id="prompt2">👆 Ketuk untuk soal berikutnya</div>
+        </div>
+
+        <!-- Pemain 1 (Bawah/Kiri) -->
+        <div id="player1" class="player-area bg-p1-default" onclick="handlePlayerTap(1)">
+            <div class="player-name" id="display-p1-name">P1</div>
+            <div class="score-display">Skor: <span id="score1">0</span></div>
+            <div class="question" id="q1">0 + 0</div>
+            <div class="options" id="opt1"></div>
+            <div class="tap-prompt" id="prompt1">👆 Ketuk untuk soal berikutnya</div>
+        </div>
+    </div>
+
+    <!-- 3. LAYAR HASIL DUEL -->
+    <div id="view-result" class="view">
+        <div class="card" style="text-align: center;">
+            <h1 id="winner-title" style="font-size: 2.5rem; margin-bottom: 10px;">🏆 Pemenang!</h1>
+            <h2 id="winner-name" style="color:#2ecc71; font-size: 2rem;">-</h2>
+            <p id="final-scores" style="font-size: 1.3rem; margin: 15px 0; color:#e2e8f0;">-</p>
+        </div>
+        <div class="btn-group">
+            <button class="btn-primary" onclick="startGame()">🔄 Main Lagi</button>
+            <button class="btn-secondary" onclick="openLeaderboard()">🏆 Peringkat</button>
+        </div>
+        <button class="btn-close" style="width:100%; max-width:520px; margin-top:10px;" onclick="showView('view-menu')">🏠 Menu Utama</button>
+    </div>
+
+    <!-- 4. LAYAR LEADERBOARD / PERINGKAT JUARA (UNTUK PEMAIN) -->
+    <div id="view-leaderboard" class="view">
+        <h1>🏆 Klasemen & Peringkat</h1>
+        <div class="card">
+            <div class="form-group">
+                <label>Filter Mode Permainan:</label>
+                <select id="lb-filter-mode" onchange="renderPlayerLeaderboard()">
+                    <option value="waktu">Mode Batas Waktu</option>
+                    <option value="soal">Mode Balapan Soal</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Filter Tingkat Kesulitan:</label>
+                <select id="lb-filter-level" onchange="renderPlayerLeaderboard()">
+                    <option value="mudah">Mudah</option>
+                    <option value="sedang">Sedang</option>
+                    <option value="susah">Susah</option>
+                </select>
+            </div>
+
+            <h2>Peringkat Juara Terbanyak</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nama Pemain</th>
+                            <th>Total Kemenangan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button class="btn-close" style="width:100%; max-width:520px;" onclick="showView('view-menu')">Kembali ke Menu</button>
+    </div>
+
+    <!-- 5. LAYAR ADMIN AUTH & PANEL -->
+    <div id="view-admin-auth" class="view">
+        <div class="card">
+            <h2>🔑 Akses Admin Duel</h2>
+            <div class="form-group">
+                <label>Masukkan PIN Admin:</label>
+                <input type="password" id="admin-pin" placeholder="PIN standar: 1234">
+            </div>
+            <p id="admin-auth-err" style="color:#e74c3c; display:none; margin-bottom:10px;">PIN Salah!</p>
+            <button class="btn-admin" style="width:100%;" onclick="loginAdmin()">Masuk Panel Admin</button>
+        </div>
+        <button class="btn-close" style="width:100%; max-width:520px;" onclick="showView('view-menu')">Batal</button>
+    </div>
+
+    <div id="view-admin-panel" class="view">
+        <h1>⚙️ Panel Admin</h1>
+        <div class="card">
+            <h2>Filter Data Leaderboard</h2>
+            <div class="form-group">
+                <label>Mode:</label>
+                <select id="admin-filter-mode" onchange="renderAdminLeaderboard()">
+                    <option value="waktu">Mode Batas Waktu</option>
+                    <option value="soal">Mode Balapan Soal</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tingkat Kesulitan:</label>
+                <select id="admin-filter-level" onchange="renderAdminLeaderboard()">
+                    <option value="mudah">Mudah</option>
+                    <option value="sedang">Sedang</option>
+                    <option value="susah">Susah</option>
+                </select>
+            </div>
+
+            <h2>Leaderboard Terfilter</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Pemain</th>
+                            <th>Kemenangan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-lb-body">
+                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>Daftar Riwayat Pertandingan</h2>
+            <p style="font-size: 0.85rem; color: #a0aec0; margin-bottom: 10px;">
+                Daftar lengkap hasil duel terbaru. Anda dapat menghapus riwayat secara individual atau keseluruhan.
+            </p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Waktu & Mode</th>
+                            <th>Pertandingan</th>
+                            <th>Pemenang</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body">
+                        <tr><td colspan="4" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn-danger" style="width:100%; margin-top:10px;" onclick="clearAllHistory()">🗑️ Hapus Semua Riwayat Pemenang</button>
+        </div>
+        <button class="btn-close" style="width:100%; max-width:520px;" onclick="showView('view-menu')">Keluar dari Admin</button>
+    </div>
+
+    <script>
+        // --- KONFIGURASI FIREBASE & STORAGE ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'duel-matematika-app';
+        let db = null;
+        let auth = null;
+        let localMatches = []; // Fallback jika offline / standalone
+        let cachedMatches = []; // Cache data dari DB
+
+        // Inisialisasi Firebase jika konfigurasi tersedia
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+            try {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await auth.signInWithCustomToken(__initial_auth_token);
+                    } else {
+                        await auth.signInAnonymously();
+                    }
+                };
+                initAuth();
+            } catch (err) {
+                console.log("Firebase tidak dikonfigurasi, menggunakan mode penyimpanan lokal.", err);
+            }
+        }
+
+        // --- MANAJEMEN FULLSCREEN ---
+        function requestFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.log(err));
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+
+        // --- MANAJEMEN NAVIGASI VIEW ---
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        // --- DUKUNGAN FORM WAKTU / SOAL ---
+        document.getElementById('mode').addEventListener('change', function() {
+            if (this.value === 'waktu') {
+                document.getElementById('waktu-group').style.display = 'block';
+                document.getElementById('soal-group').style.display = 'none';
+            } else {
+                document.getElementById('waktu-group').style.display = 'none';
+                document.getElementById('soal-group').style.display = 'block';
+            }
+        });
+
+        // --- VARIABEL PERMAINAN & STATE DELAY ---
+        let nameP1 = "Pemain 1", nameP2 = "Pemain 2";
+        let scoreP1 = 0, scoreP2 = 0;
+        let gameMode, gameLevel, gameOp, gameTarget;
+        let timerInterval = null;
+
+        // State kuncian untuk delay per-player
+        let p1WaitingNext = false;
+        let p2WaitingNext = false;
+
+        // --- MULAI GAME ---
+        function startGame() {
+            // Otomatis Fullscreen saat mulai bermain
+            requestFullscreen();
+
+            nameP1 = document.getElementById('p1-name').value.trim() || "Pemain Merah";
+            nameP2 = document.getElementById('p2-name').value.trim() || "Pemain Biru";
+            
+            document.getElementById('display-p1-name').innerText = nameP1;
+            document.getElementById('display-p2-name').innerText = nameP2;
+
+            gameMode = document.getElementById('mode').value;
+            gameLevel = document.getElementById('level').value;
+            gameOp = document.getElementById('operasi').value;
+            
+            scoreP1 = 0; scoreP2 = 0;
+            p1WaitingNext = false;
+            p2WaitingNext = false;
+            resetPlayerAreaUI(1);
+            resetPlayerAreaUI(2);
+
+            updateScoreUI();
+            showView('game-screen');
+
+            if (gameMode === 'waktu') {
+                gameTarget = parseInt(document.getElementById('waktu').value);
+                runTimer(gameTarget);
+            } else {
+                gameTarget = parseInt(document.getElementById('soal').value);
+                document.getElementById('global-info').innerText = "Target: " + gameTarget + " Soal";
+            }
+
+            generateQuestion(1);
+            generateQuestion(2);
+        }
+
+        function runTimer(seconds) {
+            let timeLeft = seconds;
+            document.getElementById('global-info').innerText = formatTime(timeLeft);
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('global-info').innerText = formatTime(timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    finishGame();
+                }
+            }, 1000);
+        }
+
+        function formatTime(sec) {
+            let m = Math.floor(sec / 60);
+            let s = sec % 60;
+            return `Waktu: ${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // --- GENERATOR SOAL MATEMATIKA (<= 999) ---
+        function generateMath(level, opType) {
+            let a, b, answer, operator;
+            let maxRange = (level === 'mudah') ? 10 : (level === 'sedang') ? 30 : 100;
+            
+            if (opType === 'campuran') {
+                const types = ['tambah_kurang', 'kali_bagi', 'pangkat'];
+                opType = types[randInt(0, 2)];
+            }
+
+            if (opType === 'tambah_kurang') {
+                let isAdd = Math.random() > 0.5;
+                if (isAdd) {
+                    a = randInt(1, maxRange * 5);
+                    b = randInt(1, maxRange * 4);
+                    answer = a + b;
+                    operator = '+';
+                } else {
+                    a = randInt(10, maxRange * 8);
+                    b = randInt(1, a);
+                    answer = a - b;
+                    operator = '-';
+                }
+            } else if (opType === 'kali_bagi') {
+                let isMul = Math.random() > 0.5;
+                let maxFactor = (level === 'mudah') ? 10 : (level === 'sedang') ? 15 : 31;
+                if (isMul) {
+                    a = randInt(2, maxFactor);
+                    b = randInt(2, maxFactor);
+                    answer = a * b;
+                    operator = '×';
+                } else {
+                    b = randInt(2, maxFactor);
+                    answer = randInt(2, maxFactor);
+                    a = b * answer; 
+                    operator = '÷';
+                }
+            } else if (opType === 'pangkat') {
+                let maxBase = (level === 'mudah') ? 10 : (level === 'sedang') ? 20 : 31;
+                a = randInt(2, maxBase);
+                answer = a * a;
+                operator = '^2';
+            }
+
+            if (answer > 999) return generateMath(level, opType);
+
+            let questionText = (operator === '^2') ? `${a}² = ?` : `${a} ${operator} ${b} = ?`;
+            return { q: questionText, a: answer };
+        }
+
+        function generateQuestion(playerNum) {
+            let mathData = generateMath(gameLevel, gameOp);
+            document.getElementById(`q${playerNum}`).innerText = mathData.q;
+
+            // Generate 3 Opsi Salah
+            let options = [mathData.a];
+            while (options.length < 4) {
+                let offset = randInt(-12, 12);
+                if (offset === 0) offset = 1;
+                let wrong = mathData.a + offset;
+                if (wrong >= 0 && wrong <= 999 && !options.includes(wrong)) {
+                    options.push(wrong);
+                }
+            }
+
+            options.sort(() => Math.random() - 0.5);
+
+            let optHTML = "";
+            options.forEach(opt => {
+                optHTML += `<button class="option-btn" onclick="checkAns(${playerNum}, ${opt}, ${mathData.a}, event)">${opt}</button>`;
+            });
+            document.getElementById(`opt${playerNum}`).innerHTML = optHTML;
+        }
+
+        function checkAns(playerNum, selected, correct, event) {
+            event.stopPropagation(); // Mencegah pemicu tap area langsung
+
+            // Jika sedang menunggu tap lanjutan, abaikan klik tombol
+            if ((playerNum === 1 && p1WaitingNext) || (playerNum === 2 && p2WaitingNext)) return;
+
+            let playerArea = document.getElementById(`player${playerNum}`);
+            let isCorrect = (selected === correct);
+
+            if (isCorrect) {
+                if (playerNum === 1) scoreP1++;
+                else scoreP2++;
+                updateScoreUI();
+
+                // Ubah Warna Background ke Hijau
+                playerArea.className = "player-area bg-correct";
+            } else {
+                // Ubah Warna Background ke Kuning Muda
+                playerArea.className = "player-area bg-wrong";
+            }
+
+            // Set State Menunggu Tap Pemain
+            if (playerNum === 1) p1WaitingNext = true;
+            else p2WaitingNext = true;
+
+            document.getElementById(`prompt${playerNum}`).style.display = "block";
+
+            // Cek jika mode soal telah tercapai
+            if (gameMode === 'soal') {
+                if (scoreP1 >= gameTarget || scoreP2 >= gameTarget) {
+                    setTimeout(finishGame, 800);
+                }
+            }
+        }
+
+        // Penanganan Tap Sembarang Area Pemain untuk Soal Berikutnya
+        function handlePlayerTap(playerNum) {
+            let isWaiting = (playerNum === 1) ? p1WaitingNext : p2WaitingNext;
+            if (!isWaiting) return;
+
+            resetPlayerAreaUI(playerNum);
+            generateQuestion(playerNum);
+
+            if (playerNum === 1) p1WaitingNext = false;
+            else p2WaitingNext = false;
+        }
+
+        function resetPlayerAreaUI(playerNum) {
+            let playerArea = document.getElementById(`player${playerNum}`);
+            let defaultBg = (playerNum === 1) ? "player-area bg-p1-default" : "player-area bg-p2-default";
+            playerArea.className = defaultBg;
+            document.getElementById(`prompt${playerNum}`).style.display = "none";
+        }
+
+        function updateScoreUI() {
+            document.getElementById('score1').innerText = scoreP1;
+            document.getElementById('score2').innerText = scoreP2;
+        }
+
+        // --- SELESAI GAME & SIMPAN DATA ---
+        function finishGame() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            let winner = "SERI";
+            if (scoreP1 > scoreP2) winner = nameP1;
+            else if (scoreP2 > scoreP1) winner = nameP2;
+
+            document.getElementById('winner-name').innerText = (winner === "SERI") ? "Pertandingan Seri! 🤝" : `${winner} 🎉`;
+            document.getElementById('final-scores').innerText = `${nameP1} (${scoreP1}) VS (${scoreP2}) ${nameP2}`;
+
+            showView('view-result');
+            saveMatchRecord(nameP1, nameP2, scoreP1, scoreP2, winner, gameMode, gameLevel);
+        }
+
+        function saveMatchRecord(p1, p2, s1, s2, winner, mode, level) {
+            const matchData = {
+                p1: p1,
+                p2: p2,
+                score1: s1,
+                score2: s2,
+                winner: winner,
+                mode: mode,
+                level: level,
+                timestamp: new Date().toLocaleString('id-ID'),
+                createdAt: Date.now()
+            };
+
+            if (db && auth && auth.currentUser) {
+                const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('matches');
+                colRef.add(matchData).catch(err => console.error("Gagal simpan ke Firestore:", err));
+            } else {
+                localMatches.push({ id: 'loc-' + Date.now(), ...matchData });
+            }
+        }
+
+        // --- BACA DATA DATABASE ---
+        function fetchMatchesData(callback) {
+            if (db && auth && auth.currentUser) {
+                const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('matches');
+                colRef.get().then(snapshot => {
+                    let list = [];
+                    snapshot.forEach(doc => {
+                        list.push({ id: doc.id, ...doc.data() });
+                    });
+                    list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    cachedMatches = list;
+                    callback(cachedMatches);
+                }).catch(err => {
+                    console.error("Error membaca Firestore:", err);
+                    cachedMatches = localMatches;
+                    callback(cachedMatches);
+                });
+            } else {
+                cachedMatches = localMatches;
+                callback(cachedMatches);
+            }
+        }
+
+        // --- LEADERBOARD UNTUK PEMAIN ---
+        function openLeaderboard() {
+            showView('view-leaderboard');
+            fetchMatchesData(() => {
+                renderPlayerLeaderboard();
+            });
+        }
+
+        function renderPlayerLeaderboard() {
+            const selectedMode = document.getElementById('lb-filter-mode').value;
+            const selectedLevel = document.getElementById('lb-filter-level').value;
+
+            // Filter Pertandingan berdasarkan Mode & Level
+            let filtered = cachedMatches.filter(m => m.mode === selectedMode && m.level === selectedLevel);
+
+            let winsCount = {};
+            filtered.forEach(m => {
+                if (m.winner && m.winner !== "SERI") {
+                    winsCount[m.winner] = (winsCount[m.winner] || 0) + 1;
+                }
+            });
+
+            let sortedWinners = Object.keys(winsCount).map(name => ({
+                name: name,
+                wins: winsCount[name]
+            })).sort((a, b) => b.wins - a.wins);
+
+            let lbBody = document.getElementById('leaderboard-body');
+            if (sortedWinners.length === 0) {
+                lbBody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada juara di kategori ini.</td></tr>`;
+            } else {
+                let html = "";
+                sortedWinners.forEach((w, idx) => {
+                    let badge = idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : '';
+                    html += `<tr>
+                        <td><b>${idx + 1}</b></td>
+                        <td>${badge}${w.name}</td>
+                        <td><b>${w.wins}</b> Menang</td>
+                    </tr>`;
+                });
+                lbBody.innerHTML = html;
+            }
+        }
+
+        // --- PANEL ADMIN ---
+        function openAdminAuth() {
+            document.getElementById('admin-pin').value = "";
+            document.getElementById('admin-auth-err').style.display = "none";
+            showView('view-admin-auth');
+        }
+
+        function loginAdmin() {
+            let pin = document.getElementById('admin-pin').value;
+            if (pin === "1234") {
+                showView('view-admin-panel');
+                fetchMatchesData(() => {
+                    renderAdminLeaderboard();
+                    renderAdminHistoryTable();
+                });
+            } else {
+                document.getElementById('admin-auth-err').style.display = "block";
+            }
+        }
+
+        function renderAdminLeaderboard() {
+            const selectedMode = document.getElementById('admin-filter-mode').value;
+            const selectedLevel = document.getElementById('admin-filter-level').value;
+
+            let filtered = cachedMatches.filter(m => m.mode === selectedMode && m.level === selectedLevel);
+
+            let winsCount = {};
+            filtered.forEach(m => {
+                if (m.winner && m.winner !== "SERI") {
+                    winsCount[m.winner] = (winsCount[m.winner] || 0) + 1;
+                }
+            });
+
+            let sorted = Object.keys(winsCount).map(name => ({
+                name: name,
+                wins: winsCount[name]
+            })).sort((a, b) => b.wins - a.wins);
+
+            let body = document.getElementById('admin-lb-body');
+            if (sorted.length === 0) {
+                body.innerHTML = `<tr><td colspan="3" style="text-align:center;">Tidak ada data untuk kategori ini.</td></tr>`;
+            } else {
+                let html = "";
+                sorted.forEach((w, idx) => {
+                    html += `<tr>
+                        <td><b>${idx + 1}</b></td>
+                        <td>${w.name}</td>
+                        <td><b>${w.wins}</b> Menang</td>
+                    </tr>`;
+                });
+                body.innerHTML = html;
+            }
+        }
+
+        function renderAdminHistoryTable() {
+            let body = document.getElementById('admin-table-body');
+            if (cachedMatches.length === 0) {
+                body.innerHTML = `<tr><td colspan="4" style="text-align:center;">Tidak ada riwayat pertandingan.</td></tr>`;
+                return;
+            }
+            let html = "";
+            cachedMatches.forEach(m => {
+                let modeInfo = `${m.mode === 'waktu' ? '⏱️ Waktu' : '🎯 Soal'} (${m.level || 'mudah'})`;
+                html += `<tr>
+                    <td><small>${m.timestamp || '-'}</small><br><b>${modeInfo}</b></td>
+                    <td>${m.p1} (${m.score1}) vs ${m.p2} (${m.score2})</td>
+                    <td><b>${m.winner}</b></td>
+                    <td><button class="btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteMatch('${m.id}')">Hapus</button></td>
+                </tr>`;
+            });
+            body.innerHTML = html;
+        }
+
+        function deleteMatch(docId) {
+            if (docId.startsWith('loc-')) {
+                localMatches = localMatches.filter(m => m.id !== docId);
+                cachedMatches = localMatches;
+                renderAdminLeaderboard();
+                renderAdminHistoryTable();
+            } else if (db && auth && auth.currentUser) {
+                db.collection('artifacts').doc(appId).collection('public').doc('data').collection('matches').doc(docId).delete().then(() => {
+                    fetchMatchesData(() => {
+                        renderAdminLeaderboard();
+                        renderAdminHistoryTable();
+                    });
+                }).catch(err => console.error("Gagal menghapus:", err));
+            }
+        }
+
+        function clearAllHistory() {
+            if (!confirm("Apakah Anda yakin ingin menghapus SELURUH riwayat pertandingan dan leaderboard?")) return;
+
+            if (db && auth && auth.currentUser) {
+                const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('matches');
+                colRef.get().then(snapshot => {
+                    let batch = db.batch();
+                    snapshot.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    return batch.commit();
+                }).then(() => {
+                    fetchMatchesData(() => {
+                        renderAdminLeaderboard();
+                        renderAdminHistoryTable();
+                    });
+                }).catch(err => console.error("Gagal membersihkan data:", err));
+            } else {
+                localMatches = [];
+                cachedMatches = [];
+                renderAdminLeaderboard();
+                renderAdminHistoryTable();
+            }
+        }
+    </script>
+</body>
+</html>
