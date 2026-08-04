@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Duel Matematika ⚔️</title>
-    <!-- Firebase SDK (Compat version) -->
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
     
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; user-select: none; margin: 0; padding: 0; }
@@ -51,8 +47,8 @@
         .bg-p2-default { background: linear-gradient(135deg, #2980b9, #16a085); }
         
         /* Warna Umpan Balik Jawaban */
-        .bg-correct { background: #27ae60 !important; color: #ffffff !important; } /* Hijau Muda / Terang */
-        .bg-wrong { background: #f1c40f !important; color: #1a1e29 !important; }   /* Kuning Muda / Terang */
+        .bg-correct { background: #27ae60 !important; color: #ffffff !important; }
+        .bg-wrong { background: #f1c40f !important; color: #1a1e29 !important; }
         
         .player-name { font-size: 1.8rem; font-weight: bold; position: absolute; top: 15px; left: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
         .score-display { font-size: 1.5rem; font-weight: bold; position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; }
@@ -314,52 +310,31 @@
         <button class="btn-close" style="width:100%; max-width:520px;" onclick="showView('view-menu')">Keluar dari Admin</button>
     </div>
 
-    <script>
-        // --- KONFIGURASI FIREBASE ANDA ---
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyC4EUcrEE12YTdlMe0a7A2jScYTEF7QySk",
-    authDomain: "duel-mtk.firebaseapp.com",
-    projectId: "duel-mtk",
-    storageBucket: "duel-mtk.firebasestorage.app",
-    messagingSenderId: "45071457305",
-    appId: "1:45071457305:web:ac2bde3652922a07d7de88",
-    measurementId: "G-NFT8PK6T8D"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-
-
-        // --- SISTEM GAME ---
+        // --- KONFIGURASI FIREBASE ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'duel-matematika-app';
         let db = null;
         let auth = null;
-        let localMatches = []; // Fallback jika offline / standalone
-        let cachedMatches = []; // Cache data dari DB
+        let localMatches = [];
+        let cachedMatches = [];
 
-        // Inisialisasi Firebase
+        // Inisialisasi dari Environment Immersive (Konfigurasi Dinamis)
         if (typeof __firebase_config !== 'undefined' && __firebase_config) {
             try {
                 const firebaseConfig = JSON.parse(__firebase_config);
-                const app = firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
-                db = firebase.firestore();
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
 
                 const initAuth = async () => {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await auth.signInWithCustomToken(__initial_auth_token);
+                        await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
-                        await auth.signInAnonymously();
+                        await signInAnonymously(auth);
                     }
                 };
                 initAuth();
@@ -415,13 +390,11 @@
         let gameMode, gameLevel, gameOp, gameTarget;
         let timerInterval = null;
 
-        // State kuncian untuk delay per-player
         let p1WaitingNext = false;
         let p2WaitingNext = false;
 
         // --- MULAI GAME ---
         function startGame() {
-            // Otomatis Fullscreen saat mulai bermain
             requestFullscreen();
 
             nameP1 = document.getElementById('p1-name').value.trim() || "Pemain Merah";
@@ -480,7 +453,7 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // --- GENERATOR SOAL MATEMATIKA (<= 999) ---
+        // --- GENERATOR SOAL MATEMATIKA ---
         function generateMath(level, opType) {
             let a, b, answer, operator;
             let maxRange = (level === 'mudah') ? 10 : (level === 'sedang') ? 30 : 100;
@@ -534,7 +507,6 @@
             let mathData = generateMath(gameLevel, gameOp);
             document.getElementById(`q${playerNum}`).innerText = mathData.q;
 
-            // Generate 3 Opsi Salah
             let options = [mathData.a];
             while (options.length < 4) {
                 let offset = randInt(-12, 12);
@@ -555,9 +527,8 @@
         }
 
         function checkAns(playerNum, selected, correct, event) {
-            event.stopPropagation(); // Mencegah pemicu tap area langsung
+            event.stopPropagation();
 
-            // Jika sedang menunggu tap lanjutan, abaikan klik tombol
             if ((playerNum === 1 && p1WaitingNext) || (playerNum === 2 && p2WaitingNext)) return;
 
             let playerArea = document.getElementById(`player${playerNum}`);
@@ -567,21 +538,16 @@
                 if (playerNum === 1) scoreP1++;
                 else scoreP2++;
                 updateScoreUI();
-
-                // Ubah Warna Background ke Hijau
                 playerArea.className = "player-area bg-correct";
             } else {
-                // Ubah Warna Background ke Kuning Muda
                 playerArea.className = "player-area bg-wrong";
             }
 
-            // Set State Menunggu Tap Pemain
             if (playerNum === 1) p1WaitingNext = true;
             else p2WaitingNext = true;
 
             document.getElementById(`prompt${playerNum}`).style.display = "block";
 
-            // Cek jika mode soal telah tercapai
             if (gameMode === 'soal') {
                 if (scoreP1 >= gameTarget || scoreP2 >= gameTarget) {
                     setTimeout(finishGame, 800);
@@ -589,7 +555,6 @@
             }
         }
 
-        // Penanganan Tap Sembarang Area Pemain untuk Soal Berikutnya
         function handlePlayerTap(playerNum) {
             let isWaiting = (playerNum === 1) ? p1WaitingNext : p2WaitingNext;
             if (!isWaiting) return;
@@ -642,8 +607,8 @@
             };
 
             if (db && auth && auth.currentUser) {
-                const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('matches');
-                colRef.add(matchData).catch(err => console.error("Gagal simpan ke Firestore:", err));
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
+                addDoc(colRef, matchData).catch(err => console.error("Gagal simpan ke Firestore:", err));
             } else {
                 localMatches.push({ id: 'loc-' + Date.now(), ...matchData });
             }
@@ -652,11 +617,11 @@
         // --- BACA DATA DATABASE ---
         function fetchMatchesData(callback) {
             if (db && auth && auth.currentUser) {
-                const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('matches');
-                colRef.get().then(snapshot => {
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
+                getDocs(colRef).then(snapshot => {
                     let list = [];
-                    snapshot.forEach(doc => {
-                        list.push({ id: doc.id, ...doc.data() });
+                    snapshot.forEach(docSnap => {
+                        list.push({ id: docSnap.id, ...docSnap.data() });
                     });
                     list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                     cachedMatches = list;
@@ -684,7 +649,6 @@
             const selectedMode = document.getElementById('lb-filter-mode').value;
             const selectedLevel = document.getElementById('lb-filter-level').value;
 
-            // Filter Pertandingan berdasarkan Mode & Level
             let filtered = cachedMatches.filter(m => m.mode === selectedMode && m.level === selectedLevel);
 
             let winsCount = {};
@@ -796,7 +760,8 @@
                 renderAdminLeaderboard();
                 renderAdminHistoryTable();
             } else if (db && auth && auth.currentUser) {
-                db.collection('artifacts').doc(appId).collection('public').doc('data').collection('matches').doc(docId).delete().then(() => {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'matches', docId);
+                deleteDoc(docRef).then(() => {
                     fetchMatchesData(() => {
                         renderAdminLeaderboard();
                         renderAdminHistoryTable();
@@ -809,11 +774,11 @@
             if (!confirm("Apakah Anda yakin ingin menghapus SELURUH riwayat pertandingan dan leaderboard?")) return;
 
             if (db && auth && auth.currentUser) {
-                const colRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('matches');
-                colRef.get().then(snapshot => {
-                    let batch = db.batch();
-                    snapshot.forEach(doc => {
-                        batch.delete(doc.ref);
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
+                getDocs(colRef).then(snapshot => {
+                    const batch = writeBatch(db);
+                    snapshot.forEach(docSnap => {
+                        batch.delete(docSnap.ref);
                     });
                     return batch.commit();
                 }).then(() => {
@@ -829,6 +794,21 @@
                 renderAdminHistoryTable();
             }
         }
+
+        // --- EXPOSE FUNCTIONS TO WINDOW FOR INLINE HTML EVENT HANDLERS ---
+        window.toggleFullscreen = toggleFullscreen;
+        window.startGame = startGame;
+        window.showView = showView;
+        window.openLeaderboard = openLeaderboard;
+        window.openAdminAuth = openAdminAuth;
+        window.loginAdmin = loginAdmin;
+        window.renderPlayerLeaderboard = renderPlayerLeaderboard;
+        window.renderAdminLeaderboard = renderAdminLeaderboard;
+        window.deleteMatch = deleteMatch;
+        window.clearAllHistory = clearAllHistory;
+        window.handlePlayerTap = handlePlayerTap;
+        window.checkAns = checkAns;
+
     </script>
 </body>
 </html>
