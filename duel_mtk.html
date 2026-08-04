@@ -316,16 +316,29 @@
 
     <script>
         // --- KONFIGURASI FIREBASE ANDA ---
-        window.__app_id = "duel-matematika-b47ea";
-        window.__firebase_config = JSON.stringify({
-            apiKey: "AIzaSyCK4OnHjsrbWxHZKpn8aMhXH71Ebofs4cA",
-            authDomain: "duel-matematika-b47ea.firebaseapp.com",
-            projectId: "duel-matematika-b47ea",
-            storageBucket: "duel-matematika-b47ea.firebasestorage.app",
-            messagingSenderId: "154456696545",
-            appId: "1:154456696545:web:21f063225fc3b19af239a0",
-            measurementId: "G-FMGV94S1V1"
-        });
+
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyC4EUcrEE12YTdlMe0a7A2jScYTEF7QySk",
+    authDomain: "duel-mtk.firebaseapp.com",
+    projectId: "duel-mtk",
+    storageBucket: "duel-mtk.firebasestorage.app",
+    messagingSenderId: "45071457305",
+    appId: "1:45071457305:web:ac2bde3652922a07d7de88",
+    measurementId: "G-NFT8PK6T8D"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
 
         // --- SISTEM GAME ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'duel-matematika-app';
