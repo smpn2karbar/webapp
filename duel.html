@@ -2,118 +2,161 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Duel IFP Mapel - SMPN 2 Karawang Barat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Game Duel IFP Mapel</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <!-- Tone JS for Synthesized Sound -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/1.4.11/Tone.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
     <style>
-        * {
-            user-select: none;
-            -webkit-user-drag: none;
-            font-family: 'Poppins', sans-serif;
-            box-sizing: border-box;
-        }
         body {
-            overflow: hidden;
-            background-color: #0f172a; /* slate-900 */
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow: hidden; /* Mencegah scrolling berlebih */
+            user-select: none; /* Cegah teks terseleksi saat disentuh cepat di layar IFP */
+            touch-action: pan-y;
         }
+        
+        /* Animasi */
+        @keyframes pulse-fast {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        .pulse-text { animation: pulse-fast 1s infinite; font-weight: 900; font-size: 1.5rem; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        
+        @keyframes countdown {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+        .countdown-anim { animation: countdown 1s ease-in-out; }
 
-        /* Tema Pemain */
-        .p1-theme { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; }
-        .p1-btn { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.4); color: white; }
-        .p2-theme { background: linear-gradient(135deg, #f59e0b, #fde047); color: #1e293b; }
-        .p2-btn { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.2); color: #1e293b; }
+        @keyframes slideInDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-anim { animation: slideInDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-        .btn-opsi { transition: all 0.2s ease; position: relative; overflow: hidden; }
-        .btn-opsi:active:not(:disabled) { transform: scale(0.95); }
-        .btn-opsi:disabled { cursor: not-allowed; opacity: 0.9; }
+        /* Tema Zona Pemain */
+        .p1-theme { background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-right: 6px solid #0f172a; }
+        .p2-theme { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
 
-        /* Glassmorphism */
-        .glass-box-p1 { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
-        .glass-box-p2 { background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1); }
+        .glass-box-p1 { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .glass-box-p2 { background: rgba(0, 0, 0, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.1); }
 
-        /* Overlay ketuk untuk lanjut */
+        .p1-btn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); color: white; transition: all 0.2s; }
+        .p1-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.3); }
+        
+        .p2-btn { background: rgba(255,255,255,0.4); border-color: rgba(0,0,0,0.2); color: #1e293b; transition: all 0.2s; }
+        .p2-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.7); }
+
+        /* Status Jawaban */
+        .btn-correct { background-color: #10b981 !important; border-color: #047857 !important; color: white !important; transform: scale(1.05); z-index: 10; box-shadow: 0 0 20px rgba(16,185,129,0.5); }
+        .btn-wrong { background-color: #ef4444 !important; border-color: #b91c1c !important; color: white !important; transform: scale(0.95); opacity: 0.8; }
+        
+        .opsi-content img { max-width: 100%; max-height: 150px; border-radius: 8px; margin-top: 8px; }
+        .soal-content img { max-width: 100%; max-height: 250px; border-radius: 12px; margin: 10px auto; }
+
+        /* Overlay Tap */
         .tap-overlay {
-            position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
-            background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(2px); cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            position: absolute; inset: 0; z-index: 50; 
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
         .tap-overlay.active { opacity: 1; pointer-events: auto; }
-        
-        /* Animasi Text */
-        .pulse-text { animation: pulse 1.5s infinite; font-size: 2rem; font-weight: 800; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
-        
-        .countdown-anim { animation: popIn 1s ease-in-out infinite; }
-        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
 
-        /* Modals & Scrollbar */
-        .modal-backdrop { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); }
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
-        /* Support untuk Image di Soal */
-        .soal-content img { max-height: 150px; margin: 10px auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .opsi-content img { max-height: 60px; margin: 0 auto; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col font-sans">
+<body class="flex flex-col h-screen w-screen overflow-hidden">
 
-    <div id="setup-panel" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/95 backdrop-blur-md">
-        <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl w-[700px] border border-slate-700 max-h-[95vh] overflow-y-auto">
-            
-            <div class="text-center mb-6">
-                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 mb-1">GAME DUEL IFP MAPEL</h1>
-                <h2 class="text-2xl font-bold text-slate-300">SMPN 2 Karawang Barat</h2>
+    <!-- CUSTOM MESSAGE BOX -->
+    <div id="custom-message-box" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl modal-anim text-center">
+            <div id="message-icon" class="text-5xl mb-4">ℹ️</div>
+            <h3 id="message-title" class="text-2xl font-bold text-white mb-2">Informasi</h3>
+            <p id="message-text" class="text-slate-300 mb-6 text-lg"></p>
+            <button onclick="closeMessageBox()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">Mengerti</button>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRM BOX -->
+    <div id="custom-confirm-box" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-2xl p-6 md:p-10 max-w-lg w-full shadow-2xl modal-anim text-center">
+            <h3 id="confirm-title" class="text-3xl font-black text-white mb-4">Konfirmasi</h3>
+            <p id="confirm-text" class="text-slate-300 mb-8 text-xl"></p>
+            <div class="flex gap-4">
+                <button id="btn-confirm-no" class="flex-1 py-4 bg-slate-600 hover:bg-slate-500 text-white text-xl font-bold rounded-xl transition">Tidak</button>
+                <button id="btn-confirm-yes" class="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xl font-bold rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.5)]">Ya</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MENU UTAMA -->
+    <div id="main-menu" class="flex-1 flex items-center justify-center relative bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] bg-slate-900">
+        
+        <div class="absolute inset-0 bg-gradient-to-b from-blue-900/40 to-slate-900/90 pointer-events-none"></div>
+
+        <div class="bg-slate-800/90 p-8 rounded-3xl shadow-2xl border border-slate-600 w-full max-w-4xl relative z-10 flex flex-col backdrop-blur-md">
             
-            <div class="flex gap-4 mb-6">
-                <button onclick="switchTab('main')" class="flex-1 py-3 bg-blue-600/20 text-blue-400 border border-blue-500/50 rounded-lg font-bold hover:bg-blue-600/40 transition">Mulai Main</button>
-                <button onclick="switchTab('import')" class="flex-1 py-3 bg-purple-600/20 text-purple-400 border border-purple-500/50 rounded-lg font-bold hover:bg-purple-600/40 transition">Impor Soal</button>
-                <button onclick="switchTab('leaderboard')" class="flex-1 py-3 bg-yellow-600/20 text-yellow-400 border border-yellow-500/50 rounded-lg font-bold hover:bg-yellow-600/40 transition">Papan Skor</button>
+            <div class="text-center mb-8">
+                <h1 class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 drop-shadow-lg mb-2">GAME DUEL IFP</h1>
+                <h2 class="text-xl md:text-2xl font-bold text-slate-300">SMPN 2 Karawang Barat</h2>
             </div>
 
-            <!-- Pesan Notifikasi -->
-            <div id="ui-message" class="hidden mb-4 p-3 rounded-lg text-center font-semibold border"></div>
+            <!-- TABS -->
+            <div class="flex border-b border-slate-600 mb-6 font-semibold">
+                <button onclick="switchTab('main')" id="tab-btn-main" class="flex-1 py-3 text-blue-400 border-b-2 border-blue-400 transition-colors">TANDING</button>
+                <button onclick="switchTab('import')" id="tab-btn-import" class="flex-1 py-3 text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition-colors">IMPOR SOAL</button>
+                <button onclick="switchTab('leaderboard')" id="tab-btn-leaderboard" class="flex-1 py-3 text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition-colors">KLASEMEN</button>
+            </div>
 
             <!-- TAB: MAIN -->
             <div id="tab-main" class="space-y-4 block">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+                    <div>
+                        <label class="block text-slate-400 font-bold mb-2 text-sm">NAMA PEMAIN KIRI (P1)</label>
+                        <input type="text" id="input-nama-p1" class="w-full p-3 bg-slate-700 border-2 border-blue-500/50 focus:border-blue-500 rounded-lg text-white font-bold text-lg outline-none transition" value="Pemain Kiri">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 font-bold mb-2 text-sm text-right">NAMA PEMAIN KANAN (P2)</label>
+                        <input type="text" id="input-nama-p2" class="w-full p-3 bg-slate-700 border-2 border-yellow-500/50 focus:border-yellow-500 rounded-lg text-white font-bold text-lg outline-none transition text-right" value="Pemain Kanan">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="space-y-1">
+                        <label class="block text-slate-400 font-bold text-sm">Tingkat</label>
+                        <select id="select-tingkat" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white font-semibold outline-none focus:border-blue-500"></select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-slate-400 font-bold text-sm">Mata Pelajaran</label>
+                        <select id="select-mapel" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white font-semibold outline-none focus:border-blue-500"></select>
+                    </div>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-300 mb-1">Nama Pemain 1 (Kiri)</label>
-                        <input type="text" id="input-p1" value="Pemain Kiri" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white font-bold text-xl outline-none focus:border-blue-500 text-center">
+                    <div class="space-y-1">
+                        <label class="block text-slate-400 font-bold text-sm">Materi / Bab</label>
+                        <select id="select-materi" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white font-semibold outline-none focus:border-blue-500"></select>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-300 mb-1">Nama Pemain 2 (Kanan)</label>
-                        <input type="text" id="input-p2" value="Pemain Kanan" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white font-bold text-xl outline-none focus:border-yellow-500 text-center">
+                    <div class="space-y-1">
+                        <label class="block text-slate-400 font-bold text-sm">Total Waktu Duel</label>
+                        <select id="select-waktu" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white font-semibold outline-none focus:border-blue-500">
+                            <option value="120">2 Menit</option>
+                            <option value="180">3 Menit</option>
+                            <option value="300">5 Menit</option>
+                        </select>
                     </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 mt-2">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-400 mb-1">Tingkat / Kelas</label>
-                        <select id="select-tingkat" class="w-full p-3 bg-slate-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500 text-lg"></select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-400 mb-1">Mata Pelajaran</label>
-                        <select id="select-mapel" class="w-full p-3 bg-slate-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500 text-lg"></select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-1">Materi Topik</label>
-                    <select id="select-materi" class="w-full p-3 bg-slate-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500 text-lg"></select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-1">Total Waktu Duel</label>
-                    <select id="select-waktu" class="w-full p-3 bg-slate-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500 text-lg">
-                        <option value="120">2 Menit</option>
-                        <option value="180">3 Menit</option>
-                        <option value="300">5 Menit</option>
-                    </select>
                 </div>
 
                 <button onclick="praMulaiGame()" class="w-full mt-6 py-4 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white text-3xl font-black rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-[1.02]">
@@ -123,16 +166,21 @@
 
             <!-- TAB: IMPOR SOAL -->
             <div id="tab-import" class="space-y-4 hidden text-slate-300">
-                <p class="text-sm">Format mendukung JSON dan CSV! JSON mendukung tag <code>&lt;img&gt;</code>. CSV format: <code class="text-yellow-300">Tingkat, Mapel, Materi, Soal, Opsi1, Opsi2, Opsi3, Opsi4, Kunci (1-4)</code> dengan header di baris ke-1.</p>
+                <p class="text-sm">Format mendukung JSON, Upload CSV, atau <strong class="text-blue-300">Tarik dari Link Publish CSV Google Sheets</strong>. (Syarat tabel: Tingkat, Mapel, Materi, Soal, Opsi1, Opsi2, Opsi3, Opsi4, Kunci 1-4).</p>
                 
-                <textarea id="json-input" rows="8" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-green-300 font-mono text-sm outline-none focus:border-purple-500" placeholder="Paste JSON disini..."></textarea>
+                <div class="flex flex-col sm:flex-row items-stretch gap-2">
+                    <input type="text" id="url-csv-input" class="flex-1 p-3 bg-slate-700 border border-slate-600 rounded-lg text-sm text-white outline-none focus:border-blue-500" placeholder="Paste link Publish to Web (CSV) Google Sheets disini...">
+                    <button onclick="tarikDataDariURL()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors whitespace-nowrap">Tarik CSV</button>
+                </div>
+
+                <textarea id="json-input" rows="5" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-green-300 font-mono text-sm outline-none focus:border-purple-500" placeholder="Paste JSON disini..."></textarea>
                 
-                <div class="flex items-center gap-4">
-                    <label class="flex-1 flex items-center justify-center py-3 px-4 bg-slate-700 border border-slate-600 rounded-lg cursor-pointer hover:bg-slate-600 transition">
+                <div class="flex flex-col sm:flex-row items-stretch gap-4">
+                    <label class="flex-1 flex items-center justify-center py-3 px-4 bg-slate-700 border border-slate-600 rounded-lg cursor-pointer hover:bg-slate-600 transition text-center">
                         <span class="text-sm font-bold text-white">Unggah File .JSON / .CSV</span>
                         <input type="file" id="file-upload" accept=".json, .csv" class="hidden" onchange="handleFileUpload(event)">
                     </label>
-                    <button onclick="simpanBankSoal()" class="flex-1 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-colors">
+                    <button onclick="simpanBankSoal()" class="flex-1 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-colors shadow-lg">
                         Simpan ke Sistem
                     </button>
                 </div>
@@ -140,39 +188,16 @@
             </div>
 
             <!-- TAB: LEADERBOARD -->
-            <div id="tab-leaderboard" class="hidden flex flex-col h-[400px]">
-                <div class="flex gap-2 mb-4">
-                    <select id="lb-tingkat" class="flex-1 p-2 bg-slate-700 rounded text-sm text-white" onchange="renderLeaderboard()"></select>
-                    <select id="lb-mapel" class="flex-1 p-2 bg-slate-700 rounded text-sm text-white" onchange="renderLeaderboard()"></select>
-                    <select id="lb-materi" class="flex-1 p-2 bg-slate-700 rounded text-sm text-white" onchange="renderLeaderboard()"></select>
+            <div id="tab-leaderboard" class="hidden h-64 overflow-y-auto pr-2 text-slate-300">
+                <div class="flex justify-between items-center mb-4 sticky top-0 bg-slate-800 p-2 border-b border-slate-700">
+                    <h3 class="font-bold text-lg text-white">Skor Tertinggi Lokal</h3>
+                    <button onclick="resetLeaderboard()" class="text-xs bg-red-600/20 text-red-400 px-3 py-1 rounded hover:bg-red-600/40 transition">Reset Klasemen</button>
                 </div>
-                <div class="flex-1 overflow-y-auto pr-2" id="lb-container">
-                    <!-- Leaderboard items injected here -->
+                <div id="leaderboard-list" class="space-y-3">
+                    <!-- List dinamis -->
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- MODAL KONFIRMASI PEMAIN -->
-    <div id="modal-ready" class="hidden absolute inset-0 z-[60] modal-backdrop flex items-center justify-center">
-        <div class="bg-slate-800 p-10 rounded-3xl border-2 border-emerald-500 shadow-2xl text-center max-w-lg">
-            <h3 class="text-3xl font-bold text-white mb-6" id="ready-text">Ahmad dan Abdul siap bermain?</h3>
-            <div class="flex gap-4">
-                <button onclick="batalMulai()" class="flex-1 py-4 bg-slate-600 hover:bg-slate-500 text-white text-xl font-bold rounded-xl transition">TIDAK</button>
-                <button onclick="konfirmasiMulai()" class="flex-1 py-4 bg-emerald-500 hover:bg-emerald-400 text-white text-xl font-black rounded-xl shadow-lg transition transform hover:scale-105">YA, SIAP!</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL BATALKAN GAME -->
-    <div id="modal-cancel" class="hidden absolute inset-0 z-[60] modal-backdrop flex items-center justify-center">
-        <div class="bg-slate-800 p-10 rounded-3xl border-2 border-red-500 shadow-2xl text-center max-w-lg">
-            <h3 class="text-3xl font-bold text-white mb-2">Batalkan Game?</h3>
-            <p class="text-slate-400 mb-6">Pertandingan yang sedang berjalan akan dihentikan dan tidak disimpan.</p>
-            <div class="flex gap-4">
-                <button onclick="lanjutkanGame()" class="flex-1 py-4 bg-slate-600 hover:bg-slate-500 text-white text-xl font-bold rounded-xl transition">TIDAK, LANJUTKAN</button>
-                <button onclick="eksekusiBatalGame()" class="flex-1 py-4 bg-red-600 hover:bg-red-500 text-white text-xl font-black rounded-xl shadow-lg transition">YA, BATALKAN</button>
-            </div>
         </div>
     </div>
 
@@ -182,72 +207,72 @@
     </div>
 
     <!-- ARENA GAME (SPLIT SCREEN) -->
-    <div id="game-arena" class="hidden flex-1 flex flex-col h-full relative">
+    <div id="game-arena" class="hidden flex-1 flex flex-col h-full relative overflow-hidden bg-black">
         
         <!-- TOP BAR (Tombol Batal & Timer) -->
-        <div class="h-20 w-full bg-slate-900 border-b-4 border-slate-700 flex justify-between items-center px-8 relative z-30 shadow-md">
-            <button onclick="tanyaBatalGame()" class="bg-red-600/20 text-red-500 border border-red-500 hover:bg-red-600 hover:text-white px-6 py-2 rounded-lg font-bold text-xl transition flex items-center gap-2">
+        <div class="h-20 w-full bg-slate-900 border-b-4 border-slate-700 flex justify-between items-center px-4 sm:px-8 relative z-30 shadow-md shrink-0">
+            <button onclick="tanyaBatalGame()" class="bg-red-600/20 text-red-500 border border-red-500 hover:bg-red-600 hover:text-white px-4 py-2 sm:px-6 sm:py-2 rounded-lg font-bold text-sm sm:text-xl transition flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 BATALKAN
             </button>
 
             <!-- Timer di Tengah Atas -->
-            <div class="bg-slate-800 border-2 border-slate-600 text-white px-8 py-2 rounded-full font-black text-4xl shadow-inner flex items-center gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
+            <div class="bg-slate-800 border-2 border-slate-600 text-white px-6 py-2 sm:px-8 sm:py-2 rounded-full font-black text-2xl sm:text-4xl shadow-inner flex items-center gap-2 sm:gap-3 absolute left-1/2 transform -translate-x-1/2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
                 <span id="global-timer" class="tracking-widest">00:00</span>
             </div>
 
-            <!-- Spacer untuk seimbang -->
-            <div class="w-[160px]"></div> 
+            <!-- Spacer untuk seimbang di sisi kanan -->
+            <div class="w-[120px] sm:w-[160px] opacity-0 pointer-events-none">BATALKAN</div> 
         </div>
 
-        <div class="flex flex-1 w-full h-full relative">
+        <div class="flex flex-1 w-full h-full relative overflow-hidden">
             
             <!-- PEMAIN 1 (KIRI - BIRU) -->
-            <div id="zone-p1" class="w-1/2 p1-theme p-8 flex flex-col justify-between border-r-4 border-slate-900 relative" onclick="handleZoneClick('p1')">
+            <div id="zone-p1" class="w-1/2 p1-theme p-4 sm:p-6 flex flex-col relative h-full overflow-hidden" onclick="handleZoneClick('p1')">
                 <div class="tap-overlay" id="overlay-p1">
                     <p class="pulse-text text-white">👇 KETUK UNTUK LANJUT 👇</p>
                 </div>
 
-                <div class="flex justify-between items-center bg-black/20 p-4 rounded-2xl border border-white/10 shadow-lg">
-                    <h3 id="display-name-p1" class="text-4xl font-black tracking-wider drop-shadow-md">Ahmad</h3>
-                    <div class="text-xl font-bold bg-white/20 px-6 py-3 rounded-xl border border-white/20 shadow-inner">
-                        SKOR: <span id="score-p1" class="text-4xl ml-2 font-black text-emerald-300">0</span>
+                <div class="flex justify-between items-center bg-black/20 p-3 sm:p-4 rounded-2xl border border-white/10 shadow-lg shrink-0 mb-4">
+                    <h3 id="display-name-p1" class="text-xl sm:text-3xl font-black tracking-wider drop-shadow-md truncate max-w-[60%]">Ahmad</h3>
+                    <div class="text-sm sm:text-lg font-bold bg-white/20 px-3 py-1 sm:px-4 sm:py-2 rounded-xl border border-white/20 shadow-inner flex items-center">
+                        SKOR: <span id="score-p1" class="text-2xl sm:text-3xl ml-2 font-black text-emerald-300">0</span>
                     </div>
                 </div>
                 
-                <div class="flex-1 flex flex-col justify-center gap-8 my-6 relative z-10 pointer-events-none">
-                    <div class="glass-box-p1 p-8 rounded-3xl min-h-[250px] flex items-center justify-center text-center">
-                        <div id="q-p1" class="soal-content text-3xl font-semibold leading-relaxed drop-shadow-md">Menyiapkan Soal...</div>
-                    </div>
-                    
-                    <div id="options-p1" class="grid grid-cols-2 gap-6 h-[320px] pointer-events-auto">
-                        <!-- Opsi P1 -->
-                    </div>
+                <!-- Area Kaca (Soal) -->
+                <div class="glass-box-p1 p-4 sm:p-6 rounded-3xl flex-1 flex items-center justify-center text-center overflow-y-auto mb-4 z-10 pointer-events-none">
+                    <div id="q-p1" class="soal-content text-lg sm:text-2xl font-semibold leading-relaxed drop-shadow-md w-full">Menyiapkan Soal...</div>
+                </div>
+                
+                <!-- Grid Opsi (Responsif - Tidak Terpotong) -->
+                <div id="options-p1" class="grid grid-cols-2 gap-3 sm:gap-4 shrink-0 h-[45%] pointer-events-auto relative z-10 pb-2">
+                    <!-- Opsi P1 -->
                 </div>
             </div>
 
             <!-- PEMAIN 2 (KANAN - KUNING) -->
-            <div id="zone-p2" class="w-1/2 p2-theme p-8 flex flex-col justify-between relative" onclick="handleZoneClick('p2')">
+            <div id="zone-p2" class="w-1/2 p2-theme p-4 sm:p-6 flex flex-col relative h-full overflow-hidden" onclick="handleZoneClick('p2')">
                 <div class="tap-overlay" id="overlay-p2">
                     <p class="pulse-text text-slate-800">👇 KETUK UNTUK LANJUT 👇</p>
                 </div>
 
-                <div class="flex justify-between items-center bg-black/5 p-4 rounded-2xl border border-black/10 shadow-lg">
-                    <h3 id="display-name-p2" class="text-4xl font-black tracking-wider drop-shadow-md text-slate-800">Abdul</h3>
-                    <div class="text-xl font-bold bg-white/40 px-6 py-3 rounded-xl border border-black/10 shadow-inner">
-                        SKOR: <span id="score-p2" class="text-4xl ml-2 font-black text-red-600">0</span>
+                <div class="flex justify-between items-center bg-black/5 p-3 sm:p-4 rounded-2xl border border-black/10 shadow-lg shrink-0 mb-4">
+                    <h3 id="display-name-p2" class="text-xl sm:text-3xl font-black tracking-wider drop-shadow-md text-slate-800 truncate max-w-[60%]">Abdul</h3>
+                    <div class="text-sm sm:text-lg font-bold bg-white/40 px-3 py-1 sm:px-4 sm:py-2 rounded-xl border border-black/10 shadow-inner flex items-center">
+                        SKOR: <span id="score-p2" class="text-2xl sm:text-3xl ml-2 font-black text-red-600">0</span>
                     </div>
                 </div>
                 
-                <div class="flex-1 flex flex-col justify-center gap-8 my-6 relative z-10 pointer-events-none">
-                    <div class="glass-box-p2 p-8 rounded-3xl min-h-[250px] flex items-center justify-center text-center">
-                        <div id="q-p2" class="soal-content text-3xl font-semibold leading-relaxed drop-shadow-md text-slate-800">Menyiapkan Soal...</div>
-                    </div>
-                    
-                    <div id="options-p2" class="grid grid-cols-2 gap-6 h-[320px] pointer-events-auto">
-                        <!-- Opsi P2 -->
-                    </div>
+                <!-- Area Kaca (Soal) -->
+                <div class="glass-box-p2 p-4 sm:p-6 rounded-3xl flex-1 flex items-center justify-center text-center overflow-y-auto mb-4 z-10 pointer-events-none">
+                    <div id="q-p2" class="soal-content text-lg sm:text-2xl font-semibold leading-relaxed drop-shadow-md text-slate-800 w-full">Menyiapkan Soal...</div>
+                </div>
+                
+                <!-- Grid Opsi (Responsif - Tidak Terpotong) -->
+                <div id="options-p2" class="grid grid-cols-2 gap-3 sm:gap-4 shrink-0 h-[45%] pointer-events-auto relative z-10 pb-2">
+                    <!-- Opsi P2 -->
                 </div>
             </div>
             
@@ -255,3247 +280,171 @@
     </div>
 
     <!-- PANEL HASIL -->
-    <div id="result-panel" class="hidden absolute inset-0 z-50 flex items-center justify-center bg-slate-900/95 backdrop-blur-md">
-        <div class="bg-slate-800 p-12 rounded-[2rem] shadow-[0_0_50px_rgba(0,0,0,0.8)] w-[700px] border-4 border-yellow-500 text-center flex flex-col items-center">
-            <h2 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-600 mb-2 drop-shadow-lg">WAKTU HABIS!</h2>
-            <div id="winner-box" class="bg-white/10 px-10 py-4 rounded-full border border-white/20 mb-8 mt-4">
-                <h3 id="winner-text" class="text-4xl font-black text-white">Pemenang: Pemain 1</h3>
-            </div>
+    <div id="result-panel" class="hidden fixed inset-0 z-50 bg-slate-900/95 flex items-center justify-center">
+        <div class="bg-slate-800 p-10 rounded-3xl shadow-2xl border-2 border-slate-600 max-w-2xl w-full text-center">
+            <h2 class="text-5xl font-black text-white mb-2">WAKTU HABIS!</h2>
+            <p id="winner-text" class="text-3xl font-bold text-yellow-400 mb-8 drop-shadow-md">Menghitung Skor...</p>
             
-            <div class="flex w-full justify-between gap-6 mb-10">
-                <div class="flex-1 p1-theme p-8 rounded-3xl shadow-lg border border-white/20">
-                    <p id="result-name-p1" class="text-blue-200 text-2xl font-bold mb-2">Pemain 1</p>
-                    <p id="final-p1" class="text-6xl font-black text-white">0</p>
+            <div class="flex justify-center gap-8 mb-8">
+                <div class="bg-blue-900/50 p-6 rounded-2xl border border-blue-500/50 w-48">
+                    <h4 id="result-name-p1" class="text-blue-300 font-bold text-xl mb-2 truncate">P1</h4>
+                    <p id="result-score-p1" class="text-4xl font-black text-white">0</p>
                 </div>
-                <div class="flex-1 p2-theme p-8 rounded-3xl shadow-lg border border-black/20">
-                    <p id="result-name-p2" class="text-yellow-800 text-2xl font-bold mb-2">Pemain 2</p>
-                    <p id="final-p2" class="text-6xl font-black text-slate-900">0</p>
+                <div class="bg-yellow-900/50 p-6 rounded-2xl border border-yellow-500/50 w-48">
+                    <h4 id="result-name-p2" class="text-yellow-300 font-bold text-xl mb-2 truncate">P2</h4>
+                    <p id="result-score-p2" class="text-4xl font-black text-white">0</p>
                 </div>
             </div>
 
-            <div class="flex gap-4 w-full">
-                <button onclick="keluarGame()" class="flex-1 py-5 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-900 text-2xl font-black rounded-2xl shadow-xl transition-transform active:scale-95">
-                    KEMBALI KE MENU
-                </button>
-            </div>
-            <p id="gas-status" class="mt-6 text-sm font-semibold text-slate-400"></p>
+            <button onclick="kembaliKeMenu()" class="w-full py-4 bg-slate-700 hover:bg-slate-600 text-white text-2xl font-bold rounded-xl transition">
+                Kembali ke Menu Utama
+            </button>
         </div>
     </div>
 
     <script>
-        // --- 1. DATA BAWAAN & KONFIGURASI URL GAS ---
+        // CONFIGURATION: Ganti dengan URL GAS Web App Anda
         const GAS_URL = "https://script.google.com/macros/s/AKfycbw5pGSBSp1vXQHlnu-US_caITmtTUcSrEg1xp6IzKFUHYrM-RaWobVdsmEGOzPxwycG/exec"; 
 
-        const soalBawaan = [
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 5 + 3 × 2?",
-    "opsi": [
-      "11",
-      "16",
-      "2",
-      "15"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 6 + 4 × 2?",
-    "opsi": [
-      "14",
-      "20",
-      "2",
-      "24"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 7 + 5 × 2?",
-    "opsi": [
-      "17",
-      "24",
-      "2",
-      "35"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 8 + 6 × 2?",
-    "opsi": [
-      "20",
-      "28",
-      "2",
-      "48"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 9 + 2 × 2?",
-    "opsi": [
-      "13",
-      "22",
-      "7",
-      "18"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 10 + 3 × 2?",
-    "opsi": [
-      "16",
-      "26",
-      "7",
-      "30"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 11 + 4 × 2?",
-    "opsi": [
-      "19",
-      "30",
-      "7",
-      "44"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 12 + 5 × 2?",
-    "opsi": [
-      "22",
-      "34",
-      "7",
-      "60"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 13 + 6 × 2?",
-    "opsi": [
-      "25",
-      "38",
-      "7",
-      "78"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 14 + 2 × 2?",
-    "opsi": [
-      "18",
-      "32",
-      "12",
-      "28"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 15 + 3 × 2?",
-    "opsi": [
-      "21",
-      "36",
-      "12",
-      "45"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 16 + 4 × 2?",
-    "opsi": [
-      "24",
-      "40",
-      "12",
-      "64"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 17 + 5 × 2?",
-    "opsi": [
-      "27",
-      "44",
-      "12",
-      "85"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 18 + 6 × 2?",
-    "opsi": [
-      "30",
-      "48",
-      "12",
-      "108"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 19 + 2 × 2?",
-    "opsi": [
-      "23",
-      "42",
-      "17",
-      "38"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 20 + 3 × 2?",
-    "opsi": [
-      "26",
-      "46",
-      "17",
-      "60"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 21 + 4 × 2?",
-    "opsi": [
-      "29",
-      "50",
-      "17",
-      "84"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 22 + 5 × 2?",
-    "opsi": [
-      "32",
-      "54",
-      "17",
-      "110"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 23 + 6 × 2?",
-    "opsi": [
-      "35",
-      "58",
-      "17",
-      "138"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Bilangan bulat dan operasi hitung",
-    "pertanyaan": "Berapakah hasil dari 24 + 2 × 2?",
-    "opsi": [
-      "28",
-      "52",
-      "22",
-      "48"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 4 cm dan lebar 2 cm. Berapakah luasnya?",
-    "opsi": [
-      "8 cm²",
-      "12 cm²",
-      "6 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 5 cm dan lebar 3 cm. Berapakah luasnya?",
-    "opsi": [
-      "15 cm²",
-      "16 cm²",
-      "8 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 6 cm dan lebar 4 cm. Berapakah luasnya?",
-    "opsi": [
-      "24 cm²",
-      "20 cm²",
-      "10 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 7 cm dan lebar 5 cm. Berapakah luasnya?",
-    "opsi": [
-      "35 cm²",
-      "24 cm²",
-      "12 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 8 cm dan lebar 6 cm. Berapakah luasnya?",
-    "opsi": [
-      "48 cm²",
-      "28 cm²",
-      "14 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 9 cm dan lebar 7 cm. Berapakah luasnya?",
-    "opsi": [
-      "63 cm²",
-      "32 cm²",
-      "16 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 10 cm dan lebar 8 cm. Berapakah luasnya?",
-    "opsi": [
-      "80 cm²",
-      "36 cm²",
-      "18 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 11 cm dan lebar 9 cm. Berapakah luasnya?",
-    "opsi": [
-      "99 cm²",
-      "40 cm²",
-      "20 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 12 cm dan lebar 10 cm. Berapakah luasnya?",
-    "opsi": [
-      "120 cm²",
-      "44 cm²",
-      "22 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 13 cm dan lebar 11 cm. Berapakah luasnya?",
-    "opsi": [
-      "143 cm²",
-      "48 cm²",
-      "24 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 14 cm dan lebar 12 cm. Berapakah luasnya?",
-    "opsi": [
-      "168 cm²",
-      "52 cm²",
-      "26 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 15 cm dan lebar 13 cm. Berapakah luasnya?",
-    "opsi": [
-      "195 cm²",
-      "56 cm²",
-      "28 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 16 cm dan lebar 14 cm. Berapakah luasnya?",
-    "opsi": [
-      "224 cm²",
-      "60 cm²",
-      "30 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 17 cm dan lebar 15 cm. Berapakah luasnya?",
-    "opsi": [
-      "255 cm²",
-      "64 cm²",
-      "32 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 18 cm dan lebar 16 cm. Berapakah luasnya?",
-    "opsi": [
-      "288 cm²",
-      "68 cm²",
-      "34 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 19 cm dan lebar 17 cm. Berapakah luasnya?",
-    "opsi": [
-      "323 cm²",
-      "72 cm²",
-      "36 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 20 cm dan lebar 18 cm. Berapakah luasnya?",
-    "opsi": [
-      "360 cm²",
-      "76 cm²",
-      "38 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 21 cm dan lebar 19 cm. Berapakah luasnya?",
-    "opsi": [
-      "399 cm²",
-      "80 cm²",
-      "40 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 22 cm dan lebar 20 cm. Berapakah luasnya?",
-    "opsi": [
-      "440 cm²",
-      "84 cm²",
-      "42 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Matematika",
-    "materi": "Geometri dasar",
-    "pertanyaan": "Sebuah persegi panjang memiliki panjang 23 cm dan lebar 21 cm. Berapakah luasnya?",
-    "opsi": [
-      "483 cm²",
-      "88 cm²",
-      "44 cm²",
-      "2 cm²"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-1 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-2 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-3 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-4 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-5 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-6 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-7 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-8 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-9 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-10 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-11 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-12 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-13 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-14 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-15 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-16 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-17 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-18 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-19 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Algoritma dasar",
-    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-20 adalah...",
-    "opsi": [
-      "Menentukan masalah",
-      "Mencetak hasil",
-      "Mematikan komputer",
-      "Menghapus data"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-1 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-2 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-3 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-4 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-5 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-6 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-7 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-8 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-9 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-10 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-11 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-12 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-13 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-14 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-15 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-16 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-17 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-18 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-19 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 7",
-    "mapel": "Informatika",
-    "materi": "Pengolah kata",
-    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-20 adalah...",
-    "opsi": [
-      "Ctrl + S",
-      "Ctrl + P",
-      "Ctrl + C",
-      "Ctrl + V"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 3^2?",
-    "opsi": [
-      "9",
-      "6",
-      "5",
-      "27"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 4^2?",
-    "opsi": [
-      "16",
-      "8",
-      "6",
-      "64"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 5^2?",
-    "opsi": [
-      "25",
-      "10",
-      "7",
-      "125"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 2^2?",
-    "opsi": [
-      "4",
-      "4",
-      "4",
-      "8"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 3^2?",
-    "opsi": [
-      "9",
-      "6",
-      "5",
-      "27"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 4^2?",
-    "opsi": [
-      "16",
-      "8",
-      "6",
-      "64"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 5^2?",
-    "opsi": [
-      "25",
-      "10",
-      "7",
-      "125"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 2^2?",
-    "opsi": [
-      "4",
-      "4",
-      "4",
-      "8"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 3^2?",
-    "opsi": [
-      "9",
-      "6",
-      "5",
-      "27"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 4^2?",
-    "opsi": [
-      "16",
-      "8",
-      "6",
-      "64"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 5^2?",
-    "opsi": [
-      "25",
-      "10",
-      "7",
-      "125"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 2^2?",
-    "opsi": [
-      "4",
-      "4",
-      "4",
-      "8"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 3^2?",
-    "opsi": [
-      "9",
-      "6",
-      "5",
-      "27"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 4^2?",
-    "opsi": [
-      "16",
-      "8",
-      "6",
-      "64"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 5^2?",
-    "opsi": [
-      "25",
-      "10",
-      "7",
-      "125"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 2^2?",
-    "opsi": [
-      "4",
-      "4",
-      "4",
-      "8"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 3^2?",
-    "opsi": [
-      "9",
-      "6",
-      "5",
-      "27"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 4^2?",
-    "opsi": [
-      "16",
-      "8",
-      "6",
-      "64"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 5^2?",
-    "opsi": [
-      "25",
-      "10",
-      "7",
-      "125"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Bilangan berpangkat dan bentuk akar",
-    "pertanyaan": "Berapakah hasil dari 2^2?",
-    "opsi": [
-      "4",
-      "4",
-      "4",
-      "8"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 3 cm dan 4 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "5 cm",
-      "7 cm",
-      "12 cm",
-      "4 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 5 cm dan 12 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "13 cm",
-      "17 cm",
-      "60 cm",
-      "12 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 8 cm dan 15 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "17 cm",
-      "23 cm",
-      "120 cm",
-      "16 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 7 cm dan 24 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "25 cm",
-      "31 cm",
-      "168 cm",
-      "24 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 9 cm dan 12 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "15 cm",
-      "21 cm",
-      "108 cm",
-      "14 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 3 cm dan 4 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "5 cm",
-      "7 cm",
-      "12 cm",
-      "4 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 5 cm dan 12 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "13 cm",
-      "17 cm",
-      "60 cm",
-      "12 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 8 cm dan 15 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "17 cm",
-      "23 cm",
-      "120 cm",
-      "16 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 7 cm dan 24 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "25 cm",
-      "31 cm",
-      "168 cm",
-      "24 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 9 cm dan 12 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "15 cm",
-      "21 cm",
-      "108 cm",
-      "14 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 3 cm dan 4 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "5 cm",
-      "7 cm",
-      "12 cm",
-      "4 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 5 cm dan 12 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "13 cm",
-      "17 cm",
-      "60 cm",
-      "12 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 8 cm dan 15 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "17 cm",
-      "23 cm",
-      "120 cm",
-      "16 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 7 cm dan 24 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "25 cm",
-      "31 cm",
-      "168 cm",
-      "24 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 9 cm dan 12 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "15 cm",
-      "21 cm",
-      "108 cm",
-      "14 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 3 cm dan 4 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "5 cm",
-      "7 cm",
-      "12 cm",
-      "4 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 5 cm dan 12 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "13 cm",
-      "17 cm",
-      "60 cm",
-      "12 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 8 cm dan 15 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "17 cm",
-      "23 cm",
-      "120 cm",
-      "16 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 7 cm dan 24 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "25 cm",
-      "31 cm",
-      "168 cm",
-      "24 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Matematika",
-    "materi": "Teorema Pythagoras",
-    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 9 cm dan 12 cm. Panjang sisi miringnya adalah...",
-    "opsi": [
-      "15 cm",
-      "21 cm",
-      "108 cm",
-      "14 cm"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-1 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-2 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-3 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-4 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-5 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-6 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-7 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-8 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-9 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-10 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-11 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-12 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-13 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-14 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-15 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-16 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-17 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-18 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-19 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Jaringan komputer",
-    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-20 adalah...",
-    "opsi": [
-      "Switch",
-      "Scanner",
-      "Printer",
-      "Speaker"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-1 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-2 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-3 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-4 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-5 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-6 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-7 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-8 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-9 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-10 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-11 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-12 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-13 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-14 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-15 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-16 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-17 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-18 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-19 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 8",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-20 adalah...",
-    "opsi": [
-      "=SUM(A1:A5)",
-      "=ADD(A1:A5)",
-      "=TOTAL(A1:A5)",
-      "=COUNT(A1:A5)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 1 dan y = 3, maka nilai x + y adalah...",
-    "opsi": [
-      "4",
-      "3",
-      "5",
-      "3"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 2 dan y = 4, maka nilai x + y adalah...",
-    "opsi": [
-      "6",
-      "8",
-      "7",
-      "5"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 3 dan y = 5, maka nilai x + y adalah...",
-    "opsi": [
-      "8",
-      "15",
-      "9",
-      "7"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 4 dan y = 6, maka nilai x + y adalah...",
-    "opsi": [
-      "10",
-      "24",
-      "11",
-      "9"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 5 dan y = 7, maka nilai x + y adalah...",
-    "opsi": [
-      "12",
-      "35",
-      "13",
-      "11"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 6 dan y = 8, maka nilai x + y adalah...",
-    "opsi": [
-      "14",
-      "48",
-      "15",
-      "13"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 7 dan y = 9, maka nilai x + y adalah...",
-    "opsi": [
-      "16",
-      "63",
-      "17",
-      "15"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 8 dan y = 10, maka nilai x + y adalah...",
-    "opsi": [
-      "18",
-      "80",
-      "19",
-      "17"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 9 dan y = 11, maka nilai x + y adalah...",
-    "opsi": [
-      "20",
-      "99",
-      "21",
-      "19"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 10 dan y = 12, maka nilai x + y adalah...",
-    "opsi": [
-      "22",
-      "120",
-      "23",
-      "21"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 11 dan y = 13, maka nilai x + y adalah...",
-    "opsi": [
-      "24",
-      "143",
-      "25",
-      "23"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 12 dan y = 14, maka nilai x + y adalah...",
-    "opsi": [
-      "26",
-      "168",
-      "27",
-      "25"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 13 dan y = 15, maka nilai x + y adalah...",
-    "opsi": [
-      "28",
-      "195",
-      "29",
-      "27"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 14 dan y = 16, maka nilai x + y adalah...",
-    "opsi": [
-      "30",
-      "224",
-      "31",
-      "29"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 15 dan y = 17, maka nilai x + y adalah...",
-    "opsi": [
-      "32",
-      "255",
-      "33",
-      "31"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 16 dan y = 18, maka nilai x + y adalah...",
-    "opsi": [
-      "34",
-      "288",
-      "35",
-      "33"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 17 dan y = 19, maka nilai x + y adalah...",
-    "opsi": [
-      "36",
-      "323",
-      "37",
-      "35"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 18 dan y = 20, maka nilai x + y adalah...",
-    "opsi": [
-      "38",
-      "360",
-      "39",
-      "37"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 19 dan y = 21, maka nilai x + y adalah...",
-    "opsi": [
-      "40",
-      "399",
-      "41",
-      "39"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Persamaan linear dua variabel",
-    "pertanyaan": "Jika x = 20 dan y = 22, maka nilai x + y adalah...",
-    "opsi": [
-      "42",
-      "440",
-      "43",
-      "41"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 3 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 9 × 10",
-      "π × 3 × 10",
-      "2π × 3 × 10",
-      "π × 27"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 4 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 16 × 10",
-      "π × 4 × 10",
-      "2π × 4 × 10",
-      "π × 64"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 5 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 25 × 10",
-      "π × 5 × 10",
-      "2π × 5 × 10",
-      "π × 125"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 6 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 36 × 10",
-      "π × 6 × 10",
-      "2π × 6 × 10",
-      "π × 216"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 2 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 4 × 10",
-      "π × 2 × 10",
-      "2π × 2 × 10",
-      "π × 8"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 3 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 9 × 10",
-      "π × 3 × 10",
-      "2π × 3 × 10",
-      "π × 27"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 4 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 16 × 10",
-      "π × 4 × 10",
-      "2π × 4 × 10",
-      "π × 64"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 5 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 25 × 10",
-      "π × 5 × 10",
-      "2π × 5 × 10",
-      "π × 125"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 6 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 36 × 10",
-      "π × 6 × 10",
-      "2π × 6 × 10",
-      "π × 216"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 2 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 4 × 10",
-      "π × 2 × 10",
-      "2π × 2 × 10",
-      "π × 8"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 3 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 9 × 10",
-      "π × 3 × 10",
-      "2π × 3 × 10",
-      "π × 27"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 4 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 16 × 10",
-      "π × 4 × 10",
-      "2π × 4 × 10",
-      "π × 64"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 5 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 25 × 10",
-      "π × 5 × 10",
-      "2π × 5 × 10",
-      "π × 125"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 6 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 36 × 10",
-      "π × 6 × 10",
-      "2π × 6 × 10",
-      "π × 216"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 2 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 4 × 10",
-      "π × 2 × 10",
-      "2π × 2 × 10",
-      "π × 8"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 3 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 9 × 10",
-      "π × 3 × 10",
-      "2π × 3 × 10",
-      "π × 27"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 4 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 16 × 10",
-      "π × 4 × 10",
-      "2π × 4 × 10",
-      "π × 64"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 5 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 25 × 10",
-      "π × 5 × 10",
-      "2π × 5 × 10",
-      "π × 125"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 6 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 36 × 10",
-      "π × 6 × 10",
-      "2π × 6 × 10",
-      "π × 216"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Matematika",
-    "materi": "Bangun ruang sisi lengkung",
-    "pertanyaan": "Sebuah tabung memiliki jari-jari 2 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
-    "opsi": [
-      "π × 4 × 10",
-      "π × 2 × 10",
-      "2π × 2 × 10",
-      "π × 8"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-1 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-2 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-3 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-4 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-5 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-6 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-7 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-8 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-9 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-10 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-11 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-12 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-13 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-14 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-15 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-16 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-17 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-18 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-19 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pemrograman dasar (Blockly)",
-    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-20 adalah...",
-    "opsi": [
-      "Repeat",
-      "Print",
-      "Input",
-      "Stop"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-1 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-2 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-3 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-4 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-5 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-6 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-7 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-8 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-9 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-10 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-11 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-12 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-13 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-14 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-15 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-16 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-17 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-18 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-19 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  },
-  {
-    "tingkat": "SMP Kelas 9",
-    "mapel": "Informatika",
-    "materi": "Pengolah spreadsheet",
-    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-20 adalah...",
-    "opsi": [
-      "=AVERAGE(B1:B10)",
-      "=SUM(B1:B10)",
-      "=MAX(B1:B10)",
-      "=MIN(B1:B10)"
-    ],
-    "jawaban_index": 0
-  }
-];
-
+        // STATE VARIABLES
         let bankSoalData = [];
-        let leaderboardData = [];
+        let filteredSoal = [];
+        let soalP1 = [], soalP2 = [];
+        let idxP1 = 0, idxP2 = 0;
+        let skorP1 = 0, skorP2 = 0;
+        let timerId = null;
+        let sisaWaktu = 0;
+        let isGameRunning = false;
         
-        let currentFilter = {};
-        let stateP1 = { name: "", score: 0, idx: 0, waiting: false, questions: [] };
-        let stateP2 = { name: "", score: 0, idx: 0, waiting: false, questions: [] };
-        let timerInterval;
-        let totalWaktu = 0;
-        let sisaWaktuGame = 0;
-        
-        let synth, synthWrong;
+        let waitTapP1 = false;
+        let waitTapP2 = false;
 
-        document.addEventListener("DOMContentLoaded", () => {
-            muatDataLokal();
-            initAudio();
-            initDropdowns();
+        let synth = null; // Tone.js Synth
+
+        // Soal Bawaan (Embedded JSON)
+        const soalBawaan = [
+            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Hasil dari 3x + 2x adalah...", opsi: ["5x", "6x", "5x^2", "6x^2"], jawaban_index: 0 },
+            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Jika y = 4, maka 2y - 3 = ...", opsi: ["5", "8", "11", "3"], jawaban_index: 0 },
+            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Sederhanakan: 5a - 2a + 4", opsi: ["3a + 4", "7a + 4", "3a - 4", "7a - 4"], jawaban_index: 0 },
+            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Nilai x yang memenuhi x + 5 = 12 adalah...", opsi: ["7", "17", "6", "8"], jawaban_index: 0 },
+            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Hasil kali 2(3x - 1) adalah...", opsi: ["6x - 2", "6x - 1", "5x - 2", "5x - 1"], jawaban_index: 0 }
+        ];
+
+        // --- CUSTOM MODALS (MENGGANTIKAN ALERT & CONFIRM) ---
+        function showMessage(pesan, isError = false) {
+            const box = document.getElementById('custom-message-box');
+            const title = document.getElementById('message-title');
+            const text = document.getElementById('message-text');
+            const icon = document.getElementById('message-icon');
+            
+            title.innerText = isError ? "Kesalahan" : "Informasi";
+            title.className = isError ? "text-2xl font-bold text-red-500 mb-2" : "text-2xl font-bold text-blue-400 mb-2";
+            icon.innerText = isError ? "❌" : "✅";
+            text.innerHTML = pesan;
+            
+            box.classList.remove('hidden');
+        }
+
+        function closeMessageBox() {
+            document.getElementById('custom-message-box').classList.add('hidden');
+        }
+
+        let confirmCallbackYes = null;
+        let confirmCallbackNo = null;
+
+        function showConfirm(pesan, onYes, onNo) {
+            const box = document.getElementById('custom-confirm-box');
+            document.getElementById('confirm-text').innerHTML = pesan;
+            confirmCallbackYes = onYes;
+            confirmCallbackNo = onNo;
+            box.classList.remove('hidden');
+        }
+
+        document.getElementById('btn-confirm-yes').addEventListener('click', () => {
+            document.getElementById('custom-confirm-box').classList.add('hidden');
+            if (confirmCallbackYes) confirmCallbackYes();
         });
 
-        function initAudio() {
-            synth = new Tone.PolySynth(Tone.Synth).toDestination();
-            synthWrong = new Tone.MembraneSynth().toDestination();
-        }
+        document.getElementById('btn-confirm-no').addEventListener('click', () => {
+            document.getElementById('custom-confirm-box').classList.add('hidden');
+            if (confirmCallbackNo) confirmCallbackNo();
+        });
 
-        function playSound(type) {
-            if(Tone.context.state !== 'running') Tone.context.resume();
-            try {
-                if(type === 'correct') synth.triggerAttackRelease(["C5", "E5", "G5"], "0.1");
-                else if(type === 'wrong') synthWrong.triggerAttackRelease("C2", "0.2");
-                else if(type === 'end') synth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "1n");
-                else if(type === 'beep') synth.triggerAttackRelease("C5", "0.1");
-                else if(type === 'go') synth.triggerAttackRelease("C6", "0.3");
-            } catch(e) {}
-        }
 
-        function toggleFullScreen(forceOpen = false) {
-            let elem = document.documentElement;
-            if (forceOpen) {
-                if (elem.requestFullscreen) { elem.requestFullscreen().catch(e=>{}); }
-                else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen().catch(e=>{}); }
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            // Load Local Storage
+            const savedData = localStorage.getItem('duelBankSoal');
+            if (savedData) {
+                try {
+                    bankSoalData = JSON.parse(savedData);
+                } catch(e) { bankSoalData = [...soalBawaan]; }
             } else {
-                if (document.exitFullscreen) { document.exitFullscreen().catch(e=>{}); }
-                else if (document.webkitExitFullscreen) { document.webkitExitFullscreen().catch(e=>{}); }
+                bankSoalData = [...soalBawaan];
+            }
+            
+            document.getElementById('json-input').value = JSON.stringify(bankSoalData, null, 2);
+            
+            // Load Names
+            if(localStorage.getItem('duelNamaP1')) document.getElementById('input-nama-p1').value = localStorage.getItem('duelNamaP1');
+            if(localStorage.getItem('duelNamaP2')) document.getElementById('input-nama-p2').value = localStorage.getItem('duelNamaP2');
+
+            initDropdowns();
+            renderLeaderboard();
+        };
+
+        // --- AUDIO (TONE.JS) ---
+        function initAudio() {
+            if(!synth) {
+                synth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.5 }
+                }).toDestination();
+                Tone.start();
             }
         }
 
-        function muatDataLokal() {
-            const storedP1 = localStorage.getItem('duelP1Name');
-            if (storedP1) document.getElementById('input-p1').value = storedP1;
-            
-            const storedP2 = localStorage.getItem('duelP2Name');
-            if (storedP2) document.getElementById('input-p2').value = storedP2;
-
-            const storedSoal = localStorage.getItem('duelBankSoal');
-            if (storedSoal) {
-                try { bankSoalData = JSON.parse(storedSoal); } 
-                catch(e) { bankSoalData = [...soalBawaan]; }
-            } else { bankSoalData = [...soalBawaan]; }
-            
-            document.getElementById('json-input').value = JSON.stringify(bankSoalData, null, 2);
-
-            const storedLb = localStorage.getItem('duelLeaderboard');
-            if (storedLb) { try { leaderboardData = JSON.parse(storedLb); } catch(e) {} }
+        function playSound(type) {
+            if(!synth) return;
+            const now = Tone.now();
+            if (type === 'correct') {
+                synth.triggerAttackRelease(["C5", "E5"], "8n", now);
+            } else if (type === 'wrong') {
+                synth.triggerAttackRelease(["C3", "Eb3"], "4n", now);
+            } else if (type === 'countdown') {
+                synth.triggerAttackRelease("G4", "8n", now);
+            } else if (type === 'go') {
+                synth.triggerAttackRelease("C5", "4n", now);
+            } else if (type === 'finish') {
+                synth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "2n", now);
+            }
         }
 
-        function showMessage(msg, isError = false) {
-            const el = document.getElementById('ui-message');
-            el.innerText = msg;
-            el.className = `mb-4 p-3 rounded-lg text-center font-bold border ${isError ? 'bg-red-500/20 text-red-300 border-red-500/50' : 'bg-green-500/20 text-green-300 border-green-500/50'}`;
-            el.classList.remove('hidden');
-            setTimeout(() => el.classList.add('hidden'), 4000);
-        }
-
+        // --- MENU LOGIC ---
         function switchTab(tabName) {
-            document.getElementById('tab-main').classList.add('hidden');
-            document.getElementById('tab-import').classList.add('hidden');
-            document.getElementById('tab-leaderboard').classList.add('hidden');
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            if(tabName === 'leaderboard') initLeaderboardDropdowns();
+            ['main', 'import', 'leaderboard'].forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+                document.getElementById('tab-btn-' + t).classList.remove('text-blue-400', 'border-blue-400');
+                document.getElementById('tab-btn-' + t).classList.add('text-slate-400', 'border-transparent');
+            });
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            document.getElementById('tab-' + tabName).classList.add('block');
+            document.getElementById('tab-btn-' + tabName).classList.remove('text-slate-400', 'border-transparent');
+            document.getElementById('tab-btn-' + tabName).classList.add('text-blue-400', 'border-blue-400');
+            
+            if(tabName === 'leaderboard') renderLeaderboard();
         }
 
         function initDropdowns() {
             const tingkatSet = [...new Set(bankSoalData.map(item => item.tingkat))];
             const selectTingkat = document.getElementById('select-tingkat');
             selectTingkat.innerHTML = '';
+            
+            if(tingkatSet.length === 0) { selectTingkat.innerHTML = '<option value="">Kosong</option>'; return; }
             tingkatSet.forEach(t => selectTingkat.innerHTML += `<option value="${t}">${t}</option>`);
-            selectTingkat.addEventListener('change', updateMapel);
-            if(tingkatSet.length > 0) updateMapel();
+            
+            selectTingkat.onchange = updateMapel;
+            updateMapel();
         }
 
         function updateMapel() {
@@ -3503,9 +452,10 @@
             const mapelSet = [...new Set(bankSoalData.filter(x => x.tingkat === tingkat).map(x => x.mapel))];
             const selectMapel = document.getElementById('select-mapel');
             selectMapel.innerHTML = '';
+            
             mapelSet.forEach(m => selectMapel.innerHTML += `<option value="${m}">${m}</option>`);
-            selectMapel.addEventListener('change', updateMateri);
-            if(mapelSet.length > 0) updateMateri();
+            selectMapel.onchange = updateMateri;
+            updateMateri();
         }
 
         function updateMateri() {
@@ -3514,418 +464,465 @@
             const materiSet = [...new Set(bankSoalData.filter(x => x.tingkat === tingkat && x.mapel === mapel).map(x => x.materi))];
             const selectMateri = document.getElementById('select-materi');
             selectMateri.innerHTML = '';
+            
             materiSet.forEach(mt => selectMateri.innerHTML += `<option value="${mt}">${mt}</option>`);
         }
 
-        function parseCSVLine(text) {
-            let ret = [], keep = false, token = '';
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                if (char === '"') { keep = !keep; }
-                else if (char === ',' && !keep) { ret.push(token); token = ''; }
-                else { token += char; }
+        // --- IMPORT DATA ---
+        function resetBankSoalBawaan() {
+            showConfirm("Yakin ingin mereset ke bank soal bawaan pabrik? Data sebelumnya akan hilang.", () => {
+                bankSoalData = [...soalBawaan];
+                localStorage.setItem('duelBankSoal', JSON.stringify(bankSoalData));
+                document.getElementById('json-input').value = JSON.stringify(bankSoalData, null, 2);
+                initDropdowns();
+                showMessage("🔄 Dikembalikan ke soal bawaan sistem.");
+            });
+        }
+
+        async function tarikDataDariURL() {
+            const url = document.getElementById('url-csv-input').value.trim();
+            if (!url) {
+                showMessage("❌ Masukkan URL Google Sheets CSV terlebih dahulu!", true);
+                return;
             }
-            ret.push(token);
-            return ret.map(s => s.trim().replace(/^"|"$/g, ''));
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Gagal mengakses URL");
+                
+                const textData = await response.text();
+                const lines = textData.trim().split('\n');
+                const result = [];
+                
+                for(let i=1; i<lines.length; i++) {
+                    if(!lines[i].trim()) continue;
+                    const cells = parseCSVLine(lines[i]);
+                    if(cells.length >= 9) {
+                        result.push({
+                            tingkat: cells[0], mapel: cells[1], materi: cells[2],
+                            pertanyaan: cells[3],
+                            opsi: [cells[4], cells[5], cells[6], cells[7]],
+                            jawaban_index: parseInt(cells[8]) - 1
+                        });
+                    }
+                }
+                
+                if (result.length > 0) {
+                    document.getElementById('json-input').value = JSON.stringify(result, null, 2);
+                    showMessage("✅ Berhasil menarik " + result.length + " soal. Silakan klik 'Simpan ke Sistem' untuk menerapkan.");
+                } else {
+                    showMessage("⚠ Data ditarik, tapi format tabel tidak sesuai (butuh minimal 9 kolom).", true);
+                }
+                
+            } catch (error) {
+                showMessage("❌ Gagal mengambil data. Pastikan URL adalah link Publish to Web (CSV).", true);
+                console.error(error);
+            }
         }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-            const isCSV = file.name.toLowerCase().endsWith('.csv');
+
             const reader = new FileReader();
-            reader.onload = (e) => { 
-                if (isCSV) {
-                    try {
-                        const lines = e.target.result.trim().split('\n');
-                        const result = [];
-                        // Mulai dari baris 1 (asumsi baris 0 adalah header)
-                        for(let i=1; i<lines.length; i++) {
-                            if(!lines[i].trim()) continue;
-                            const cells = parseCSVLine(lines[i]);
-                            if(cells.length >= 9) {
-                                result.push({
-                                    tingkat: cells[0], mapel: cells[1], materi: cells[2],
-                                    pertanyaan: cells[3],
-                                    opsi: [cells[4], cells[5], cells[6], cells[7]],
-                                    jawaban_index: parseInt(cells[8]) - 1 // CSV (1-4) ke Index (0-3)
-                                });
-                            }
+            reader.onload = (e) => {
+                const content = e.target.result;
+                if(file.name.endsWith('.json')) {
+                    document.getElementById('json-input').value = content;
+                    showMessage("✅ File JSON dibaca. Klik Simpan ke Sistem.");
+                } else if(file.name.endsWith('.csv')) {
+                    const lines = content.split('\n');
+                    const result = [];
+                    for(let i=1; i<lines.length; i++) {
+                        if(lines[i].trim() === '') continue;
+                        const cells = parseCSVLine(lines[i]);
+                        if(cells.length >= 9) {
+                            result.push({
+                                tingkat: cells[0], mapel: cells[1], materi: cells[2],
+                                pertanyaan: cells[3],
+                                opsi: [cells[4], cells[5], cells[6], cells[7]],
+                                jawaban_index: parseInt(cells[8]) - 1
+                            });
                         }
-                        document.getElementById('json-input').value = JSON.stringify(result, null, 2);
-                        showMessage("✅ File CSV berhasil dibaca. Klik Simpan untuk menerapkan.");
-                    } catch (err) {
-                        showMessage("❌ Gagal membaca CSV. Pastikan format tabel sesuai ketentuan.", true);
                     }
-                } else {
-                    document.getElementById('json-input').value = e.target.result; 
+                    document.getElementById('json-input').value = JSON.stringify(result, null, 2);
+                    showMessage(`✅ File CSV dibaca (${result.length} soal). Klik Simpan ke Sistem.`);
                 }
             };
             reader.readAsText(file);
         }
 
+        function parseCSVLine(text) {
+            let result = [];
+            let row = '', inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"' && text[i+1] === '"') { row += '"'; i++; }
+                else if (char === '"') inQuotes = !inQuotes;
+                else if (char === ',' && !inQuotes) { result.push(row.trim()); row = ''; }
+                else row += char;
+            }
+            result.push(row.trim());
+            return result;
+        }
+
         function simpanBankSoal() {
-            const text = document.getElementById('json-input').value;
             try {
-                const parsed = JSON.parse(text);
-                if (!Array.isArray(parsed) || !parsed[0].pertanyaan) throw new Error();
+                const inputVal = document.getElementById('json-input').value;
+                const parsed = JSON.parse(inputVal);
+                if (!Array.isArray(parsed)) throw new Error("Format JSON harus berupa Array");
+                
                 bankSoalData = parsed;
                 localStorage.setItem('duelBankSoal', JSON.stringify(bankSoalData));
                 initDropdowns();
-                showMessage("✅ Bank Soal Berhasil Diperbarui!");
-            } catch (err) { showMessage("❌ Gagal: Format JSON tidak valid atau rusak.", true); }
+                showMessage("🎉 Bank Soal berhasil diperbarui di sistem!");
+            } catch (err) {
+                showMessage("❌ Gagal menyimpan. Pastikan format JSON benar.\nError: " + err.message, true);
+            }
         }
 
-        function resetBankSoalBawaan() {
-            bankSoalData = [...soalBawaan];
-            localStorage.setItem('duelBankSoal', JSON.stringify(bankSoalData));
-            document.getElementById('json-input').value = JSON.stringify(bankSoalData, null, 2);
-            initDropdowns();
-            showMessage("🔄 Dikembalikan ke soal bawaan sistem.");
+        // --- PRE-GAME & CORE GAME LOGIC ---
+        function praMulaiGame() {
+            const p1 = document.getElementById('input-nama-p1').value.trim() || "Pemain Kiri";
+            const p2 = document.getElementById('input-nama-p2').value.trim() || "Pemain Kanan";
+            
+            // Simpan nama
+            localStorage.setItem('duelNamaP1', p1);
+            localStorage.setItem('duelNamaP2', p2);
+            
+            showConfirm(`Apakah <strong>${p1}</strong> dan <strong>${p2}</strong> sudah siap bermain?`, () => {
+                // Yes Action
+                initAudio(); // Inisialisasi Audio Engine
+                requestFullScreen();
+                mulaiHitungMundur();
+            });
+        }
+
+        function requestFullScreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen(); } 
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } 
+            else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
+        }
+        function exitFullScreen() {
+            if (document.exitFullscreen) { document.exitFullscreen(); } 
+            else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } 
+            else if (document.msExitFullscreen) { document.msExitFullscreen(); }
+        }
+
+        function mulaiHitungMundur() {
+            document.getElementById('main-menu').classList.add('hidden');
+            const overlay = document.getElementById('overlay-countdown');
+            const numEl = document.getElementById('countdown-number');
+            overlay.classList.remove('hidden');
+
+            let count = 3;
+            playSound('countdown');
+            numEl.innerText = count;
+
+            const countInterval = setInterval(() => {
+                count--;
+                if(count > 0) {
+                    numEl.classList.remove('countdown-anim');
+                    void numEl.offsetWidth; // trigger reflow
+                    numEl.classList.add('countdown-anim');
+                    numEl.innerText = count;
+                    playSound('countdown');
+                } else if(count === 0) {
+                    numEl.innerText = "Mulai!";
+                    playSound('go');
+                } else {
+                    clearInterval(countInterval);
+                    overlay.classList.add('hidden');
+                    mulaiGame();
+                }
+            }, 1000);
         }
 
         function acakSoal(array) {
             return array.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value);
         }
 
-        function getShuffledQueue(soalArray, isP1) {
-            const mid = Math.floor(soalArray.length / 2);
-            const part1 = acakSoal([...soalArray.slice(0, mid)]);
-            const part2 = acakSoal([...soalArray.slice(mid)]);
-            return isP1 ? [...part1, ...part2] : [...part2, ...part1];
-        }
-
-        function praMulaiGame() {
-            currentFilter = {
-                tingkat: document.getElementById('select-tingkat').value,
-                mapel: document.getElementById('select-mapel').value,
-                materi: document.getElementById('select-materi').value
-            };
-
-            const filteredSoal = bankSoalData.filter(x => 
-                x.tingkat === currentFilter.tingkat && x.mapel === currentFilter.mapel && x.materi === currentFilter.materi
-            );
+        function mulaiGame() {
+            const tingkat = document.getElementById('select-tingkat').value;
+            const mapel = document.getElementById('select-mapel').value;
+            const materi = document.getElementById('select-materi').value;
+            
+            filteredSoal = bankSoalData.filter(x => x.tingkat === tingkat && x.mapel === mapel && x.materi === materi);
 
             if (filteredSoal.length < 2) {
-                showMessage('Peringatan: Jumlah soal minimal 2. Tambahkan soal ke dalam bank!', true);
+                showMessage("❌ Soal di materi ini kurang dari 2. Tambahkan soal dulu.", true);
+                kembaliKeMenu();
                 return;
             }
 
-            stateP1.name = document.getElementById('input-p1').value || "Pemain Kiri";
-            stateP2.name = document.getElementById('input-p2').value || "Pemain Kanan";
+            // STRATEGI PEMBAGIAN 50/50
+            let arrayAcak = acakSoal([...filteredSoal]);
+            let midIndex = Math.ceil(arrayAcak.length / 2);
             
-            // Simpan nama pemain ke local storage
-            localStorage.setItem('duelP1Name', stateP1.name);
-            localStorage.setItem('duelP2Name', stateP2.name);
+            let bagianAwal = arrayAcak.slice(0, midIndex);
+            let bagianAkhir = arrayAcak.slice(midIndex);
+            if(bagianAkhir.length === 0) bagianAkhir = [...bagianAwal]; // Fallback jika soal sangat sedikit
+
+            // P1 mulai dari bagianAwal, P2 mulai dari bagianAkhir, lalu acak masing-masing
+            soalP1 = acakSoal(bagianAwal).concat(acakSoal(bagianAkhir));
+            soalP2 = acakSoal(bagianAkhir).concat(acakSoal(bagianAwal));
+
+            idxP1 = 0; idxP2 = 0;
+            skorP1 = 0; skorP2 = 0;
+            waitTapP1 = false; waitTapP2 = false;
             
-            // Acak soal dengan strategi 50% awal / akhir agar pemain tidak bertemu soal yang sama di waktu bersamaan
-            stateP1.questions = getShuffledQueue([...filteredSoal], true);
-            stateP2.questions = getShuffledQueue([...filteredSoal], false);
+            document.getElementById('overlay-p1').classList.remove('active');
+            document.getElementById('overlay-p2').classList.remove('active');
 
-            totalWaktu = parseInt(document.getElementById('select-waktu').value);
+            document.getElementById('display-name-p1').innerText = localStorage.getItem('duelNamaP1');
+            document.getElementById('display-name-p2').innerText = localStorage.getItem('duelNamaP2');
             
-            // Tampilkan Modal Konfirmasi
-            document.getElementById('ready-text').innerText = `${stateP1.name} dan ${stateP2.name} siap bermain?`;
-            document.getElementById('modal-ready').classList.remove('hidden');
-        }
+            document.getElementById('score-p1').innerText = "0";
+            document.getElementById('score-p2').innerText = "0";
 
-        function batalMulai() {
-            document.getElementById('modal-ready').classList.add('hidden');
-        }
-
-        function konfirmasiMulai() {
-            // Start Audio Context pada interaksi klik user
-            if(Tone.context.state !== 'running') Tone.context.resume();
-
-            document.getElementById('modal-ready').classList.add('hidden');
-            document.getElementById('setup-panel').classList.add('hidden');
-            
-            toggleFullScreen(true); // Masuk Fullscreen
-
-            // Setup UI Arena awal
             document.getElementById('game-arena').classList.remove('hidden');
-            document.getElementById('display-name-p1').innerText = stateP1.name;
-            document.getElementById('display-name-p2').innerText = stateP2.name;
-            stateP1.score = 0; stateP1.idx = 0; stateP1.waiting = false;
-            stateP2.score = 0; stateP2.idx = 0; stateP2.waiting = false;
-            updateSkorUI();
             
-            // Tampilkan Countdown
-            const overlay = document.getElementById('overlay-countdown');
-            const numEl = document.getElementById('countdown-number');
-            overlay.classList.remove('hidden');
+            tampilkanSoal('p1');
+            tampilkanSoal('p2');
             
-            let count = 3;
-            numEl.innerText = count;
-            playSound('beep');
-
-            const countInterval = setInterval(() => {
-                count--;
-                if(count > 0) {
-                    numEl.innerText = count;
-                    // Reset animasi CSS
-                    numEl.style.animation = 'none';
-                    numEl.offsetHeight; 
-                    numEl.style.animation = null; 
-                    playSound('beep');
-                } else if(count === 0) {
-                    numEl.innerText = "GO!";
-                    playSound('go');
-                } else {
-                    clearInterval(countInterval);
-                    overlay.classList.add('hidden');
-                    renderQuestion('p1');
-                    renderQuestion('p2');
-                    startTimer(totalWaktu);
-                }
-            }, 1000);
+            isGameRunning = true;
+            startTimer();
         }
 
-        const checkIcon = `<svg class="w-8 h-8 ml-auto text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
-        const crossIcon = `<svg class="w-8 h-8 ml-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>`;
-
-        function renderQuestion(playerCode) {
+        function tampilkanSoal(playerCode) {
             const isP1 = playerCode === 'p1';
-            const state = isP1 ? stateP1 : stateP2;
-            const container = document.getElementById(isP1 ? 'q-p1' : 'q-p2');
-            const optionsContainer = document.getElementById(isP1 ? 'options-p1' : 'options-p2');
-            const overlay = document.getElementById(isP1 ? 'overlay-p1' : 'overlay-p2');
+            const soalArr = isP1 ? soalP1 : soalP2;
+            let currentIdx = isP1 ? idxP1 : idxP2;
 
-            state.waiting = false;
-            overlay.classList.remove('active');
-
-            // Jika soal habis, acak ulang menggunakan strategi yang sama
-            if (state.idx >= state.questions.length) {
-                state.questions = getShuffledQueue([...state.questions], isP1);
-                state.idx = 0;
+            // Looping jika soal habis sebelum waktu habis
+            if (currentIdx >= soalArr.length) {
+                if(isP1) { soalP1 = acakSoal([...filteredSoal]); idxP1 = 0; currentIdx = 0; }
+                else { soalP2 = acakSoal([...filteredSoal]); idxP2 = 0; currentIdx = 0; }
             }
 
-            const currentSoal = state.questions[state.idx];
-            
-            // Mendukung innerHTML untuk merender gambar <img> pada JSON
-            container.innerHTML = currentSoal.pertanyaan;
+            const currentSoal = isP1 ? soalP1[currentIdx] : soalP2[currentIdx];
+            const containerBox = document.getElementById(isP1 ? 'q-p1' : 'q-p2');
+            const optionsContainer = document.getElementById(isP1 ? 'options-p1' : 'options-p2');
+
+            // Render HTML (mendukung gambar)
+            containerBox.innerHTML = currentSoal.pertanyaan;
             optionsContainer.innerHTML = '';
 
             const btnClass = isP1 ? 'p1-btn' : 'p2-btn';
 
-            // Petakan ke objek boolean yang menyatakan apakah ini kunci yang benar sebelum kita acak posisinya
+            // Petakan opsi dengan indeks kuncinya, lalu ACAK posisinya
             const opsiObj = currentSoal.opsi.map((teks, i) => ({ teks, isCorrect: i === currentSoal.jawaban_index }));
             const shuffledOpsi = acakSoal(opsiObj);
 
             shuffledOpsi.forEach((opt) => {
                 const btn = document.createElement('button');
-                btn.className = `btn-opsi ${btnClass} opsi-content border-2 rounded-2xl text-2xl font-bold p-4 flex items-center shadow-md`;
-                btn.innerHTML = `<span class="flex-1 text-left">${opt.teks}</span>`; // Render text/img
+                btn.className = `btn-opsi ${btnClass} opsi-content border-2 rounded-2xl text-sm sm:text-xl lg:text-2xl font-bold p-2 sm:p-4 flex items-center shadow-md h-full w-full break-words`;
+                btn.innerHTML = `<span class="flex-1 text-center w-full">${opt.teks}</span>`;
                 btn.onclick = (e) => cekJawaban(playerCode, opt.isCorrect, btn, e);
                 optionsContainer.appendChild(btn);
             });
         }
 
         function cekJawaban(playerCode, isCorrect, btnElement, event) {
-            event.stopPropagation();
-            
             const isP1 = playerCode === 'p1';
-            const state = isP1 ? stateP1 : stateP2;
-            if(state.waiting) return; 
+            
+            // Cegah klik berulang saat masih menunggu tap
+            if ((isP1 && waitTapP1) || (!isP1 && waitTapP2)) return;
 
-            // Matikan semua tombol 
-            const optionsContainer = document.getElementById(isP1 ? 'options-p1' : 'options-p2');
-            Array.from(optionsContainer.children).forEach(b => b.disabled = true);
+            // Matikan semua tombol di sisi ini
+            const opsiContainer = document.getElementById(isP1 ? 'options-p1' : 'options-p2');
+            const allBtns = opsiContainer.querySelectorAll('.btn-opsi');
+            allBtns.forEach(b => b.disabled = true);
 
             if (isCorrect) {
+                if (isP1) skorP1 += 10; else skorP2 += 10;
+                btnElement.classList.add('btn-correct');
+                btnElement.innerHTML += ' <span class="ml-2 text-3xl drop-shadow-md">✅</span>';
                 playSound('correct');
-                state.score += 10;
-                updateSkorUI();
-                btnElement.classList.add(isP1 ? 'bg-emerald-600/60' : 'bg-emerald-400/60', 'border-emerald-500');
-                btnElement.innerHTML += checkIcon;
             } else {
+                btnElement.classList.add('btn-wrong');
+                btnElement.innerHTML += ' <span class="ml-2 text-3xl drop-shadow-md">❌</span>';
                 playSound('wrong');
-                btnElement.classList.add(isP1 ? 'bg-red-600/60' : 'bg-red-400/60', 'border-red-500');
-                btnElement.innerHTML += crossIcon;
+                // Tunjukkan yang benar
+                allBtns.forEach(b => {
+                    // Cek properti onclick lama (agak tricky karena anonymous function, lebih aman abaikan atau tebak)
+                    // Tapi di versi ini kita hanya tandai yang diklik
+                });
             }
 
-            // Aktifkan overlay nunggu sentuhan
-            state.waiting = true;
-            document.getElementById(isP1 ? 'overlay-p1' : 'overlay-p2').classList.add('active');
+            document.getElementById('score-p1').innerText = skorP1;
+            document.getElementById('score-p2').innerText = skorP2;
+
+            // Munculkan Overlay Tap To Continue
+            if(isP1) waitTapP1 = true; else waitTapP2 = true;
+            document.getElementById(`overlay-${playerCode}`).classList.add('active');
         }
 
         function handleZoneClick(playerCode) {
-            const state = playerCode === 'p1' ? stateP1 : stateP2;
-            if (state.waiting) {
-                state.idx++;
-                renderQuestion(playerCode);
+            const isP1 = playerCode === 'p1';
+            if (isP1 && waitTapP1) {
+                waitTapP1 = false;
+                document.getElementById('overlay-p1').classList.remove('active');
+                idxP1++;
+                tampilkanSoal('p1');
+            } else if (!isP1 && waitTapP2) {
+                waitTapP2 = false;
+                document.getElementById('overlay-p2').classList.remove('active');
+                idxP2++;
+                tampilkanSoal('p2');
             }
         }
 
-        function updateSkorUI() {
-            document.getElementById('score-p1').innerText = stateP1.score;
-            document.getElementById('score-p2').innerText = stateP2.score;
-        }
+        function startTimer() {
+            sisaWaktu = parseInt(document.getElementById('select-waktu').value);
+            updateTimerDisplay();
 
-        function formatTime(s) {
-            return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
-        }
-
-        function startTimer(durasi) {
-            sisaWaktuGame = durasi;
-            const timerEl = document.getElementById('global-timer');
-            timerEl.innerText = formatTime(sisaWaktuGame);
-            timerEl.classList.remove('text-red-500', 'animate-pulse');
-            timerEl.classList.add('text-white');
-
-            timerInterval = setInterval(() => {
-                sisaWaktuGame--;
-                timerEl.innerText = formatTime(sisaWaktuGame);
+            timerId = setInterval(() => {
+                if(!isGameRunning) return; // Jeda jika dibatalkan (dikonfirmasi)
                 
-                if(sisaWaktuGame <= 10 && sisaWaktuGame > 0) {
-                    timerEl.classList.replace('text-white', 'text-red-500');
-                    timerEl.classList.add('animate-pulse');
-                }
+                sisaWaktu--;
+                updateTimerDisplay();
 
-                if (sisaWaktuGame <= 0) {
-                    clearInterval(timerInterval);
-                    akhiriGame();
+                if (sisaWaktu <= 0) {
+                    clearInterval(timerId);
+                    selesaiGame();
                 }
             }, 1000);
         }
 
+        function updateTimerDisplay() {
+            let m = Math.floor(sisaWaktu / 60);
+            let s = sisaWaktu % 60;
+            document.getElementById('global-timer').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
         function tanyaBatalGame() {
-            // Jeda Timer sementara
-            clearInterval(timerInterval);
-            document.getElementById('modal-cancel').classList.remove('hidden');
+            isGameRunning = false; // Pause timer
+            showConfirm("Yakin ingin membatalkan pertandingan yang sedang berlangsung?", 
+                () => { // YES
+                    clearInterval(timerId);
+                    kembaliKeMenu();
+                },
+                () => { // NO
+                    isGameRunning = true; // Resume timer
+                }
+            );
         }
 
-        function lanjutkanGame() {
-            document.getElementById('modal-cancel').classList.add('hidden');
-            // Lanjutkan timer dengan sisa waktu yang ada
-            startTimer(sisaWaktuGame);
-        }
-
-        function eksekusiBatalGame() {
-            document.getElementById('modal-cancel').classList.add('hidden');
+        function selesaiGame() {
+            isGameRunning = false;
+            playSound('finish');
             document.getElementById('game-arena').classList.add('hidden');
-            document.getElementById('setup-panel').classList.remove('hidden');
+            document.getElementById('result-panel').classList.remove('hidden');
+            exitFullScreen();
+
+            const name1 = localStorage.getItem('duelNamaP1');
+            const name2 = localStorage.getItem('duelNamaP2');
+
+            document.getElementById('result-name-p1').innerText = name1;
+            document.getElementById('result-score-p1').innerText = skorP1;
+            document.getElementById('result-name-p2').innerText = name2;
+            document.getElementById('result-score-p2').innerText = skorP2;
+
+            let pemenang = "SERI!";
+            if (skorP1 > skorP2) pemenang = name1 + " MENANG!";
+            else if (skorP2 > skorP1) pemenang = name2 + " MENANG!";
+
+            document.getElementById('winner-text').innerText = pemenang;
+
+            simpanKeLeaderboard();
             
-            // Reset Overlay di dalam arena jika pemain sedang di state waiting
-            document.getElementById('overlay-p1').classList.remove('active');
-            document.getElementById('overlay-p2').classList.remove('active');
-        }
-
-        function keluarGame() {
-            toggleFullScreen(false); // Keluar Fullscreen
-            location.reload(); // Muat ulang bersih ke awal
-        }
-
-        function akhiriGame() {
-            playSound('end');
-            document.getElementById('game-arena').classList.add('hidden');
-            const resultPanel = document.getElementById('result-panel');
-            resultPanel.classList.remove('hidden');
-
-            let teksMenang = "HASIL SERI!";
-            let namePemenang = "Seri";
-            if (stateP1.score > stateP2.score) {
-                teksMenang = `🏆 ${stateP1.name.toUpperCase()} MENANG! 🏆`;
-                namePemenang = stateP1.name;
-            } else if (stateP2.score > stateP1.score) {
-                teksMenang = `🏆 ${stateP2.name.toUpperCase()} MENANG! 🏆`;
-                namePemenang = stateP2.name;
-            }
-
-            document.getElementById('winner-text').innerText = teksMenang;
-            document.getElementById('result-name-p1').innerText = stateP1.name;
-            document.getElementById('result-name-p2').innerText = stateP2.name;
-            document.getElementById('final-p1').innerText = stateP1.score;
-            document.getElementById('final-p2').innerText = stateP2.score;
-
-            simpanKeLeaderboard(namePemenang);
-            
-            if (GAS_URL.trim() !== "") {
-                kirimDataKeSheet(namePemenang);
-            } else {
-                document.getElementById('gas-status').innerText = "*Google Sheet tidak dikonfigurasi.";
-            }
-        }
-
-        // Leaderboard Logics
-        function simpanKeLeaderboard(pemenang) {
-            const entry = {
-                tanggal: new Date().toLocaleDateString('id-ID'),
-                tingkat: currentFilter.tingkat, mapel: currentFilter.mapel, materi: currentFilter.materi,
-                p1: stateP1.name, skor1: stateP1.score, p2: stateP2.name, skor2: stateP2.score, pemenang: pemenang
-            };
-            leaderboardData.push(entry);
-            if(leaderboardData.length > 50) leaderboardData.shift(); 
-            localStorage.setItem('duelLeaderboard', JSON.stringify(leaderboardData));
-        }
-
-        function initLeaderboardDropdowns() {
-            const tSet = [...new Set(leaderboardData.map(i => i.tingkat))];
-            const tSel = document.getElementById('lb-tingkat');
-            tSel.innerHTML = '<option value="ALL">Semua Tingkat</option>';
-            tSet.forEach(t => tSel.innerHTML += `<option value="${t}">${t}</option>`);
-
-            const mSet = [...new Set(leaderboardData.map(i => i.mapel))];
-            const mSel = document.getElementById('lb-mapel');
-            mSel.innerHTML = '<option value="ALL">Semua Mapel</option>';
-            mSet.forEach(m => mSel.innerHTML += `<option value="${m}">${m}</option>`);
-
-            const mtSet = [...new Set(leaderboardData.map(i => i.materi))];
-            const mtSel = document.getElementById('lb-materi');
-            mtSel.innerHTML = '<option value="ALL">Semua Materi</option>';
-            mtSet.forEach(m => mtSel.innerHTML += `<option value="${m}">${m}</option>`);
-
-            renderLeaderboard();
-        }
-
-        function renderLeaderboard() {
-            const t = document.getElementById('lb-tingkat').value;
-            const m = document.getElementById('lb-mapel').value;
-            const mt = document.getElementById('lb-materi').value;
-            
-            const filtered = leaderboardData.filter(x => 
-                (t === 'ALL' || x.tingkat === t) && (m === 'ALL' || x.mapel === m) && (mt === 'ALL' || x.materi === mt)
-            ).reverse(); 
-
-            const container = document.getElementById('lb-container');
-            container.innerHTML = '';
-            
-            if(filtered.length === 0) {
-                container.innerHTML = '<p class="text-slate-400 text-center mt-10">Belum ada data pertandingan.</p>'; return;
-            }
-
-            filtered.forEach((item) => {
-                container.innerHTML += `
-                    <div class="bg-slate-700 p-4 rounded-xl mb-3 flex justify-between items-center border border-slate-600">
-                        <div>
-                            <p class="text-xs text-slate-400">${item.tanggal} | ${item.mapel} - ${item.materi}</p>
-                            <p class="font-bold text-white mt-1">🏆 ${item.pemenang}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm"><span class="text-blue-400">${item.p1}:</span> ${item.skor1}</p>
-                            <p class="text-sm"><span class="text-yellow-400">${item.p2}:</span> ${item.skor2}</p>
-                        </div>
-                    </div>`;
+            kirimKeGAS({
+                tingkat: document.getElementById('select-tingkat').value,
+                mapel: document.getElementById('select-mapel').value,
+                materi: document.getElementById('select-materi').value,
+                pemain1: name1, skor1: skorP1,
+                pemain2: name2, skor2: skorP2,
+                pemenang: (skorP1===skorP2) ? "Seri" : (skorP1>skorP2 ? name1 : name2)
             });
         }
 
-        function kirimDataKeSheet(pemenang) {
-            const statusEl = document.getElementById('gas-status');
-            statusEl.innerText = "Menyimpan ke Google Sheet...";
-            
-            const payload = {
-                tingkat: currentFilter.tingkat, mapel: currentFilter.mapel, materi: currentFilter.materi,
-                pemain1: stateP1.name, skor1: stateP1.score, pemain2: stateP2.name, skor2: stateP2.score, pemenang: pemenang
-            };
+        function kembaliKeMenu() {
+            document.getElementById('game-arena').classList.add('hidden');
+            document.getElementById('result-panel').classList.add('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
+            exitFullScreen();
+        }
 
+        function simpanKeLeaderboard() {
+            const key = `leaderboard_${document.getElementById('select-tingkat').value}_${document.getElementById('select-mapel').value}`;
+            let lb = JSON.parse(localStorage.getItem(key) || "[]");
+            
+            const name1 = localStorage.getItem('duelNamaP1');
+            const name2 = localStorage.getItem('duelNamaP2');
+
+            lb.push({ nama: name1, skor: skorP1, materi: document.getElementById('select-materi').value, date: new Date().toLocaleDateString() });
+            lb.push({ nama: name2, skor: skorP2, materi: document.getElementById('select-materi').value, date: new Date().toLocaleDateString() });
+            
+            // Sort & Keep top 10
+            lb.sort((a,b) => b.skor - a.skor);
+            lb = lb.slice(0, 10);
+            
+            localStorage.setItem(key, JSON.stringify(lb));
+        }
+
+        function renderLeaderboard() {
+            const tk = document.getElementById('select-tingkat').value;
+            const mp = document.getElementById('select-mapel').value;
+            const key = `leaderboard_${tk}_${mp}`;
+            
+            const lb = JSON.parse(localStorage.getItem(key) || "[]");
+            const listEl = document.getElementById('leaderboard-list');
+            
+            if(lb.length === 0) {
+                listEl.innerHTML = `<p class="text-sm text-slate-500 italic">Belum ada data untuk ${tk} - ${mp}</p>`;
+                return;
+            }
+
+            let html = '';
+            lb.forEach((item, index) => {
+                let badge = "bg-slate-700";
+                if(index === 0) badge = "bg-yellow-600/30 border border-yellow-500/50 text-yellow-300";
+                else if(index === 1) badge = "bg-slate-300/20 border border-slate-300/50 text-slate-200";
+                else if(index === 2) badge = "bg-amber-700/30 border border-amber-600/50 text-amber-500";
+                
+                html += `
+                <div class="flex justify-between items-center p-3 rounded-lg ${badge}">
+                    <div class="flex items-center gap-3">
+                        <span class="font-black text-xl opacity-50">#${index+1}</span>
+                        <div>
+                            <p class="font-bold">${item.nama}</p>
+                            <p class="text-xs opacity-70">${item.materi} (${item.date})</p>
+                        </div>
+                    </div>
+                    <div class="font-black text-2xl">${item.skor}</div>
+                </div>`;
+            });
+            listEl.innerHTML = html;
+        }
+
+        function resetLeaderboard() {
+            showConfirm("Yakin ingin mereset klasemen untuk mapel ini?", () => {
+                const key = `leaderboard_${document.getElementById('select-tingkat').value}_${document.getElementById('select-mapel').value}`;
+                localStorage.removeItem(key);
+                renderLeaderboard();
+                showMessage("✅ Klasemen berhasil dihapus.");
+            });
+        }
+
+        function kirimKeGAS(payload) {
+            if (!GAS_URL || GAS_URL.includes("PASTE_DI_SINI")) return;
+            
             fetch(GAS_URL, {
-                method: 'POST', mode: 'no-cors',
+                method: 'POST',
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
-            })
-            .then(() => statusEl.innerText = "✓ Tersimpan ke Sheet")
-            .catch(err => statusEl.innerText = "⚠ Gagal menyimpan ke online.");
+            }).then(() => console.log("Data berhasil dikirim ke GAS"))
+              .catch(err => console.error("Gagal kirim GAS:", err));
         }
+
     </script>
 </body>
 </html>
