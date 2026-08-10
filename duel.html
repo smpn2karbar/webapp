@@ -82,12 +82,12 @@
             <div id="tab-main" class="space-y-4 block">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-300 mb-1">Nama Pemain 1 (Biru)</label>
-                        <input type="text" id="input-p1" value="Ahmad" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white font-bold text-xl outline-none focus:border-blue-500 text-center">
+                        <label class="block text-sm font-semibold text-slate-300 mb-1">Nama Pemain 1 (Kiri)</label>
+                        <input type="text" id="input-p1" value="Pemain Kiri" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white font-bold text-xl outline-none focus:border-blue-500 text-center">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-slate-300 mb-1">Nama Pemain 2 (Kuning)</label>
-                        <input type="text" id="input-p2" value="Abdul" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white font-bold text-xl outline-none focus:border-yellow-500 text-center">
+                        <label class="block text-sm font-semibold text-slate-300 mb-1">Nama Pemain 2 (Kanan)</label>
+                        <input type="text" id="input-p2" value="Pemain Kanan" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white font-bold text-xl outline-none focus:border-yellow-500 text-center">
                     </div>
                 </div>
 
@@ -123,14 +123,14 @@
 
             <!-- TAB: IMPOR SOAL -->
             <div id="tab-import" class="space-y-4 hidden text-slate-300">
-                <p class="text-sm">Format JSON mendukung gambar! Gunakan tag <code class="bg-slate-900 px-1 rounded">&lt;img src="URL"&gt;</code> di dalam pertanyaan/opsi.</p>
+                <p class="text-sm">Format mendukung JSON dan CSV! JSON mendukung tag <code>&lt;img&gt;</code>. CSV format: <code class="text-yellow-300">Tingkat, Mapel, Materi, Soal, Opsi1, Opsi2, Opsi3, Opsi4, Kunci (1-4)</code> dengan header di baris ke-1.</p>
                 
                 <textarea id="json-input" rows="8" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-green-300 font-mono text-sm outline-none focus:border-purple-500" placeholder="Paste JSON disini..."></textarea>
                 
                 <div class="flex items-center gap-4">
                     <label class="flex-1 flex items-center justify-center py-3 px-4 bg-slate-700 border border-slate-600 rounded-lg cursor-pointer hover:bg-slate-600 transition">
-                        <span class="text-sm font-bold text-white">Unggah File .JSON</span>
-                        <input type="file" id="file-upload" accept=".json" class="hidden" onchange="handleFileUpload(event)">
+                        <span class="text-sm font-bold text-white">Unggah File .JSON / .CSV</span>
+                        <input type="file" id="file-upload" accept=".json, .csv" class="hidden" onchange="handleFileUpload(event)">
                     </label>
                     <button onclick="simpanBankSoal()" class="flex-1 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-colors">
                         Simpan ke Sistem
@@ -287,16 +287,3127 @@
         const GAS_URL = "https://script.google.com/macros/s/AKfycbw5pGSBSp1vXQHlnu-US_caITmtTUcSrEg1xp6IzKFUHYrM-RaWobVdsmEGOzPxwycG/exec"; 
 
         const soalBawaan = [
-            { tingkat: "SMP Kelas 8", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Hasil dari 3x + 2x adalah...", opsi: ["5x", "6x", "5x^2", "x"], jawaban_index: 0 },
-            { tingkat: "SMP Kelas 8", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Nilai x dari 2x - 4 = 10 adalah...", opsi: ["3", "5", "7", "9"], jawaban_index: 2 },
-            { tingkat: "SMP Kelas 8", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Jika y = 2x + 1, berapa nilai y jika x = 4?", opsi: ["7", "8", "9", "10"], jawaban_index: 2 },
-            { tingkat: "SMP Kelas 8", mapel: "Informatika", materi: "Jaringan", pertanyaan: "Kepanjangan dari LAN adalah...", opsi: ["Local Area Network", "Light Area Node", "Large Area Network", "Local Access Node"], jawaban_index: 0 },
-            { tingkat: "SMP Kelas 8", mapel: "Informatika", materi: "Jaringan", pertanyaan: "Perangkat untuk menghubungkan dua jaringan berbeda adalah...", opsi: ["Switch", "Hub", "Router", "Kabel UTP"], jawaban_index: 2 },
-            { tingkat: "SMP Kelas 9", mapel: "IPA", materi: "Listrik", pertanyaan: "Satuan kuat arus listrik adalah...", opsi: ["Volt", "Ampere", "Ohm", "Watt"], jawaban_index: 1 },
-            { tingkat: "SMP Kelas 9", mapel: "IPA", materi: "Listrik", pertanyaan: "Rumus hukum Ohm adalah...", opsi: ["V = I/R", "R = V*I", "V = I*R", "I = V*R"], jawaban_index: 2 },
-            // Contoh soal dengan gambar
-            { tingkat: "SMP Kelas 9", mapel: "IPA", materi: "Biologi", pertanyaan: "Apa nama organ pada gambar ini?<br><img src='https://placehold.co/200x100/ec4899/white?text=Jantung' alt='Organ'>", opsi: ["Paru-paru", "Jantung", "Hati", "Ginjal"], jawaban_index: 1 }
-        ];
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 5 + 3 × 2?",
+    "opsi": [
+      "11",
+      "16",
+      "2",
+      "15"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 6 + 4 × 2?",
+    "opsi": [
+      "14",
+      "20",
+      "2",
+      "24"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 7 + 5 × 2?",
+    "opsi": [
+      "17",
+      "24",
+      "2",
+      "35"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 8 + 6 × 2?",
+    "opsi": [
+      "20",
+      "28",
+      "2",
+      "48"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 9 + 2 × 2?",
+    "opsi": [
+      "13",
+      "22",
+      "7",
+      "18"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 10 + 3 × 2?",
+    "opsi": [
+      "16",
+      "26",
+      "7",
+      "30"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 11 + 4 × 2?",
+    "opsi": [
+      "19",
+      "30",
+      "7",
+      "44"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 12 + 5 × 2?",
+    "opsi": [
+      "22",
+      "34",
+      "7",
+      "60"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 13 + 6 × 2?",
+    "opsi": [
+      "25",
+      "38",
+      "7",
+      "78"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 14 + 2 × 2?",
+    "opsi": [
+      "18",
+      "32",
+      "12",
+      "28"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 15 + 3 × 2?",
+    "opsi": [
+      "21",
+      "36",
+      "12",
+      "45"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 16 + 4 × 2?",
+    "opsi": [
+      "24",
+      "40",
+      "12",
+      "64"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 17 + 5 × 2?",
+    "opsi": [
+      "27",
+      "44",
+      "12",
+      "85"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 18 + 6 × 2?",
+    "opsi": [
+      "30",
+      "48",
+      "12",
+      "108"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 19 + 2 × 2?",
+    "opsi": [
+      "23",
+      "42",
+      "17",
+      "38"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 20 + 3 × 2?",
+    "opsi": [
+      "26",
+      "46",
+      "17",
+      "60"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 21 + 4 × 2?",
+    "opsi": [
+      "29",
+      "50",
+      "17",
+      "84"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 22 + 5 × 2?",
+    "opsi": [
+      "32",
+      "54",
+      "17",
+      "110"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 23 + 6 × 2?",
+    "opsi": [
+      "35",
+      "58",
+      "17",
+      "138"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Bilangan bulat dan operasi hitung",
+    "pertanyaan": "Berapakah hasil dari 24 + 2 × 2?",
+    "opsi": [
+      "28",
+      "52",
+      "22",
+      "48"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 4 cm dan lebar 2 cm. Berapakah luasnya?",
+    "opsi": [
+      "8 cm²",
+      "12 cm²",
+      "6 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 5 cm dan lebar 3 cm. Berapakah luasnya?",
+    "opsi": [
+      "15 cm²",
+      "16 cm²",
+      "8 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 6 cm dan lebar 4 cm. Berapakah luasnya?",
+    "opsi": [
+      "24 cm²",
+      "20 cm²",
+      "10 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 7 cm dan lebar 5 cm. Berapakah luasnya?",
+    "opsi": [
+      "35 cm²",
+      "24 cm²",
+      "12 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 8 cm dan lebar 6 cm. Berapakah luasnya?",
+    "opsi": [
+      "48 cm²",
+      "28 cm²",
+      "14 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 9 cm dan lebar 7 cm. Berapakah luasnya?",
+    "opsi": [
+      "63 cm²",
+      "32 cm²",
+      "16 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 10 cm dan lebar 8 cm. Berapakah luasnya?",
+    "opsi": [
+      "80 cm²",
+      "36 cm²",
+      "18 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 11 cm dan lebar 9 cm. Berapakah luasnya?",
+    "opsi": [
+      "99 cm²",
+      "40 cm²",
+      "20 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 12 cm dan lebar 10 cm. Berapakah luasnya?",
+    "opsi": [
+      "120 cm²",
+      "44 cm²",
+      "22 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 13 cm dan lebar 11 cm. Berapakah luasnya?",
+    "opsi": [
+      "143 cm²",
+      "48 cm²",
+      "24 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 14 cm dan lebar 12 cm. Berapakah luasnya?",
+    "opsi": [
+      "168 cm²",
+      "52 cm²",
+      "26 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 15 cm dan lebar 13 cm. Berapakah luasnya?",
+    "opsi": [
+      "195 cm²",
+      "56 cm²",
+      "28 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 16 cm dan lebar 14 cm. Berapakah luasnya?",
+    "opsi": [
+      "224 cm²",
+      "60 cm²",
+      "30 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 17 cm dan lebar 15 cm. Berapakah luasnya?",
+    "opsi": [
+      "255 cm²",
+      "64 cm²",
+      "32 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 18 cm dan lebar 16 cm. Berapakah luasnya?",
+    "opsi": [
+      "288 cm²",
+      "68 cm²",
+      "34 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 19 cm dan lebar 17 cm. Berapakah luasnya?",
+    "opsi": [
+      "323 cm²",
+      "72 cm²",
+      "36 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 20 cm dan lebar 18 cm. Berapakah luasnya?",
+    "opsi": [
+      "360 cm²",
+      "76 cm²",
+      "38 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 21 cm dan lebar 19 cm. Berapakah luasnya?",
+    "opsi": [
+      "399 cm²",
+      "80 cm²",
+      "40 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 22 cm dan lebar 20 cm. Berapakah luasnya?",
+    "opsi": [
+      "440 cm²",
+      "84 cm²",
+      "42 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Matematika",
+    "materi": "Geometri dasar",
+    "pertanyaan": "Sebuah persegi panjang memiliki panjang 23 cm dan lebar 21 cm. Berapakah luasnya?",
+    "opsi": [
+      "483 cm²",
+      "88 cm²",
+      "44 cm²",
+      "2 cm²"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-1 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-2 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-3 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-4 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-5 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-6 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-7 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-8 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-9 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-10 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-11 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-12 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-13 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-14 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-15 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-16 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-17 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-18 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-19 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Algoritma dasar",
+    "pertanyaan": "Langkah pertama dalam membuat algoritma ke-20 adalah...",
+    "opsi": [
+      "Menentukan masalah",
+      "Mencetak hasil",
+      "Mematikan komputer",
+      "Menghapus data"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-1 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-2 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-3 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-4 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-5 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-6 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-7 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-8 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-9 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-10 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-11 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-12 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-13 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-14 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-15 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-16 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-17 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-18 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-19 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 7",
+    "mapel": "Informatika",
+    "materi": "Pengolah kata",
+    "pertanyaan": "Shortcut untuk menyimpan dokumen pada pengolah kata ke-20 adalah...",
+    "opsi": [
+      "Ctrl + S",
+      "Ctrl + P",
+      "Ctrl + C",
+      "Ctrl + V"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 3^2?",
+    "opsi": [
+      "9",
+      "6",
+      "5",
+      "27"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 4^2?",
+    "opsi": [
+      "16",
+      "8",
+      "6",
+      "64"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 5^2?",
+    "opsi": [
+      "25",
+      "10",
+      "7",
+      "125"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 2^2?",
+    "opsi": [
+      "4",
+      "4",
+      "4",
+      "8"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 3^2?",
+    "opsi": [
+      "9",
+      "6",
+      "5",
+      "27"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 4^2?",
+    "opsi": [
+      "16",
+      "8",
+      "6",
+      "64"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 5^2?",
+    "opsi": [
+      "25",
+      "10",
+      "7",
+      "125"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 2^2?",
+    "opsi": [
+      "4",
+      "4",
+      "4",
+      "8"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 3^2?",
+    "opsi": [
+      "9",
+      "6",
+      "5",
+      "27"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 4^2?",
+    "opsi": [
+      "16",
+      "8",
+      "6",
+      "64"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 5^2?",
+    "opsi": [
+      "25",
+      "10",
+      "7",
+      "125"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 2^2?",
+    "opsi": [
+      "4",
+      "4",
+      "4",
+      "8"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 3^2?",
+    "opsi": [
+      "9",
+      "6",
+      "5",
+      "27"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 4^2?",
+    "opsi": [
+      "16",
+      "8",
+      "6",
+      "64"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 5^2?",
+    "opsi": [
+      "25",
+      "10",
+      "7",
+      "125"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 2^2?",
+    "opsi": [
+      "4",
+      "4",
+      "4",
+      "8"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 3^2?",
+    "opsi": [
+      "9",
+      "6",
+      "5",
+      "27"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 4^2?",
+    "opsi": [
+      "16",
+      "8",
+      "6",
+      "64"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 5^2?",
+    "opsi": [
+      "25",
+      "10",
+      "7",
+      "125"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Bilangan berpangkat dan bentuk akar",
+    "pertanyaan": "Berapakah hasil dari 2^2?",
+    "opsi": [
+      "4",
+      "4",
+      "4",
+      "8"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 3 cm dan 4 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "5 cm",
+      "7 cm",
+      "12 cm",
+      "4 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 5 cm dan 12 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "13 cm",
+      "17 cm",
+      "60 cm",
+      "12 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 8 cm dan 15 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "17 cm",
+      "23 cm",
+      "120 cm",
+      "16 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 7 cm dan 24 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "25 cm",
+      "31 cm",
+      "168 cm",
+      "24 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 9 cm dan 12 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "15 cm",
+      "21 cm",
+      "108 cm",
+      "14 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 3 cm dan 4 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "5 cm",
+      "7 cm",
+      "12 cm",
+      "4 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 5 cm dan 12 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "13 cm",
+      "17 cm",
+      "60 cm",
+      "12 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 8 cm dan 15 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "17 cm",
+      "23 cm",
+      "120 cm",
+      "16 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 7 cm dan 24 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "25 cm",
+      "31 cm",
+      "168 cm",
+      "24 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 9 cm dan 12 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "15 cm",
+      "21 cm",
+      "108 cm",
+      "14 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 3 cm dan 4 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "5 cm",
+      "7 cm",
+      "12 cm",
+      "4 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 5 cm dan 12 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "13 cm",
+      "17 cm",
+      "60 cm",
+      "12 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 8 cm dan 15 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "17 cm",
+      "23 cm",
+      "120 cm",
+      "16 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 7 cm dan 24 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "25 cm",
+      "31 cm",
+      "168 cm",
+      "24 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 9 cm dan 12 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "15 cm",
+      "21 cm",
+      "108 cm",
+      "14 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 3 cm dan 4 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "5 cm",
+      "7 cm",
+      "12 cm",
+      "4 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 5 cm dan 12 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "13 cm",
+      "17 cm",
+      "60 cm",
+      "12 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 8 cm dan 15 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "17 cm",
+      "23 cm",
+      "120 cm",
+      "16 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 7 cm dan 24 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "25 cm",
+      "31 cm",
+      "168 cm",
+      "24 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Matematika",
+    "materi": "Teorema Pythagoras",
+    "pertanyaan": "Sebuah segitiga siku-siku memiliki sisi siku-siku 9 cm dan 12 cm. Panjang sisi miringnya adalah...",
+    "opsi": [
+      "15 cm",
+      "21 cm",
+      "108 cm",
+      "14 cm"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-1 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-2 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-3 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-4 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-5 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-6 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-7 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-8 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-9 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-10 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-11 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-12 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-13 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-14 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-15 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-16 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-17 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-18 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-19 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Jaringan komputer",
+    "pertanyaan": "Perangkat yang digunakan untuk menghubungkan beberapa komputer dalam satu jaringan lokal ke-20 adalah...",
+    "opsi": [
+      "Switch",
+      "Scanner",
+      "Printer",
+      "Speaker"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-1 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-2 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-3 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-4 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-5 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-6 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-7 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-8 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-9 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-10 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-11 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-12 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-13 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-14 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-15 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-16 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-17 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-18 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-19 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 8",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Rumus spreadsheet untuk menjumlahkan sel A1 sampai A5 pada soal ke-20 adalah...",
+    "opsi": [
+      "=SUM(A1:A5)",
+      "=ADD(A1:A5)",
+      "=TOTAL(A1:A5)",
+      "=COUNT(A1:A5)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 1 dan y = 3, maka nilai x + y adalah...",
+    "opsi": [
+      "4",
+      "3",
+      "5",
+      "3"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 2 dan y = 4, maka nilai x + y adalah...",
+    "opsi": [
+      "6",
+      "8",
+      "7",
+      "5"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 3 dan y = 5, maka nilai x + y adalah...",
+    "opsi": [
+      "8",
+      "15",
+      "9",
+      "7"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 4 dan y = 6, maka nilai x + y adalah...",
+    "opsi": [
+      "10",
+      "24",
+      "11",
+      "9"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 5 dan y = 7, maka nilai x + y adalah...",
+    "opsi": [
+      "12",
+      "35",
+      "13",
+      "11"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 6 dan y = 8, maka nilai x + y adalah...",
+    "opsi": [
+      "14",
+      "48",
+      "15",
+      "13"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 7 dan y = 9, maka nilai x + y adalah...",
+    "opsi": [
+      "16",
+      "63",
+      "17",
+      "15"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 8 dan y = 10, maka nilai x + y adalah...",
+    "opsi": [
+      "18",
+      "80",
+      "19",
+      "17"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 9 dan y = 11, maka nilai x + y adalah...",
+    "opsi": [
+      "20",
+      "99",
+      "21",
+      "19"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 10 dan y = 12, maka nilai x + y adalah...",
+    "opsi": [
+      "22",
+      "120",
+      "23",
+      "21"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 11 dan y = 13, maka nilai x + y adalah...",
+    "opsi": [
+      "24",
+      "143",
+      "25",
+      "23"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 12 dan y = 14, maka nilai x + y adalah...",
+    "opsi": [
+      "26",
+      "168",
+      "27",
+      "25"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 13 dan y = 15, maka nilai x + y adalah...",
+    "opsi": [
+      "28",
+      "195",
+      "29",
+      "27"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 14 dan y = 16, maka nilai x + y adalah...",
+    "opsi": [
+      "30",
+      "224",
+      "31",
+      "29"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 15 dan y = 17, maka nilai x + y adalah...",
+    "opsi": [
+      "32",
+      "255",
+      "33",
+      "31"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 16 dan y = 18, maka nilai x + y adalah...",
+    "opsi": [
+      "34",
+      "288",
+      "35",
+      "33"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 17 dan y = 19, maka nilai x + y adalah...",
+    "opsi": [
+      "36",
+      "323",
+      "37",
+      "35"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 18 dan y = 20, maka nilai x + y adalah...",
+    "opsi": [
+      "38",
+      "360",
+      "39",
+      "37"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 19 dan y = 21, maka nilai x + y adalah...",
+    "opsi": [
+      "40",
+      "399",
+      "41",
+      "39"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Persamaan linear dua variabel",
+    "pertanyaan": "Jika x = 20 dan y = 22, maka nilai x + y adalah...",
+    "opsi": [
+      "42",
+      "440",
+      "43",
+      "41"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 3 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 9 × 10",
+      "π × 3 × 10",
+      "2π × 3 × 10",
+      "π × 27"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 4 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 16 × 10",
+      "π × 4 × 10",
+      "2π × 4 × 10",
+      "π × 64"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 5 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 25 × 10",
+      "π × 5 × 10",
+      "2π × 5 × 10",
+      "π × 125"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 6 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 36 × 10",
+      "π × 6 × 10",
+      "2π × 6 × 10",
+      "π × 216"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 2 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 4 × 10",
+      "π × 2 × 10",
+      "2π × 2 × 10",
+      "π × 8"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 3 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 9 × 10",
+      "π × 3 × 10",
+      "2π × 3 × 10",
+      "π × 27"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 4 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 16 × 10",
+      "π × 4 × 10",
+      "2π × 4 × 10",
+      "π × 64"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 5 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 25 × 10",
+      "π × 5 × 10",
+      "2π × 5 × 10",
+      "π × 125"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 6 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 36 × 10",
+      "π × 6 × 10",
+      "2π × 6 × 10",
+      "π × 216"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 2 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 4 × 10",
+      "π × 2 × 10",
+      "2π × 2 × 10",
+      "π × 8"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 3 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 9 × 10",
+      "π × 3 × 10",
+      "2π × 3 × 10",
+      "π × 27"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 4 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 16 × 10",
+      "π × 4 × 10",
+      "2π × 4 × 10",
+      "π × 64"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 5 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 25 × 10",
+      "π × 5 × 10",
+      "2π × 5 × 10",
+      "π × 125"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 6 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 36 × 10",
+      "π × 6 × 10",
+      "2π × 6 × 10",
+      "π × 216"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 2 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 4 × 10",
+      "π × 2 × 10",
+      "2π × 2 × 10",
+      "π × 8"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 3 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 9 × 10",
+      "π × 3 × 10",
+      "2π × 3 × 10",
+      "π × 27"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 4 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 16 × 10",
+      "π × 4 × 10",
+      "2π × 4 × 10",
+      "π × 64"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 5 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 25 × 10",
+      "π × 5 × 10",
+      "2π × 5 × 10",
+      "π × 125"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 6 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 36 × 10",
+      "π × 6 × 10",
+      "2π × 6 × 10",
+      "π × 216"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Matematika",
+    "materi": "Bangun ruang sisi lengkung",
+    "pertanyaan": "Sebuah tabung memiliki jari-jari 2 cm dan tinggi 10 cm. Volume tabung sebanding dengan...",
+    "opsi": [
+      "π × 4 × 10",
+      "π × 2 × 10",
+      "2π × 2 × 10",
+      "π × 8"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-1 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-2 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-3 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-4 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-5 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-6 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-7 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-8 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-9 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-10 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-11 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-12 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-13 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-14 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-15 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-16 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-17 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-18 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-19 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pemrograman dasar (Blockly)",
+    "pertanyaan": "Blok yang digunakan untuk melakukan pengulangan pada Blockly ke-20 adalah...",
+    "opsi": [
+      "Repeat",
+      "Print",
+      "Input",
+      "Stop"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-1 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-2 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-3 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-4 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-5 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-6 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-7 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-8 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-9 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-10 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-11 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-12 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-13 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-14 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-15 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-16 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-17 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-18 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-19 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  },
+  {
+    "tingkat": "SMP Kelas 9",
+    "mapel": "Informatika",
+    "materi": "Pengolah spreadsheet",
+    "pertanyaan": "Fungsi untuk mencari nilai rata-rata pada spreadsheet soal ke-20 adalah...",
+    "opsi": [
+      "=AVERAGE(B1:B10)",
+      "=SUM(B1:B10)",
+      "=MAX(B1:B10)",
+      "=MIN(B1:B10)"
+    ],
+    "jawaban_index": 0
+  }
+];
 
         let bankSoalData = [];
         let leaderboardData = [];
@@ -344,6 +3455,12 @@
         }
 
         function muatDataLokal() {
+            const storedP1 = localStorage.getItem('duelP1Name');
+            if (storedP1) document.getElementById('input-p1').value = storedP1;
+            
+            const storedP2 = localStorage.getItem('duelP2Name');
+            if (storedP2) document.getElementById('input-p2').value = storedP2;
+
             const storedSoal = localStorage.getItem('duelBankSoal');
             if (storedSoal) {
                 try { bankSoalData = JSON.parse(storedSoal); } 
@@ -400,11 +3517,50 @@
             materiSet.forEach(mt => selectMateri.innerHTML += `<option value="${mt}">${mt}</option>`);
         }
 
+        function parseCSVLine(text) {
+            let ret = [], keep = false, token = '';
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"') { keep = !keep; }
+                else if (char === ',' && !keep) { ret.push(token); token = ''; }
+                else { token += char; }
+            }
+            ret.push(token);
+            return ret.map(s => s.trim().replace(/^"|"$/g, ''));
+        }
+
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
+            const isCSV = file.name.toLowerCase().endsWith('.csv');
             const reader = new FileReader();
-            reader.onload = (e) => { document.getElementById('json-input').value = e.target.result; };
+            reader.onload = (e) => { 
+                if (isCSV) {
+                    try {
+                        const lines = e.target.result.trim().split('\n');
+                        const result = [];
+                        // Mulai dari baris 1 (asumsi baris 0 adalah header)
+                        for(let i=1; i<lines.length; i++) {
+                            if(!lines[i].trim()) continue;
+                            const cells = parseCSVLine(lines[i]);
+                            if(cells.length >= 9) {
+                                result.push({
+                                    tingkat: cells[0], mapel: cells[1], materi: cells[2],
+                                    pertanyaan: cells[3],
+                                    opsi: [cells[4], cells[5], cells[6], cells[7]],
+                                    jawaban_index: parseInt(cells[8]) - 1 // CSV (1-4) ke Index (0-3)
+                                });
+                            }
+                        }
+                        document.getElementById('json-input').value = JSON.stringify(result, null, 2);
+                        showMessage("✅ File CSV berhasil dibaca. Klik Simpan untuk menerapkan.");
+                    } catch (err) {
+                        showMessage("❌ Gagal membaca CSV. Pastikan format tabel sesuai ketentuan.", true);
+                    }
+                } else {
+                    document.getElementById('json-input').value = e.target.result; 
+                }
+            };
             reader.readAsText(file);
         }
 
@@ -432,6 +3588,13 @@
             return array.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value);
         }
 
+        function getShuffledQueue(soalArray, isP1) {
+            const mid = Math.floor(soalArray.length / 2);
+            const part1 = acakSoal([...soalArray.slice(0, mid)]);
+            const part2 = acakSoal([...soalArray.slice(mid)]);
+            return isP1 ? [...part1, ...part2] : [...part2, ...part1];
+        }
+
         function praMulaiGame() {
             currentFilter = {
                 tingkat: document.getElementById('select-tingkat').value,
@@ -444,15 +3607,20 @@
             );
 
             if (filteredSoal.length < 2) {
-                showMessage('Peringatan: Jumlah soal kurang dari 2. Tambahkan soal!', true);
+                showMessage('Peringatan: Jumlah soal minimal 2. Tambahkan soal ke dalam bank!', true);
                 return;
             }
 
-            stateP1.name = document.getElementById('input-p1').value || "Pemain 1";
-            stateP2.name = document.getElementById('input-p2').value || "Pemain 2";
+            stateP1.name = document.getElementById('input-p1').value || "Pemain Kiri";
+            stateP2.name = document.getElementById('input-p2').value || "Pemain Kanan";
             
-            stateP1.questions = acakSoal([...filteredSoal]);
-            stateP2.questions = acakSoal([...filteredSoal]);
+            // Simpan nama pemain ke local storage
+            localStorage.setItem('duelP1Name', stateP1.name);
+            localStorage.setItem('duelP2Name', stateP2.name);
+            
+            // Acak soal dengan strategi 50% awal / akhir agar pemain tidak bertemu soal yang sama di waktu bersamaan
+            stateP1.questions = getShuffledQueue([...filteredSoal], true);
+            stateP2.questions = getShuffledQueue([...filteredSoal], false);
 
             totalWaktu = parseInt(document.getElementById('select-waktu').value);
             
@@ -526,9 +3694,9 @@
             state.waiting = false;
             overlay.classList.remove('active');
 
-            // Jika soal habis, acak ulang (Infinite Loop)
+            // Jika soal habis, acak ulang menggunakan strategi yang sama
             if (state.idx >= state.questions.length) {
-                state.questions = acakSoal([...state.questions]);
+                state.questions = getShuffledQueue([...state.questions], isP1);
                 state.idx = 0;
             }
 
@@ -540,24 +3708,25 @@
 
             const btnClass = isP1 ? 'p1-btn' : 'p2-btn';
 
-            currentSoal.opsi.forEach((teks, i) => {
+            // Petakan ke objek boolean yang menyatakan apakah ini kunci yang benar sebelum kita acak posisinya
+            const opsiObj = currentSoal.opsi.map((teks, i) => ({ teks, isCorrect: i === currentSoal.jawaban_index }));
+            const shuffledOpsi = acakSoal(opsiObj);
+
+            shuffledOpsi.forEach((opt) => {
                 const btn = document.createElement('button');
                 btn.className = `btn-opsi ${btnClass} opsi-content border-2 rounded-2xl text-2xl font-bold p-4 flex items-center shadow-md`;
-                btn.innerHTML = `<span class="flex-1 text-left">${teks}</span>`; // Render text/img
-                btn.onclick = (e) => cekJawaban(playerCode, i, btn, e);
+                btn.innerHTML = `<span class="flex-1 text-left">${opt.teks}</span>`; // Render text/img
+                btn.onclick = (e) => cekJawaban(playerCode, opt.isCorrect, btn, e);
                 optionsContainer.appendChild(btn);
             });
         }
 
-        function cekJawaban(playerCode, indexDipilih, btnElement, event) {
+        function cekJawaban(playerCode, isCorrect, btnElement, event) {
             event.stopPropagation();
             
             const isP1 = playerCode === 'p1';
             const state = isP1 ? stateP1 : stateP2;
             if(state.waiting) return; 
-
-            const currentSoal = state.questions[state.idx];
-            const isCorrect = (indexDipilih === currentSoal.jawaban_index);
 
             // Matikan semua tombol 
             const optionsContainer = document.getElementById(isP1 ? 'options-p1' : 'options-p2');
