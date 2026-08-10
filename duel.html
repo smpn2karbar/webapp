@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Duel IFP</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- PANEL PENGATURAN GURU -->
+  <div id="setup-panel" class="modal">
+    <div class="modal-content">
+      <h2>Pengaturan Duel (Guru)</h2>
+      
+      <label>Tingkat:</label>
+      <select id="select-tingkat"></select>
+
+      <label>Mata Pelajaran:</label>
+      <select id="select-mapel"></select>
+
+      <label>Materi:</label>
+      <select id="select-materi"></select>
+
+      <label>Waktu Per Soal (Detik):</label>
+      <input type="number" id="input-waktu" value="15" min="5" max="60">
+
+      <button id="btn-start" onclick="mulaiGame()">MULAI TANDING</button>
+    </div>
+  </div>
+
+  <!-- ARENA GAME DUEL (SPLIT SCREEN FOR IFP) -->
+  <div id="game-arena" class="hidden">
+    <div class="timer-bar" id="global-timer">15</div>
+
+    <div class="split-container">
+      <!-- PEMAIN 1 (KIRI) -->
+      <div class="player-zone p1-theme">
+        <div class="player-header">
+          <h3>Pemain 1</h3>
+          <div class="score" id="score-p1">Skor: 0</div>
+        </div>
+        <div class="question-box" id="q-p1">Soal Pemain 1...</div>
+        <div class="options-grid" id="options-p1"></div>
+      </div>
+
+      <!-- PEMAIN 2 (KANAN) -->
+      <div class="player-zone p2-theme">
+        <div class="player-header">
+          <h3>Pemain 2</h3>
+          <div class="score" id="score-p2">Skor: 0</div>
+        </div>
+        <div class="question-box" id="q-p2">Soal Pemain 2...</div>
+        <div class="options-grid" id="options-p2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HASIL AKHIR -->
+  <div id="result-panel" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="winner-text">HASIL TANDING</h2>
+      <p id="final-scores"></p>
+      <button onclick="location.reload()">Main Lagi</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
