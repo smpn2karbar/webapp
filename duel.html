@@ -1,70 +1,434 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Duel IFP</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Duel IFP - Pendidikan</title>
+    <!-- Menggunakan Tailwind CSS untuk styling yang modern dan rapi -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            user-select: none; /* Mencegah seleksi teks tak sengaja di layar sentuh */
+            -webkit-user-drag: none;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Mencegah scrolling */
+            background-color: #111827; /* Gray 900 */
+        }
+
+        /* Tema Khusus Pemain */
+        .p1-theme { background: linear-gradient(135deg, #1e3a8a, #3b82f6); } /* Biru */
+        .p2-theme { background: linear-gradient(135deg, #064e3b, #10b981); } /* Hijau */
+
+        /* Efek klik tombol */
+        .btn-opsi:active {
+            transform: scale(0.95);
+            transition: transform 0.1s;
+        }
+
+        /* Glassmorphism untuk kotak soal */
+        .glass-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
 </head>
-<body>
+<body class="text-white h-screen w-screen flex flex-col">
 
-  <!-- PANEL PENGATURAN GURU -->
-  <div id="setup-panel" class="modal">
-    <div class="modal-content">
-      <h2>Pengaturan Duel (Guru)</h2>
-      
-      <label>Tingkat:</label>
-      <select id="select-tingkat"></select>
+    <!-- PANEL SETUP GURU -->
+    <div id="setup-panel" class="absolute inset-0 z-50 flex items-center justify-center bg-gray-900/95 backdrop-blur-sm">
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-[500px] border border-gray-700">
+            <h2 class="text-3xl font-bold mb-6 text-center text-blue-400">Pengaturan Duel</h2>
+            
+            <div id="error-message" class="hidden mb-4 p-3 bg-red-500/20 text-red-300 border border-red-500/50 rounded-lg text-center font-semibold"></div>
 
-      <label>Mata Pelajaran:</label>
-      <select id="select-mapel"></select>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Tingkat / Kelas</label>
+                    <select id="select-tingkat" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-lg focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                </div>
 
-      <label>Materi:</label>
-      <select id="select-materi"></select>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Mata Pelajaran</label>
+                    <select id="select-mapel" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-lg focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                </div>
 
-      <label>Waktu Per Soal (Detik):</label>
-      <input type="number" id="input-waktu" value="15" min="5" max="60">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Materi</label>
+                    <select id="select-materi" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-lg focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                </div>
 
-      <button id="btn-start" onclick="mulaiGame()">MULAI TANDING</button>
-    </div>
-  </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Total Waktu Duel</label>
+                    <select id="select-waktu" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="120">2 Menit</option>
+                        <option value="180">3 Menit</option>
+                        <option value="300">5 Menit</option>
+                    </select>
+                </div>
 
-  <!-- ARENA GAME DUEL (SPLIT SCREEN FOR IFP) -->
-  <div id="game-arena" class="hidden">
-    <div class="timer-bar" id="global-timer">15</div>
-
-    <div class="split-container">
-      <!-- PEMAIN 1 (KIRI) -->
-      <div class="player-zone p1-theme">
-        <div class="player-header">
-          <h3>Pemain 1</h3>
-          <div class="score" id="score-p1">Skor: 0</div>
+                <button onclick="mulaiGame()" class="w-full mt-4 py-4 bg-blue-600 hover:bg-blue-500 text-white text-xl font-bold rounded-lg shadow-lg transition-colors">
+                    MULAI TANDING
+                </button>
+            </div>
         </div>
-        <div class="question-box" id="q-p1">Soal Pemain 1...</div>
-        <div class="options-grid" id="options-p1"></div>
-      </div>
+    </div>
 
-      <!-- PEMAIN 2 (KANAN) -->
-      <div class="player-zone p2-theme">
-        <div class="player-header">
-          <h3>Pemain 2</h3>
-          <div class="score" id="score-p2">Skor: 0</div>
+    <!-- ARENA GAME (SPLIT SCREEN) -->
+    <div id="game-arena" class="hidden flex-1 flex flex-col h-full relative">
+        
+        <!-- Timer Global di Tengah Atas -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 bg-yellow-500 text-gray-900 px-8 py-3 rounded-b-2xl font-black text-4xl shadow-xl z-10 flex items-center gap-2 border-x-4 border-b-4 border-yellow-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span id="global-timer">00:00</span>
         </div>
-        <div class="question-box" id="q-p2">Soal Pemain 2...</div>
-        <div class="options-grid" id="options-p2"></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- HASIL AKHIR -->
-  <div id="result-panel" class="modal hidden">
-    <div class="modal-content">
-      <h2 id="winner-text">HASIL TANDING</h2>
-      <p id="final-scores"></p>
-      <button onclick="location.reload()">Main Lagi</button>
-    </div>
-  </div>
+        <div class="flex flex-1 w-full">
+            <!-- PEMAIN 1 (KIRI) -->
+            <div class="w-1/2 p1-theme p-6 flex flex-col justify-between border-r-8 border-gray-900">
+                <div class="flex justify-between items-center bg-black/30 p-4 rounded-xl">
+                    <h3 class="text-3xl font-bold text-white tracking-wider">PEMAIN 1</h3>
+                    <div class="text-2xl font-bold bg-white/20 px-6 py-2 rounded-lg">Skor: <span id="score-p1" class="text-4xl text-yellow-300">0</span></div>
+                </div>
+                
+                <div class="flex-1 flex flex-col justify-center gap-6 my-6">
+                    <div class="glass-box p-8 rounded-2xl min-h-[200px] flex items-center justify-center text-center shadow-lg">
+                        <p id="q-p1" class="text-3xl font-semibold leading-relaxed">Menyiapkan Soal...</p>
+                    </div>
+                    
+                    <div id="options-p1" class="grid grid-cols-2 gap-4 h-[300px]">
+                        <!-- Tombol opsi dimuat via JS -->
+                    </div>
+                </div>
+            </div>
 
-  <script src="app.js"></script>
+            <!-- PEMAIN 2 (KANAN) -->
+            <div class="w-1/2 p2-theme p-6 flex flex-col justify-between">
+                <div class="flex justify-between items-center bg-black/30 p-4 rounded-xl">
+                    <h3 class="text-3xl font-bold text-white tracking-wider">PEMAIN 2</h3>
+                    <div class="text-2xl font-bold bg-white/20 px-6 py-2 rounded-lg">Skor: <span id="score-p2" class="text-4xl text-yellow-300">0</span></div>
+                </div>
+                
+                <div class="flex-1 flex flex-col justify-center gap-6 my-6">
+                    <div class="glass-box p-8 rounded-2xl min-h-[200px] flex items-center justify-center text-center shadow-lg">
+                        <p id="q-p2" class="text-3xl font-semibold leading-relaxed">Menyiapkan Soal...</p>
+                    </div>
+                    
+                    <div id="options-p2" class="grid grid-cols-2 gap-4 h-[300px]">
+                        <!-- Tombol opsi dimuat via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL HASIL -->
+    <div id="result-panel" class="hidden absolute inset-0 z-50 flex items-center justify-center bg-gray-900/95 backdrop-blur-sm">
+        <div class="bg-gray-800 p-10 rounded-3xl shadow-2xl w-[600px] border-2 border-yellow-500 text-center flex flex-col items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-yellow-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+            
+            <h2 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 mb-2">WAKTU HABIS!</h2>
+            <h3 id="winner-text" class="text-3xl font-bold text-white mb-8">Pemenang: Pemain 1</h3>
+            
+            <div class="flex w-full justify-between gap-6 mb-8">
+                <div class="flex-1 bg-blue-900/50 p-6 rounded-2xl border border-blue-500/50">
+                    <p class="text-blue-300 text-xl mb-2">Skor Pemain 1</p>
+                    <p id="final-p1" class="text-5xl font-black text-white">0</p>
+                </div>
+                <div class="flex-1 bg-green-900/50 p-6 rounded-2xl border border-green-500/50">
+                    <p class="text-green-300 text-xl mb-2">Skor Pemain 2</p>
+                    <p id="final-p2" class="text-5xl font-black text-white">0</p>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="px-8 py-4 bg-yellow-500 hover:bg-yellow-400 text-gray-900 text-xl font-bold rounded-xl shadow-lg transition-transform active:scale-95 w-full">
+                MAIN KEMBALI
+            </button>
+            <p id="gas-status" class="mt-4 text-sm text-gray-400"></p>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATA BANK SOAL (Format JSON Array of Objects) ---
+        // Guru bisa menambahkan atau mengedit soal langsung di array ini.
+        const bankSoalData = [
+            // MATEMATIKA - KELAS 8
+            { tingkat: "SMP Kelas 8", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Hasil dari 3x + 2x adalah...", opsi: ["5x", "6x", "5x^2", "x"], jawaban_index: 0 },
+            { tingkat: "SMP Kelas 8", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Nilai x dari persamaan 2x - 4 = 10 adalah...", opsi: ["3", "5", "7", "9"], jawaban_index: 2 },
+            { tingkat: "SMP Kelas 8", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Jika y = 2x + 1, berapa nilai y jika x = 4?", opsi: ["7", "8", "9", "10"], jawaban_index: 2 },
+            { tingkat: "SMP Kelas 8", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Faktorisasi dari x^2 - 9 adalah...", opsi: ["(x-3)(x-3)", "(x+3)(x-3)", "(x+9)(x-1)", "(x-9)(x+1)"], jawaban_index: 1 },
+            
+            // INFORMATIKA - KELAS 8
+            { tingkat: "SMP Kelas 8", mapel: "Informatika", materi: "Jaringan", pertanyaan: "Kepanjangan dari LAN adalah...", opsi: ["Local Area Network", "Light Area Node", "Large Area Network", "Local Access Node"], jawaban_index: 0 },
+            { tingkat: "SMP Kelas 8", mapel: "Informatika", materi: "Jaringan", pertanyaan: "Perangkat untuk menghubungkan dua jaringan berbeda adalah...", opsi: ["Switch", "Hub", "Router", "Kabel UTP"], jawaban_index: 2 },
+            { tingkat: "SMP Kelas 8", mapel: "Informatika", materi: "Jaringan", pertanyaan: "Alamat unik komputer di jaringan disebut...", opsi: ["MAC Address", "IP Address", "Web Address", "Email Address"], jawaban_index: 1 },
+            
+            // IPA - KELAS 9
+            { tingkat: "SMP Kelas 9", mapel: "IPA", materi: "Listrik Dinamis", pertanyaan: "Satuan kuat arus listrik adalah...", opsi: ["Volt", "Ampere", "Ohm", "Watt"], jawaban_index: 1 },
+            { tingkat: "SMP Kelas 9", mapel: "IPA", materi: "Listrik Dinamis", pertanyaan: "Rumus hukum Ohm adalah...", opsi: ["V = I/R", "R = V*I", "V = I*R", "I = V*R"], jawaban_index: 2 },
+            { tingkat: "SMP Kelas 9", mapel: "IPA", materi: "Listrik Dinamis", pertanyaan: "Alat pengukur tegangan listrik disebut...", opsi: ["Amperemeter", "Voltmeter", "Ohmmeter", "Barometer"], jawaban_index: 1 }
+        ];
+
+        // Konfigurasi Google Apps Script Web App URL (Opsional)
+        // Ganti dengan URL hasil deploy GAS Anda untuk menyimpan skor ke Google Sheet
+        const GAS_URL = ""; 
+
+        // --- 2. VARIABEL STATE GAME ---
+        let filteredSoal = [];
+        let soalP1 = [], soalP2 = [];
+        let idxP1 = 0, idxP2 = 0;
+        let skorP1 = 0, skorP2 = 0;
+        let timerInterval, sisaWaktu;
+
+        // --- 3. INISIALISASI DROPDOWN ---
+        document.addEventListener("DOMContentLoaded", () => {
+            initDropdownTingkat();
+        });
+
+        function initDropdownTingkat() {
+            const tingkatSet = [...new Set(bankSoalData.map(item => item.tingkat))];
+            const selectTingkat = document.getElementById('select-tingkat');
+            selectTingkat.innerHTML = '';
+            tingkatSet.forEach(t => selectTingkat.innerHTML += `<option value="${t}">${t}</option>`);
+            
+            selectTingkat.addEventListener('change', initDropdownMapel);
+            initDropdownMapel();
+        }
+
+        function initDropdownMapel() {
+            const tingkat = document.getElementById('select-tingkat').value;
+            const mapelSet = [...new Set(bankSoalData.filter(x => x.tingkat === tingkat).map(x => x.mapel))];
+            const selectMapel = document.getElementById('select-mapel');
+            selectMapel.innerHTML = '';
+            mapelSet.forEach(m => selectMapel.innerHTML += `<option value="${m}">${m}</option>`);
+            
+            selectMapel.addEventListener('change', initDropdownMateri);
+            initDropdownMateri();
+        }
+
+        function initDropdownMateri() {
+            const tingkat = document.getElementById('select-tingkat').value;
+            const mapel = document.getElementById('select-mapel').value;
+            const materiSet = [...new Set(bankSoalData.filter(x => x.tingkat === tingkat && x.mapel === mapel).map(x => x.materi))];
+            const selectMateri = document.getElementById('select-materi');
+            selectMateri.innerHTML = '';
+            materiSet.forEach(mt => selectMateri.innerHTML += `<option value="${mt}">${mt}</option>`);
+        }
+
+        // --- 4. LOGIKA GAME ---
+        function showError(msg) {
+            const errDiv = document.getElementById('error-message');
+            errDiv.innerText = msg;
+            errDiv.classList.remove('hidden');
+            setTimeout(() => errDiv.classList.add('hidden'), 3000);
+        }
+
+        function acakArray(array) {
+            return array.map(value => ({ value, sort: Math.random() }))
+                        .sort((a, b) => a.sort - b.sort)
+                        .map(({ value }) => value);
+        }
+
+        function mulaiGame() {
+            const tingkat = document.getElementById('select-tingkat').value;
+            const mapel = document.getElementById('select-mapel').value;
+            const materi = document.getElementById('select-materi').value;
+            const waktuDipilih = parseInt(document.getElementById('select-waktu').value);
+
+            // Filter soal sesuai kriteria
+            filteredSoal = bankSoalData.filter(x => x.tingkat === tingkat && x.mapel === mapel && x.materi === materi);
+
+            if (filteredSoal.length < 2) {
+                showError('Peringatan: Jumlah soal pada materi ini kurang dari 2. Tambahkan soal terlebih dahulu.');
+                return;
+            }
+
+            // Reset State
+            skorP1 = 0; skorP2 = 0;
+            idxP1 = 0; idxP2 = 0;
+            updateSkorUI();
+
+            // Siapkan Soal Masing-masing pemain (Diacak)
+            soalP1 = acakArray([...filteredSoal]);
+            soalP2 = acakArray([...filteredSoal]);
+
+            // Transisi UI
+            document.getElementById('setup-panel').classList.add('hidden');
+            document.getElementById('game-arena').classList.remove('hidden');
+            document.getElementById('game-arena').classList.add('flex');
+
+            tampilkanSoal('p1');
+            tampilkanSoal('p2');
+            mulaiTimer(waktuDipilih);
+        }
+
+        function tampilkanSoal(player) {
+            const isP1 = player === 'p1';
+            let currentIdx = isP1 ? idxP1 : idxP2;
+            let targetSoalArray = isP1 ? soalP1 : soalP2;
+            
+            // Jika soal habis sebelum waktu habis, acak ulang dari awal (Looping)
+            if (currentIdx >= targetSoalArray.length) {
+                targetSoalArray = acakArray([...filteredSoal]);
+                if (isP1) {
+                    soalP1 = targetSoalArray;
+                    idxP1 = 0;
+                    currentIdx = 0;
+                } else {
+                    soalP2 = targetSoalArray;
+                    idxP2 = 0;
+                    currentIdx = 0;
+                }
+            }
+
+            const soalObj = targetSoalArray[currentIdx];
+            document.getElementById(isP1 ? 'q-p1' : 'q-p2').innerText = soalObj.pertanyaan;
+            
+            const optionsContainer = document.getElementById(isP1 ? 'options-p1' : 'options-p2');
+            optionsContainer.innerHTML = '';
+
+            soalObj.opsi.forEach((teksOpsi, i) => {
+                const btn = document.createElement('button');
+                // Styling tombol jawaban besar, cocok untuk ditekan di IFP
+                btn.className = 'btn-opsi bg-white/10 hover:bg-white/20 border-2 border-white/40 rounded-xl text-2xl font-bold text-white transition-colors flex items-center justify-center p-4 break-words';
+                btn.innerText = teksOpsi;
+                // Bind parameter pakai arrow function
+                btn.onclick = () => cekJawaban(player, i);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function cekJawaban(player, indexDipilih) {
+            const isP1 = player === 'p1';
+            const currentIdx = isP1 ? idxP1 : idxP2;
+            const soalObj = isP1 ? soalP1[currentIdx] : soalP2[currentIdx];
+
+            // Cek benar/salah
+            if (indexDipilih === soalObj.jawaban_index) {
+                // Tambah skor jika benar
+                if (isP1) skorP1 += 1;
+                else skorP2 += 1;
+                updateSkorUI();
+            }
+
+            // Lanjut soal berikutnya terlepas benar atau salah
+            if (isP1) {
+                idxP1++;
+                tampilkanSoal('p1');
+            } else {
+                idxP2++;
+                tampilkanSoal('p2');
+            }
+        }
+
+        function updateSkorUI() {
+            document.getElementById('score-p1').innerText = skorP1;
+            document.getElementById('score-p2').innerText = skorP2;
+        }
+
+        // --- 5. TIMER & SELESAI ---
+        function formatWaktu(detikTotal) {
+            const menit = Math.floor(detikTotal / 60);
+            const detik = detikTotal % 60;
+            return `${menit.toString().padStart(2, '0')}:${detik.toString().padStart(2, '0')}`;
+        }
+
+        function mulaiTimer(durasi) {
+            sisaWaktu = durasi;
+            const timerEl = document.getElementById('global-timer');
+            timerEl.innerText = formatWaktu(sisaWaktu);
+
+            timerInterval = setInterval(() => {
+                sisaWaktu--;
+                timerEl.innerText = formatWaktu(sisaWaktu);
+                
+                // Ubah warna merah jika sisa 10 detik
+                if(sisaWaktu <= 10) {
+                    timerEl.parentElement.classList.replace('bg-yellow-500', 'bg-red-500');
+                    timerEl.parentElement.classList.replace('border-yellow-600', 'border-red-700');
+                    timerEl.parentElement.classList.add('animate-pulse');
+                    timerEl.parentElement.classList.replace('text-gray-900', 'text-white');
+                }
+
+                if (sisaWaktu <= 0) {
+                    clearInterval(timerInterval);
+                    akhiriGame();
+                }
+            }, 1000);
+        }
+
+        function akhiriGame() {
+            // Sembunyikan Arena, Tampilkan Hasil
+            document.getElementById('game-arena').classList.remove('flex');
+            document.getElementById('game-arena').classList.add('hidden');
+            
+            const resultPanel = document.getElementById('result-panel');
+            resultPanel.classList.remove('hidden');
+            resultPanel.classList.add('flex');
+
+            // Tentukan Pemenang berdasarkan skor terbanyak
+            let teksMenang = "HASIL SERI!";
+            let warnaTeks = "text-yellow-300";
+
+            if (skorP1 > skorP2) {
+                teksMenang = "🏆 PEMAIN 1 MENANG! 🏆";
+                warnaTeks = "text-blue-400";
+            } else if (skorP2 > skorP1) {
+                teksMenang = "🏆 PEMAIN 2 MENANG! 🏆";
+                warnaTeks = "text-green-400";
+            }
+
+            const winnerEl = document.getElementById('winner-text');
+            winnerEl.innerText = teksMenang;
+            winnerEl.className = `text-4xl font-black mb-8 ${warnaTeks}`;
+
+            document.getElementById('final-p1').innerText = skorP1;
+            document.getElementById('final-p2').innerText = skorP2;
+
+            // Integrasi Google Sheets via GAS (Hanya dipanggil jika URL diisi)
+            if (GAS_URL.trim() !== "") {
+                kirimDataKeSheet();
+            } else {
+                document.getElementById('gas-status').innerText = "Data tidak disimpan (URL GAS kosong).";
+            }
+        }
+
+        // Mengirim data Post ke Google Apps Script
+        function kirimDataKeSheet() {
+            const statusEl = document.getElementById('gas-status');
+            statusEl.innerText = "Menyimpan hasil ke server...";
+            statusEl.classList.replace('text-gray-400', 'text-yellow-400');
+
+            const payload = {
+                tingkat: document.getElementById('select-tingkat').value,
+                mapel: document.getElementById('select-mapel').value,
+                materi: document.getElementById('select-materi').value,
+                pemain1: "Pemain 1",
+                skor1: skorP1,
+                pemain2: "Pemain 2",
+                skor2: skorP2,
+                pemenang: (skorP1 > skorP2) ? "Pemain 1" : (skorP2 > skorP1 ? "Pemain 2" : "Seri")
+            };
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Penting agar tidak kena block CORS dari browser
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                statusEl.innerText = "✓ Hasil berhasil disimpan ke Google Sheets.";
+                statusEl.classList.replace('text-yellow-400', 'text-green-400');
+            })
+            .catch(err => {
+                console.error(err);
+                statusEl.innerText = "⚠ Gagal menyimpan data.";
+                statusEl.classList.replace('text-yellow-400', 'text-red-400');
+            });
+        }
+    </script>
 </body>
 </html>
