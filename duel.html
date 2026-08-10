@@ -2,11 +2,12 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <!-- Memastikan tidak bisa di-zoom out/in di IFP agar ukuran tetap presisi -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Game Duel IFP Mapel</title>
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS untuk Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tone JS for Synthesized Sound (Versi Diperbarui) -->
+    <!-- Tone JS untuk Synthesized Sound (Versi Stabil 14) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -50,9 +51,11 @@
 
         .p1-btn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); color: white; transition: all 0.2s; }
         .p1-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.3); }
+        .p1-btn:disabled { opacity: 0.8; transform: none; cursor: not-allowed; }
         
         .p2-btn { background: rgba(255,255,255,0.4); border-color: rgba(0,0,0,0.2); color: #1e293b; transition: all 0.2s; }
         .p2-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.7); }
+        .p2-btn:disabled { opacity: 0.8; transform: none; cursor: not-allowed; }
 
         /* Status Jawaban */
         .btn-correct { background-color: #10b981 !important; border-color: #047857 !important; color: white !important; transform: scale(1.05); z-index: 10; box-shadow: 0 0 20px rgba(16,185,129,0.5); }
@@ -68,7 +71,8 @@
             display: flex; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
-        .tap-overlay.active { opacity: 1; pointer-events: auto; }
+        /* Saat active, overlay tidak memblokir pointer-events sepenuhnya agar event klik bisa tembus ke container zone */
+        .tap-overlay.active { opacity: 1; pointer-events: none; }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
@@ -109,7 +113,7 @@
         <div class="bg-slate-800/90 p-8 rounded-3xl shadow-2xl border border-slate-600 w-full max-w-4xl relative z-10 flex flex-col backdrop-blur-md">
             
             <div class="text-center mb-8">
-                <h1 class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 drop-shadow-lg mb-2">GAME DUEL IFP</h1>
+                <h1 class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 drop-shadow-lg mb-2">GAME DUEL IFP MAPEL</h1>
                 <h2 class="text-xl md:text-2xl font-bold text-slate-300">SMPN 2 Karawang Barat</h2>
             </div>
 
@@ -229,13 +233,14 @@
         <div class="flex flex-1 w-full h-full relative overflow-hidden">
             
             <!-- PEMAIN 1 (KIRI - BIRU) -->
-            <div id="zone-p1" class="w-1/2 p1-theme p-4 sm:p-6 flex flex-col relative h-full overflow-hidden" onclick="handleZoneClick('p1')">
-                <div class="tap-overlay" id="overlay-p1">
+            <!-- Ditambahkan onclick untuk trigger 'Tap to continue' -->
+            <div id="zone-p1" class="w-1/2 p1-theme p-4 sm:p-6 flex flex-col relative h-full overflow-hidden cursor-pointer" onclick="handleZoneClick('p1')">
+                <div class="tap-overlay flex-col" id="overlay-p1">
                     <p class="pulse-text text-white">👇 KETUK UNTUK LANJUT 👇</p>
                 </div>
 
                 <div class="flex justify-between items-center bg-black/20 p-3 sm:p-4 rounded-2xl border border-white/10 shadow-lg shrink-0 mb-4">
-                    <h3 id="display-name-p1" class="text-xl sm:text-3xl font-black tracking-wider drop-shadow-md truncate max-w-[60%]">Ahmad</h3>
+                    <h3 id="display-name-p1" class="text-xl sm:text-3xl font-black tracking-wider drop-shadow-md truncate max-w-[60%]">P1</h3>
                     <div class="text-sm sm:text-lg font-bold bg-white/20 px-3 py-1 sm:px-4 sm:py-2 rounded-xl border border-white/20 shadow-inner flex items-center">
                         SKOR: <span id="score-p1" class="text-2xl sm:text-3xl ml-2 font-black text-emerald-300">0</span>
                     </div>
@@ -253,13 +258,13 @@
             </div>
 
             <!-- PEMAIN 2 (KANAN - KUNING) -->
-            <div id="zone-p2" class="w-1/2 p2-theme p-4 sm:p-6 flex flex-col relative h-full overflow-hidden" onclick="handleZoneClick('p2')">
-                <div class="tap-overlay" id="overlay-p2">
+            <div id="zone-p2" class="w-1/2 p2-theme p-4 sm:p-6 flex flex-col relative h-full overflow-hidden cursor-pointer" onclick="handleZoneClick('p2')">
+                <div class="tap-overlay flex-col" id="overlay-p2">
                     <p class="pulse-text text-slate-800">👇 KETUK UNTUK LANJUT 👇</p>
                 </div>
 
                 <div class="flex justify-between items-center bg-black/5 p-3 sm:p-4 rounded-2xl border border-black/10 shadow-lg shrink-0 mb-4">
-                    <h3 id="display-name-p2" class="text-xl sm:text-3xl font-black tracking-wider drop-shadow-md text-slate-800 truncate max-w-[60%]">Abdul</h3>
+                    <h3 id="display-name-p2" class="text-xl sm:text-3xl font-black tracking-wider drop-shadow-md text-slate-800 truncate max-w-[60%]">P2</h3>
                     <div class="text-sm sm:text-lg font-bold bg-white/40 px-3 py-1 sm:px-4 sm:py-2 rounded-xl border border-black/10 shadow-inner flex items-center">
                         SKOR: <span id="score-p2" class="text-2xl sm:text-3xl ml-2 font-black text-red-600">0</span>
                     </div>
@@ -303,8 +308,8 @@
     </div>
 
     <script>
-        // CONFIGURATION: Ganti dengan URL GAS Web App Anda
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw5pGSBSp1vXQHlnu-US_caITmtTUcSrEg1xp6IzKFUHYrM-RaWobVdsmEGOzPxwycG/exec"; 
+        // CONFIGURATION: URL Google Apps Script Anda
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbw5pGSBSp1vXQHlnu-US_caITmtTUcSrEg1xp6IzKFUHYrM-RaWobVdsmEGOzPxwycG/exec";
 
         // STATE VARIABLES
         let bankSoalData = [];
@@ -323,11 +328,10 @@
 
         // Soal Bawaan (Embedded JSON)
         const soalBawaan = [
-            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Hasil dari 3x + 2x adalah...", opsi: ["5x", "6x", "5x^2", "6x^2"], jawaban_index: 0 },
-            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Jika y = 4, maka 2y - 3 = ...", opsi: ["5", "8", "11", "3"], jawaban_index: 0 },
-            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Sederhanakan: 5a - 2a + 4", opsi: ["3a + 4", "7a + 4", "3a - 4", "7a - 4"], jawaban_index: 0 },
-            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Nilai x yang memenuhi x + 5 = 12 adalah...", opsi: ["7", "17", "6", "8"], jawaban_index: 0 },
-            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar", pertanyaan: "Hasil kali 2(3x - 1) adalah...", opsi: ["6x - 2", "6x - 1", "5x - 2", "5x - 1"], jawaban_index: 0 }
+            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar Dasar", pertanyaan: "Hasil dari 3x + 2x adalah...", opsi: ["5x", "6x", "5x^2", "6x^2"], jawaban_index: 0 },
+            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar Dasar", pertanyaan: "Jika y = 4, maka 2y - 3 = ...", opsi: ["5", "8", "11", "3"], jawaban_index: 0 },
+            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar Dasar", pertanyaan: "Sederhanakan: 5a - 2a + 4", opsi: ["3a + 4", "7a + 4", "3a - 4", "7a - 4"], jawaban_index: 0 },
+            { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar Dasar", pertanyaan: "Nilai x yang memenuhi x + 5 = 12 adalah...", opsi: ["7", "17", "6", "8"], jawaban_index: 0 }
         ];
 
         // --- CUSTOM MODALS (MENGGANTIKAN ALERT & CONFIRM) ---
@@ -404,7 +408,7 @@
                     }).toDestination();
                 }
             } catch (err) {
-                console.warn("Audio tidak dapat diinisialisasi:", err);
+                console.warn("Audio tidak dapat diinisialisasi secara otomatis (Mungkin diblokir browser):", err);
             }
         }
 
@@ -504,11 +508,20 @@
                     if(!lines[i].trim()) continue;
                     const cells = parseCSVLine(lines[i]);
                     if(cells.length >= 9) {
+                        let rawIndex = parseInt(cells[8]);
+                        // Logika Pintar Indexing (Mendukung input 1-4 maupun 0-3 dari guru)
+                        let finalIndex = 0;
+                        if (rawIndex > 0) {
+                            finalIndex = rawIndex > 3 ? (rawIndex > 0 ? rawIndex - 1 : 0) : rawIndex - 1; 
+                        } else {
+                            finalIndex = 0; // Kunci di 0 jika input kosong atau 0
+                        }
+                        
                         result.push({
                             tingkat: cells[0], mapel: cells[1], materi: cells[2],
                             pertanyaan: cells[3],
                             opsi: [cells[4], cells[5], cells[6], cells[7]],
-                            jawaban_index: parseInt(cells[8]) - 1
+                            jawaban_index: finalIndex
                         });
                     }
                 }
@@ -543,11 +556,19 @@
                         if(lines[i].trim() === '') continue;
                         const cells = parseCSVLine(lines[i]);
                         if(cells.length >= 9) {
+                            let rawIndex = parseInt(cells[8]);
+                            let finalIndex = 0;
+                            if (rawIndex > 0) {
+                                finalIndex = rawIndex > 3 ? (rawIndex > 0 ? rawIndex - 1 : 0) : rawIndex - 1; 
+                            } else {
+                                finalIndex = 0; 
+                            }
+
                             result.push({
                                 tingkat: cells[0], mapel: cells[1], materi: cells[2],
                                 pertanyaan: cells[3],
                                 opsi: [cells[4], cells[5], cells[6], cells[7]],
-                                jawaban_index: parseInt(cells[8]) - 1
+                                jawaban_index: finalIndex
                             });
                         }
                     }
@@ -597,9 +618,12 @@
             localStorage.setItem('duelNamaP2', p2);
             
             showConfirm(`Apakah <strong>${p1}</strong> dan <strong>${p2}</strong> sudah siap bermain?`, async () => {
-                // Yes Action
-                try { requestFullScreen(); } catch(e) {} // Panggil fullscreen lebih dulu agar sinkron dengan klik
-                await initAudio(); // Inisialisasi Audio Engine dengan aman
+                // Yes Action - Request Fullscreen terlebih dahulu (membutuhkan interaksi user)
+                try { requestFullScreen(); } catch(e) {} 
+                
+                // Inisialisasi Audio setelah interaksi
+                await initAudio(); 
+                
                 mulaiHitungMundur();
             });
         }
@@ -635,7 +659,7 @@
                     numEl.innerText = count;
                     playSound('countdown');
                 } else if(count === 0) {
-                    numEl.innerText = "Mulai!";
+                    numEl.innerText = "GO!";
                     playSound('go');
                 } else {
                     clearInterval(countInterval);
@@ -662,15 +686,15 @@
                 return;
             }
 
-            // STRATEGI PEMBAGIAN 50/50
+            // STRATEGI PEMBAGIAN 50/50 SOAL
             let arrayAcak = acakSoal([...filteredSoal]);
             let midIndex = Math.ceil(arrayAcak.length / 2);
             
             let bagianAwal = arrayAcak.slice(0, midIndex);
             let bagianAkhir = arrayAcak.slice(midIndex);
-            if(bagianAkhir.length === 0) bagianAkhir = [...bagianAwal]; // Fallback jika soal sangat sedikit
+            if(bagianAkhir.length === 0) bagianAkhir = [...bagianAwal]; // Fallback
 
-            // P1 mulai dari bagianAwal, P2 mulai dari bagianAkhir, lalu acak masing-masing
+            // P1 mulai dari awal, P2 mulai dari akhir, lalu acak opsi dan susunannya
             soalP1 = acakSoal(bagianAwal).concat(acakSoal(bagianAkhir));
             soalP2 = acakSoal(bagianAkhir).concat(acakSoal(bagianAwal));
 
@@ -701,7 +725,7 @@
             const soalArr = isP1 ? soalP1 : soalP2;
             let currentIdx = isP1 ? idxP1 : idxP2;
 
-            // Looping jika soal habis sebelum waktu habis
+            // Looping jika soal habis
             if (currentIdx >= soalArr.length) {
                 if(isP1) { soalP1 = acakSoal([...filteredSoal]); idxP1 = 0; currentIdx = 0; }
                 else { soalP2 = acakSoal([...filteredSoal]); idxP2 = 0; currentIdx = 0; }
@@ -711,21 +735,27 @@
             const containerBox = document.getElementById(isP1 ? 'q-p1' : 'q-p2');
             const optionsContainer = document.getElementById(isP1 ? 'options-p1' : 'options-p2');
 
-            // Render HTML (mendukung gambar)
+            // Render HTML (mendukung tag <img> jika ada di JSON)
             containerBox.innerHTML = currentSoal.pertanyaan;
             optionsContainer.innerHTML = '';
 
             const btnClass = isP1 ? 'p1-btn' : 'p2-btn';
 
-            // Petakan opsi dengan indeks kuncinya, lalu ACAK posisinya
+            // Menggabungkan teks opsi dengan status benar/salah, lalu mengacaknya
             const opsiObj = currentSoal.opsi.map((teks, i) => ({ teks, isCorrect: i === currentSoal.jawaban_index }));
             const shuffledOpsi = acakSoal(opsiObj);
 
             shuffledOpsi.forEach((opt) => {
                 const btn = document.createElement('button');
-                btn.className = `btn-opsi ${btnClass} opsi-content border-2 rounded-2xl text-sm sm:text-xl lg:text-2xl font-bold p-2 sm:p-4 flex items-center shadow-md h-full w-full break-words`;
-                btn.innerHTML = `<span class="flex-1 text-center w-full">${opt.teks}</span>`;
-                btn.onclick = (e) => cekJawaban(playerCode, opt.isCorrect, btn, e);
+                btn.className = `btn-opsi ${btnClass} opsi-content border-2 rounded-2xl text-sm sm:text-xl lg:text-2xl font-bold p-2 sm:p-4 flex items-center justify-center shadow-md h-full w-full break-words relative overflow-hidden`;
+                
+                // Cegah event bubbling dari tombol ke handler zona (supaya tidak langsung skip ke soal selanjutnya saat ngetap opsi)
+                btn.onclick = (e) => {
+                    e.stopPropagation(); 
+                    cekJawaban(playerCode, opt.isCorrect, btn, e);
+                };
+                
+                btn.innerHTML = `<span class="text-center w-full relative z-10">${opt.teks}</span>`;
                 optionsContainer.appendChild(btn);
             });
         }
@@ -733,40 +763,38 @@
         function cekJawaban(playerCode, isCorrect, btnElement, event) {
             const isP1 = playerCode === 'p1';
             
-            // Cegah klik berulang saat masih menunggu tap
+            // Cegah interaksi ganda jika masih dalam mode 'Tap to Continue'
             if ((isP1 && waitTapP1) || (!isP1 && waitTapP2)) return;
 
-            // Matikan semua tombol di sisi ini
+            // Matikan semua tombol di sisi pemain tersebut
             const opsiContainer = document.getElementById(isP1 ? 'options-p1' : 'options-p2');
             const allBtns = opsiContainer.querySelectorAll('.btn-opsi');
             allBtns.forEach(b => b.disabled = true);
 
+            // Logika Benar / Salah
             if (isCorrect) {
                 if (isP1) skorP1 += 10; else skorP2 += 10;
                 btnElement.classList.add('btn-correct');
-                btnElement.innerHTML += ' <span class="ml-2 text-3xl drop-shadow-md">✅</span>';
+                btnElement.innerHTML += '<span class="absolute right-4 text-3xl drop-shadow-md z-20">✅</span>';
                 playSound('correct');
             } else {
                 btnElement.classList.add('btn-wrong');
-                btnElement.innerHTML += ' <span class="ml-2 text-3xl drop-shadow-md">❌</span>';
+                btnElement.innerHTML += '<span class="absolute right-4 text-3xl drop-shadow-md z-20">❌</span>';
                 playSound('wrong');
-                // Tunjukkan yang benar
-                allBtns.forEach(b => {
-                    // Cek properti onclick lama (agak tricky karena anonymous function, lebih aman abaikan atau tebak)
-                    // Tapi di versi ini kita hanya tandai yang diklik
-                });
             }
 
             document.getElementById('score-p1').innerText = skorP1;
             document.getElementById('score-p2').innerText = skorP2;
 
-            // Munculkan Overlay Tap To Continue
+            // Aktifkan mode Tap To Continue
             if(isP1) waitTapP1 = true; else waitTapP2 = true;
             document.getElementById(`overlay-${playerCode}`).classList.add('active');
         }
 
         function handleZoneClick(playerCode) {
+            // Fungsi ini dipanggil ketika user mengetuk sembarang area (termasuk overlay) di zona mereka
             const isP1 = playerCode === 'p1';
+            
             if (isP1 && waitTapP1) {
                 waitTapP1 = false;
                 document.getElementById('overlay-p1').classList.remove('active');
@@ -785,7 +813,7 @@
             updateTimerDisplay();
 
             timerId = setInterval(() => {
-                if(!isGameRunning) return; // Jeda jika dibatalkan (dikonfirmasi)
+                if(!isGameRunning) return; // Jeda otomatis saat modal konfirmasi batal terbuka
                 
                 sisaWaktu--;
                 updateTimerDisplay();
@@ -804,14 +832,14 @@
         }
 
         function tanyaBatalGame() {
-            isGameRunning = false; // Pause timer
+            isGameRunning = false; // Jeda permainan
             showConfirm("Yakin ingin membatalkan pertandingan yang sedang berlangsung?", 
-                () => { // YES
+                () => { // JIKA YA
                     clearInterval(timerId);
                     kembaliKeMenu();
                 },
-                () => { // NO
-                    isGameRunning = true; // Resume timer
+                () => { // JIKA TIDAK
+                    isGameRunning = true; // Lanjutkan permainan
                 }
             );
         }
@@ -866,7 +894,7 @@
             lb.push({ nama: name1, skor: skorP1, materi: document.getElementById('select-materi').value, date: new Date().toLocaleDateString() });
             lb.push({ nama: name2, skor: skorP2, materi: document.getElementById('select-materi').value, date: new Date().toLocaleDateString() });
             
-            // Sort & Keep top 10
+            // Sort Descending & Keep top 10
             lb.sort((a,b) => b.skor - a.skor);
             lb = lb.slice(0, 10);
             
