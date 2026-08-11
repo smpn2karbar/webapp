@@ -7,7 +7,7 @@
     <title>Game Duel IFP Mapel</title>
     <!-- Tailwind CSS untuk Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tone JS untuk Synthesized Sound (Versi Stabil 14) -->
+    <!-- Tone JS untuk Synthesized Sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -71,20 +71,19 @@
             display: flex; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
-        /* Saat active, overlay tidak memblokir pointer-events sepenuhnya agar event klik bisa tembus ke container zone */
         .tap-overlay.active { opacity: 1; pointer-events: none; }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
     </style>
 </head>
 <body class="flex flex-col h-screen w-screen overflow-hidden">
 
     <!-- CUSTOM MESSAGE BOX -->
-    <div id="custom-message-box" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
+    <div id="custom-message-box" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-slate-800 border border-slate-600 rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl modal-anim text-center">
             <div id="message-icon" class="text-5xl mb-4">ℹ️</div>
             <h3 id="message-title" class="text-2xl font-bold text-white mb-2">Informasi</h3>
@@ -94,13 +93,27 @@
     </div>
 
     <!-- CUSTOM CONFIRM BOX -->
-    <div id="custom-confirm-box" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
+    <div id="custom-confirm-box" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-slate-800 border border-slate-600 rounded-2xl p-6 md:p-10 max-w-lg w-full shadow-2xl modal-anim text-center">
             <h3 id="confirm-title" class="text-3xl font-black text-white mb-4">Konfirmasi</h3>
             <p id="confirm-text" class="text-slate-300 mb-8 text-xl"></p>
             <div class="flex gap-4">
                 <button id="btn-confirm-no" class="flex-1 py-4 bg-slate-600 hover:bg-slate-500 text-white text-xl font-bold rounded-xl transition">Tidak</button>
                 <button id="btn-confirm-yes" class="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xl font-bold rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.5)]">Ya</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM PIN BOX -->
+    <div id="custom-pin-box" class="hidden fixed inset-0 z-[110] bg-black/85 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-slate-800 border border-slate-600 rounded-2xl p-6 md:p-8 max-w-sm w-full shadow-2xl modal-anim text-center">
+            <div class="text-4xl mb-4">🔐</div>
+            <h3 class="text-2xl font-bold text-white mb-2">Akses Guru</h3>
+            <p class="text-slate-400 mb-6 text-sm">Masukkan PIN untuk mengakses Bank Soal dan Manajemen Histori.</p>
+            <input type="password" id="pin-input" class="w-full text-center text-3xl tracking-[0.5em] font-black p-4 bg-slate-900 border-2 border-blue-500 rounded-xl text-white mb-6 focus:outline-none focus:border-emerald-500 transition-colors" placeholder="****" maxlength="4">
+            <div class="flex gap-3">
+                <button onclick="closePinBox()" class="flex-1 py-3 bg-slate-600 hover:bg-slate-500 text-white font-bold rounded-xl transition">Batal</button>
+                <button onclick="verifyPin()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition shadow-[0_0_15px_rgba(59,130,246,0.5)]">Buka</button>
             </div>
         </div>
     </div>
@@ -120,13 +133,12 @@
             <!-- TABS -->
             <div class="flex border-b border-slate-600 mb-6 font-semibold">
                 <button onclick="switchTab('main')" id="tab-btn-main" class="flex-1 py-3 text-blue-400 border-b-2 border-blue-400 transition-colors">TANDING</button>
-                <button onclick="switchTab('import')" id="tab-btn-import" class="flex-1 py-3 text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition-colors">IMPOR SOAL</button>
+                <button onclick="requestBankAccess()" id="tab-btn-bank" class="flex-1 py-3 text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition-colors">BANK SOAL</button>
                 <button onclick="switchTab('leaderboard')" id="tab-btn-leaderboard" class="flex-1 py-3 text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition-colors">KLASEMEN</button>
             </div>
 
             <!-- TAB: MAIN -->
             <div id="tab-main" class="space-y-4 block">
-                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700">
                     <div>
                         <label class="block text-slate-400 font-bold mb-2 text-sm">NAMA PEMAIN KIRI (P1)</label>
@@ -168,9 +180,9 @@
                 </button>
             </div>
 
-            <!-- TAB: IMPOR SOAL -->
-            <div id="tab-import" class="space-y-4 hidden text-slate-300">
-                <p class="text-sm">Format mendukung JSON, Upload CSV, atau <strong class="text-blue-300">Tarik dari Link Publish CSV Google Sheets</strong>. (Syarat tabel: Tingkat, Mapel, Materi, Soal, Opsi1, Opsi2, Opsi3, Opsi4, Kunci 1-4).</p>
+            <!-- TAB: BANK SOAL (GURU ONLY) -->
+            <div id="tab-bank" class="space-y-4 hidden text-slate-300 custom-scrollbar overflow-y-auto max-h-[50vh] pr-2">
+                <p class="text-sm">Format mendukung JSON, Upload CSV, atau <strong class="text-blue-300">Tarik dari Link Publish CSV Google Sheets</strong>.</p>
                 
                 <div class="flex flex-col sm:flex-row items-stretch gap-2">
                     <input type="text" id="url-csv-input" class="flex-1 p-3 bg-slate-700 border border-slate-600 rounded-lg text-sm text-white outline-none focus:border-blue-500" placeholder="Paste link Publish to Web (CSV) Google Sheets disini...">
@@ -188,17 +200,28 @@
                         Simpan ke Sistem
                     </button>
                 </div>
-                <button onclick="resetBankSoalBawaan()" class="w-full py-2 bg-red-900/30 text-red-400 border border-red-800/50 rounded-lg text-sm hover:bg-red-900/50">Kembalikan ke Soal Bawaan (Reset)</button>
+                <button onclick="resetBankSoalBawaan()" class="w-full py-2 bg-red-900/30 text-red-400 border border-red-800/50 rounded-lg text-sm hover:bg-red-900/50 transition">Kembalikan ke Soal Bawaan (Reset)</button>
+
+                <!-- SECTION MANAJEMEN HISTORI -->
+                <div class="mt-8 pt-6 border-t border-slate-600">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                        <h3 class="text-lg font-bold text-white">Manajemen Histori Klasemen</h3>
+                        <button onclick="deleteAllHistory()" class="text-sm bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg shadow transition whitespace-nowrap">🗑 Hapus Semua Histori</button>
+                    </div>
+                    <div id="history-list" class="space-y-2">
+                        <!-- List Histori Dinamis -->
+                    </div>
+                </div>
             </div>
 
             <!-- TAB: LEADERBOARD -->
-            <div id="tab-leaderboard" class="hidden h-64 overflow-y-auto pr-2 text-slate-300">
-                <div class="flex justify-between items-center mb-4 sticky top-0 bg-slate-800 p-2 border-b border-slate-700">
-                    <h3 class="font-bold text-lg text-white">Skor Tertinggi Lokal</h3>
-                    <button onclick="resetLeaderboard()" class="text-xs bg-red-600/20 text-red-400 px-3 py-1 rounded hover:bg-red-600/40 transition">Reset Klasemen</button>
+            <div id="tab-leaderboard" class="hidden max-h-[50vh] overflow-y-auto pr-2 text-slate-300 custom-scrollbar">
+                <div class="sticky top-0 bg-slate-800/95 backdrop-blur-sm p-3 border-b border-slate-700 z-10 mb-4 rounded-t-lg">
+                    <h3 class="font-black text-xl text-white text-center tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-600">PAPAN PERINGKAT TOTAL</h3>
+                    <p class="text-xs text-center text-slate-400 mt-1">Daftar skor tertinggi dari seluruh mata pelajaran dan tingkat</p>
                 </div>
-                <div id="leaderboard-list" class="space-y-3">
-                    <!-- List dinamis -->
+                <div id="leaderboard-list" class="space-y-4 pb-4">
+                    <!-- List dinamis semua klasemen -->
                 </div>
             </div>
 
@@ -231,9 +254,7 @@
         </div>
 
         <div class="flex flex-1 w-full h-full relative overflow-hidden">
-            
             <!-- PEMAIN 1 (KIRI - BIRU) -->
-            <!-- Ditambahkan onclick untuk trigger 'Tap to continue' -->
             <div id="zone-p1" class="w-1/2 p1-theme p-4 sm:p-6 flex flex-col relative h-full overflow-hidden cursor-pointer" onclick="handleZoneClick('p1')">
                 <div class="tap-overlay flex-col" id="overlay-p1">
                     <p class="pulse-text text-white">👇 KETUK UNTUK LANJUT 👇</p>
@@ -246,12 +267,10 @@
                     </div>
                 </div>
                 
-                <!-- Area Kaca (Soal) -->
-                <div class="glass-box-p1 p-4 sm:p-6 rounded-3xl flex-1 flex items-center justify-center text-center overflow-y-auto mb-4 z-10 pointer-events-none">
+                <div class="glass-box-p1 p-4 sm:p-6 rounded-3xl flex-1 flex items-center justify-center text-center overflow-y-auto mb-4 z-10 pointer-events-none custom-scrollbar">
                     <div id="q-p1" class="soal-content text-lg sm:text-2xl font-semibold leading-relaxed drop-shadow-md w-full">Menyiapkan Soal...</div>
                 </div>
                 
-                <!-- Grid Opsi (Responsif - Tidak Terpotong) -->
                 <div id="options-p1" class="grid grid-cols-2 gap-3 sm:gap-4 shrink-0 h-[45%] pointer-events-auto relative z-10 pb-2">
                     <!-- Opsi P1 -->
                 </div>
@@ -260,56 +279,54 @@
             <!-- PEMAIN 2 (KANAN - KUNING) -->
             <div id="zone-p2" class="w-1/2 p2-theme p-4 sm:p-6 flex flex-col relative h-full overflow-hidden cursor-pointer" onclick="handleZoneClick('p2')">
                 <div class="tap-overlay flex-col" id="overlay-p2">
-                    <p class="pulse-text text-slate-800">👇 KETUK UNTUK LANJUT 👇</p>
+                    <p class="pulse-text text-slate-900">👇 KETUK UNTUK LANJUT 👇</p>
                 </div>
 
                 <div class="flex justify-between items-center bg-black/5 p-3 sm:p-4 rounded-2xl border border-black/10 shadow-lg shrink-0 mb-4">
-                    <h3 id="display-name-p2" class="text-xl sm:text-3xl font-black tracking-wider drop-shadow-md text-slate-800 truncate max-w-[60%]">P2</h3>
-                    <div class="text-sm sm:text-lg font-bold bg-white/40 px-3 py-1 sm:px-4 sm:py-2 rounded-xl border border-black/10 shadow-inner flex items-center">
+                    <h3 id="display-name-p2" class="text-xl sm:text-3xl font-black tracking-wider drop-shadow-md text-slate-900 truncate max-w-[60%]">P2</h3>
+                    <div class="text-sm sm:text-lg font-bold bg-white/40 px-3 py-1 sm:px-4 sm:py-2 rounded-xl border border-black/10 shadow-inner flex items-center text-slate-900">
                         SKOR: <span id="score-p2" class="text-2xl sm:text-3xl ml-2 font-black text-red-600">0</span>
                     </div>
                 </div>
                 
-                <!-- Area Kaca (Soal) -->
-                <div class="glass-box-p2 p-4 sm:p-6 rounded-3xl flex-1 flex items-center justify-center text-center overflow-y-auto mb-4 z-10 pointer-events-none">
-                    <div id="q-p2" class="soal-content text-lg sm:text-2xl font-semibold leading-relaxed drop-shadow-md text-slate-800 w-full">Menyiapkan Soal...</div>
+                <div class="glass-box-p2 p-4 sm:p-6 rounded-3xl flex-1 flex items-center justify-center text-center overflow-y-auto mb-4 z-10 pointer-events-none custom-scrollbar">
+                    <div id="q-p2" class="soal-content text-lg sm:text-2xl font-semibold leading-relaxed drop-shadow-md text-slate-900 w-full">Menyiapkan Soal...</div>
                 </div>
                 
-                <!-- Grid Opsi (Responsif - Tidak Terpotong) -->
                 <div id="options-p2" class="grid grid-cols-2 gap-3 sm:gap-4 shrink-0 h-[45%] pointer-events-auto relative z-10 pb-2">
                     <!-- Opsi P2 -->
                 </div>
             </div>
-            
         </div>
     </div>
 
     <!-- PANEL HASIL -->
-    <div id="result-panel" class="hidden fixed inset-0 z-50 bg-slate-900/95 flex items-center justify-center">
-        <div class="bg-slate-800 p-10 rounded-3xl shadow-2xl border-2 border-slate-600 max-w-2xl w-full text-center">
+    <div id="result-panel" class="hidden fixed inset-0 z-[80] bg-slate-900/95 flex items-center justify-center">
+        <div class="bg-slate-800 p-10 rounded-3xl shadow-2xl border-2 border-slate-600 max-w-2xl w-full text-center modal-anim">
             <h2 class="text-5xl font-black text-white mb-2">WAKTU HABIS!</h2>
             <p id="winner-text" class="text-3xl font-bold text-yellow-400 mb-8 drop-shadow-md">Menghitung Skor...</p>
             
             <div class="flex justify-center gap-8 mb-8">
-                <div class="bg-blue-900/50 p-6 rounded-2xl border border-blue-500/50 w-48">
+                <div class="bg-blue-900/50 p-6 rounded-2xl border border-blue-500/50 w-48 shadow-lg">
                     <h4 id="result-name-p1" class="text-blue-300 font-bold text-xl mb-2 truncate">P1</h4>
                     <p id="result-score-p1" class="text-4xl font-black text-white">0</p>
                 </div>
-                <div class="bg-yellow-900/50 p-6 rounded-2xl border border-yellow-500/50 w-48">
+                <div class="bg-yellow-900/50 p-6 rounded-2xl border border-yellow-500/50 w-48 shadow-lg">
                     <h4 id="result-name-p2" class="text-yellow-300 font-bold text-xl mb-2 truncate">P2</h4>
                     <p id="result-score-p2" class="text-4xl font-black text-white">0</p>
                 </div>
             </div>
 
-            <button onclick="kembaliKeMenu()" class="w-full py-4 bg-slate-700 hover:bg-slate-600 text-white text-2xl font-bold rounded-xl transition">
+            <button onclick="kembaliKeMenu()" class="w-full py-4 bg-slate-700 hover:bg-slate-600 text-white text-2xl font-bold rounded-xl transition shadow-md">
                 Kembali ke Menu Utama
             </button>
         </div>
     </div>
 
     <script>
-        // CONFIGURATION: URL Google Apps Script Anda
+        // CONFIGURATION
         const GAS_URL = "https://script.google.com/macros/s/AKfycbw5pGSBSp1vXQHlnu-US_caITmtTUcSrEg1xp6IzKFUHYrM-RaWobVdsmEGOzPxwycG/exec";
+        const PIN_GURU = "1234";
 
         // STATE VARIABLES
         let bankSoalData = [];
@@ -323,6 +340,7 @@
         
         let waitTapP1 = false;
         let waitTapP2 = false;
+        let isBankUnlocked = false; // Status proteksi tab Bank Soal
 
         let synth = null; // Tone.js Synth
 
@@ -334,105 +352,53 @@
             { tingkat: "SMP Kelas 7", mapel: "Matematika", materi: "Aljabar Dasar", pertanyaan: "Nilai x yang memenuhi x + 5 = 12 adalah...", opsi: ["7", "17", "6", "8"], jawaban_index: 0 }
         ];
 
-        // --- CUSTOM MODALS (MENGGANTIKAN ALERT & CONFIRM) ---
+        // --- CUSTOM UI MODALS ---
         function showMessage(pesan, isError = false) {
             const box = document.getElementById('custom-message-box');
-            const title = document.getElementById('message-title');
-            const text = document.getElementById('message-text');
-            const icon = document.getElementById('message-icon');
-            
-            title.innerText = isError ? "Kesalahan" : "Informasi";
-            title.className = isError ? "text-2xl font-bold text-red-500 mb-2" : "text-2xl font-bold text-blue-400 mb-2";
-            icon.innerText = isError ? "❌" : "✅";
-            text.innerHTML = pesan;
-            
+            document.getElementById('message-title').innerText = isError ? "Kesalahan" : "Informasi";
+            document.getElementById('message-title').className = isError ? "text-2xl font-bold text-red-500 mb-2" : "text-2xl font-bold text-blue-400 mb-2";
+            document.getElementById('message-icon').innerText = isError ? "❌" : "✅";
+            document.getElementById('message-text').innerHTML = pesan;
             box.classList.remove('hidden');
         }
+        function closeMessageBox() { document.getElementById('custom-message-box').classList.add('hidden'); }
 
-        function closeMessageBox() {
-            document.getElementById('custom-message-box').classList.add('hidden');
-        }
-
-        let confirmCallbackYes = null;
-        let confirmCallbackNo = null;
-
+        let confirmCallbackYes = null, confirmCallbackNo = null;
         function showConfirm(pesan, onYes, onNo) {
-            const box = document.getElementById('custom-confirm-box');
+            document.getElementById('custom-confirm-box').classList.remove('hidden');
             document.getElementById('confirm-text').innerHTML = pesan;
-            confirmCallbackYes = onYes;
-            confirmCallbackNo = onNo;
-            box.classList.remove('hidden');
+            confirmCallbackYes = onYes; confirmCallbackNo = onNo;
         }
+        document.getElementById('btn-confirm-yes').addEventListener('click', () => { document.getElementById('custom-confirm-box').classList.add('hidden'); if (confirmCallbackYes) confirmCallbackYes(); });
+        document.getElementById('btn-confirm-no').addEventListener('click', () => { document.getElementById('custom-confirm-box').classList.add('hidden'); if (confirmCallbackNo) confirmCallbackNo(); });
 
-        document.getElementById('btn-confirm-yes').addEventListener('click', () => {
-            document.getElementById('custom-confirm-box').classList.add('hidden');
-            if (confirmCallbackYes) confirmCallbackYes();
-        });
-
-        document.getElementById('btn-confirm-no').addEventListener('click', () => {
-            document.getElementById('custom-confirm-box').classList.add('hidden');
-            if (confirmCallbackNo) confirmCallbackNo();
-        });
-
-
-        // --- INITIALIZATION ---
-        window.onload = () => {
-            // Load Local Storage
-            const savedData = localStorage.getItem('duelBankSoal');
-            if (savedData) {
-                try {
-                    bankSoalData = JSON.parse(savedData);
-                } catch(e) { bankSoalData = [...soalBawaan]; }
+        // --- PIN & TAB LOGIC ---
+        function requestBankAccess() {
+            if (isBankUnlocked) {
+                switchTab('bank');
             } else {
-                bankSoalData = [...soalBawaan];
+                document.getElementById('custom-pin-box').classList.remove('hidden');
+                document.getElementById('pin-input').focus();
             }
-            
-            document.getElementById('json-input').value = JSON.stringify(bankSoalData, null, 2);
-            
-            // Load Names
-            if(localStorage.getItem('duelNamaP1')) document.getElementById('input-nama-p1').value = localStorage.getItem('duelNamaP1');
-            if(localStorage.getItem('duelNamaP2')) document.getElementById('input-nama-p2').value = localStorage.getItem('duelNamaP2');
-
-            initDropdowns();
-            renderLeaderboard();
-        };
-
-        // --- AUDIO (TONE.JS) ---
-        async function initAudio() {
-            try {
-                if(!synth && window.Tone) {
-                    await Tone.start();
-                    synth = new Tone.PolySynth(Tone.Synth, {
-                        oscillator: { type: "sine" },
-                        envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.5 }
-                    }).toDestination();
-                }
-            } catch (err) {
-                console.warn("Audio tidak dapat diinisialisasi secara otomatis (Mungkin diblokir browser):", err);
+        }
+        function closePinBox() {
+            document.getElementById('custom-pin-box').classList.add('hidden');
+            document.getElementById('pin-input').value = '';
+        }
+        function verifyPin() {
+            const input = document.getElementById('pin-input').value;
+            if (input === PIN_GURU) {
+                isBankUnlocked = true;
+                closePinBox();
+                switchTab('bank');
+            } else {
+                showMessage("❌ PIN Salah!", true);
+                document.getElementById('pin-input').value = '';
             }
         }
 
-        function playSound(type) {
-            if(!synth) return;
-            try {
-                const now = Tone.now();
-                if (type === 'correct') {
-                    synth.triggerAttackRelease(["C5", "E5"], "8n", now);
-                } else if (type === 'wrong') {
-                    synth.triggerAttackRelease(["C3", "Eb3"], "4n", now);
-                } else if (type === 'countdown') {
-                    synth.triggerAttackRelease("G4", "8n", now);
-                } else if (type === 'go') {
-                    synth.triggerAttackRelease("C5", "4n", now);
-                } else if (type === 'finish') {
-                    synth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "2n", now);
-                }
-            } catch (err) {}
-        }
-
-        // --- MENU LOGIC ---
         function switchTab(tabName) {
-            ['main', 'import', 'leaderboard'].forEach(t => {
+            ['main', 'bank', 'leaderboard'].forEach(t => {
                 document.getElementById('tab-' + t).classList.add('hidden');
                 document.getElementById('tab-btn-' + t).classList.remove('text-blue-400', 'border-blue-400');
                 document.getElementById('tab-btn-' + t).classList.add('text-slate-400', 'border-transparent');
@@ -442,17 +408,38 @@
             document.getElementById('tab-btn-' + tabName).classList.remove('text-slate-400', 'border-transparent');
             document.getElementById('tab-btn-' + tabName).classList.add('text-blue-400', 'border-blue-400');
             
-            if(tabName === 'leaderboard') renderLeaderboard();
+            if(tabName === 'leaderboard') renderLeaderboardAll();
+            if(tabName === 'bank') renderHistoryList();
         }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            const savedData = localStorage.getItem('duelBankSoal');
+            if (savedData) {
+                try { bankSoalData = JSON.parse(savedData); } catch(e) { bankSoalData = [...soalBawaan]; }
+            } else {
+                bankSoalData = [...soalBawaan];
+            }
+            
+            document.getElementById('json-input').value = JSON.stringify(bankSoalData, null, 2);
+            if(localStorage.getItem('duelNamaP1')) document.getElementById('input-nama-p1').value = localStorage.getItem('duelNamaP1');
+            if(localStorage.getItem('duelNamaP2')) document.getElementById('input-nama-p2').value = localStorage.getItem('duelNamaP2');
+
+            initDropdowns();
+            renderLeaderboardAll();
+            
+            // Allow Enter key in PIN
+            document.getElementById('pin-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') verifyPin();
+            });
+        };
 
         function initDropdowns() {
             const tingkatSet = [...new Set(bankSoalData.map(item => item.tingkat))];
             const selectTingkat = document.getElementById('select-tingkat');
             selectTingkat.innerHTML = '';
-            
             if(tingkatSet.length === 0) { selectTingkat.innerHTML = '<option value="">Kosong</option>'; return; }
             tingkatSet.forEach(t => selectTingkat.innerHTML += `<option value="${t}">${t}</option>`);
-            
             selectTingkat.onchange = updateMapel;
             updateMapel();
         }
@@ -462,7 +449,6 @@
             const mapelSet = [...new Set(bankSoalData.filter(x => x.tingkat === tingkat).map(x => x.mapel))];
             const selectMapel = document.getElementById('select-mapel');
             selectMapel.innerHTML = '';
-            
             mapelSet.forEach(m => selectMapel.innerHTML += `<option value="${m}">${m}</option>`);
             selectMapel.onchange = updateMateri;
             updateMateri();
@@ -474,7 +460,6 @@
             const materiSet = [...new Set(bankSoalData.filter(x => x.tingkat === tingkat && x.mapel === mapel).map(x => x.materi))];
             const selectMateri = document.getElementById('select-materi');
             selectMateri.innerHTML = '';
-            
             materiSet.forEach(mt => selectMateri.innerHTML += `<option value="${mt}">${mt}</option>`);
         }
 
@@ -491,58 +476,37 @@
 
         async function tarikDataDariURL() {
             const url = document.getElementById('url-csv-input').value.trim();
-            if (!url) {
-                showMessage("❌ Masukkan URL Google Sheets CSV terlebih dahulu!", true);
-                return;
-            }
-            
+            if (!url) { showMessage("❌ Masukkan URL Google Sheets CSV terlebih dahulu!", true); return; }
             try {
                 const response = await fetch(url);
                 if (!response.ok) throw new Error("Gagal mengakses URL");
-                
                 const textData = await response.text();
                 const lines = textData.trim().split('\n');
                 const result = [];
-                
                 for(let i=1; i<lines.length; i++) {
                     if(!lines[i].trim()) continue;
                     const cells = parseCSVLine(lines[i]);
                     if(cells.length >= 9) {
                         let rawIndex = parseInt(cells[8]);
-                        // Logika Pintar Indexing (Mendukung input 1-4 maupun 0-3 dari guru)
-                        let finalIndex = 0;
-                        if (rawIndex > 0) {
-                            finalIndex = rawIndex > 3 ? (rawIndex > 0 ? rawIndex - 1 : 0) : rawIndex - 1; 
-                        } else {
-                            finalIndex = 0; // Kunci di 0 jika input kosong atau 0
-                        }
-                        
+                        let finalIndex = (rawIndex > 0) ? (rawIndex <= 4 ? rawIndex - 1 : 0) : 0; 
                         result.push({
                             tingkat: cells[0], mapel: cells[1], materi: cells[2],
-                            pertanyaan: cells[3],
-                            opsi: [cells[4], cells[5], cells[6], cells[7]],
-                            jawaban_index: finalIndex
+                            pertanyaan: cells[3], opsi: [cells[4], cells[5], cells[6], cells[7]], jawaban_index: finalIndex
                         });
                     }
                 }
-                
                 if (result.length > 0) {
                     document.getElementById('json-input').value = JSON.stringify(result, null, 2);
                     showMessage("✅ Berhasil menarik " + result.length + " soal. Silakan klik 'Simpan ke Sistem' untuk menerapkan.");
-                } else {
-                    showMessage("⚠ Data ditarik, tapi format tabel tidak sesuai (butuh minimal 9 kolom).", true);
-                }
-                
+                } else { showMessage("⚠ Data ditarik, tapi format tabel tidak sesuai (butuh minimal 9 kolom).", true); }
             } catch (error) {
                 showMessage("❌ Gagal mengambil data. Pastikan URL adalah link Publish to Web (CSV).", true);
-                console.error(error);
             }
         }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = (e) => {
                 const content = e.target.result;
@@ -557,18 +521,10 @@
                         const cells = parseCSVLine(lines[i]);
                         if(cells.length >= 9) {
                             let rawIndex = parseInt(cells[8]);
-                            let finalIndex = 0;
-                            if (rawIndex > 0) {
-                                finalIndex = rawIndex > 3 ? (rawIndex > 0 ? rawIndex - 1 : 0) : rawIndex - 1; 
-                            } else {
-                                finalIndex = 0; 
-                            }
-
+                            let finalIndex = (rawIndex > 0) ? (rawIndex <= 4 ? rawIndex - 1 : 0) : 0;
                             result.push({
                                 tingkat: cells[0], mapel: cells[1], materi: cells[2],
-                                pertanyaan: cells[3],
-                                opsi: [cells[4], cells[5], cells[6], cells[7]],
-                                jawaban_index: finalIndex
+                                pertanyaan: cells[3], opsi: [cells[4], cells[5], cells[6], cells[7]], jawaban_index: finalIndex
                             });
                         }
                     }
@@ -580,8 +536,7 @@
         }
 
         function parseCSVLine(text) {
-            let result = [];
-            let row = '', inQuotes = false;
+            let result = [], row = '', inQuotes = false;
             for (let i = 0; i < text.length; i++) {
                 let char = text[i];
                 if (char === '"' && text[i+1] === '"') { row += '"'; i++; }
@@ -589,8 +544,7 @@
                 else if (char === ',' && !inQuotes) { result.push(row.trim()); row = ''; }
                 else row += char;
             }
-            result.push(row.trim());
-            return result;
+            result.push(row.trim()); return result;
         }
 
         function simpanBankSoal() {
@@ -598,32 +552,46 @@
                 const inputVal = document.getElementById('json-input').value;
                 const parsed = JSON.parse(inputVal);
                 if (!Array.isArray(parsed)) throw new Error("Format JSON harus berupa Array");
-                
                 bankSoalData = parsed;
                 localStorage.setItem('duelBankSoal', JSON.stringify(bankSoalData));
                 initDropdowns();
                 showMessage("🎉 Bank Soal berhasil diperbarui di sistem!");
-            } catch (err) {
-                showMessage("❌ Gagal menyimpan. Pastikan format JSON benar.\nError: " + err.message, true);
-            }
+            } catch (err) { showMessage("❌ Gagal menyimpan. Pastikan format JSON benar.\nError: " + err.message, true); }
         }
 
-        // --- PRE-GAME & CORE GAME LOGIC ---
+        async function initAudio() {
+            try {
+                if(!synth && window.Tone) {
+                    await Tone.start();
+                    synth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.5 }
+                    }).toDestination();
+                }
+            } catch (err) { console.warn("Audio tidak dapat diinisialisasi secara otomatis."); }
+        }
+
+        function playSound(type) {
+            if(!synth) return;
+            try {
+                const now = Tone.now();
+                if (type === 'correct') { synth.triggerAttackRelease(["C5", "E5", "G5"], "8n", now); } 
+                else if (type === 'wrong') { synth.triggerAttackRelease(["C3", "Eb3"], "4n", now); } 
+                else if (type === 'countdown') { synth.triggerAttackRelease("G4", "8n", now); } 
+                else if (type === 'go') { synth.triggerAttackRelease("C5", "4n", now); } 
+                else if (type === 'finish') { synth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "2n", now); }
+            } catch (err) {}
+        }
+
         function praMulaiGame() {
             const p1 = document.getElementById('input-nama-p1').value.trim() || "Pemain Kiri";
             const p2 = document.getElementById('input-nama-p2').value.trim() || "Pemain Kanan";
-            
-            // Simpan nama
             localStorage.setItem('duelNamaP1', p1);
             localStorage.setItem('duelNamaP2', p2);
             
             showConfirm(`Apakah <strong>${p1}</strong> dan <strong>${p2}</strong> sudah siap bermain?`, async () => {
-                // Yes Action - Request Fullscreen terlebih dahulu (membutuhkan interaksi user)
                 try { requestFullScreen(); } catch(e) {} 
-                
-                // Inisialisasi Audio setelah interaksi
                 await initAudio(); 
-                
                 mulaiHitungMundur();
             });
         }
@@ -637,7 +605,6 @@
         function exitFullScreen() {
             if (document.exitFullscreen) { document.exitFullscreen(); } 
             else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } 
-            else if (document.msExitFullscreen) { document.msExitFullscreen(); }
         }
 
         function mulaiHitungMundur() {
@@ -654,7 +621,7 @@
                 count--;
                 if(count > 0) {
                     numEl.classList.remove('countdown-anim');
-                    void numEl.offsetWidth; // trigger reflow
+                    void numEl.offsetWidth; // reflow
                     numEl.classList.add('countdown-anim');
                     numEl.innerText = count;
                     playSound('countdown');
@@ -682,19 +649,15 @@
 
             if (filteredSoal.length < 2) {
                 showMessage("❌ Soal di materi ini kurang dari 2. Tambahkan soal dulu.", true);
-                kembaliKeMenu();
-                return;
+                kembaliKeMenu(); return;
             }
 
-            // STRATEGI PEMBAGIAN 50/50 SOAL
             let arrayAcak = acakSoal([...filteredSoal]);
             let midIndex = Math.ceil(arrayAcak.length / 2);
-            
             let bagianAwal = arrayAcak.slice(0, midIndex);
             let bagianAkhir = arrayAcak.slice(midIndex);
-            if(bagianAkhir.length === 0) bagianAkhir = [...bagianAwal]; // Fallback
+            if(bagianAkhir.length === 0) bagianAkhir = [...bagianAwal];
 
-            // P1 mulai dari awal, P2 mulai dari akhir, lalu acak opsi dan susunannya
             soalP1 = acakSoal(bagianAwal).concat(acakSoal(bagianAkhir));
             soalP2 = acakSoal(bagianAkhir).concat(acakSoal(bagianAwal));
 
@@ -704,18 +667,13 @@
             
             document.getElementById('overlay-p1').classList.remove('active');
             document.getElementById('overlay-p2').classList.remove('active');
-
             document.getElementById('display-name-p1').innerText = localStorage.getItem('duelNamaP1');
             document.getElementById('display-name-p2').innerText = localStorage.getItem('duelNamaP2');
-            
             document.getElementById('score-p1').innerText = "0";
             document.getElementById('score-p2').innerText = "0";
-
             document.getElementById('game-arena').classList.remove('hidden');
             
-            tampilkanSoal('p1');
-            tampilkanSoal('p2');
-            
+            tampilkanSoal('p1'); tampilkanSoal('p2');
             isGameRunning = true;
             startTimer();
         }
@@ -725,7 +683,6 @@
             const soalArr = isP1 ? soalP1 : soalP2;
             let currentIdx = isP1 ? idxP1 : idxP2;
 
-            // Looping jika soal habis
             if (currentIdx >= soalArr.length) {
                 if(isP1) { soalP1 = acakSoal([...filteredSoal]); idxP1 = 0; currentIdx = 0; }
                 else { soalP2 = acakSoal([...filteredSoal]); idxP2 = 0; currentIdx = 0; }
@@ -735,13 +692,10 @@
             const containerBox = document.getElementById(isP1 ? 'q-p1' : 'q-p2');
             const optionsContainer = document.getElementById(isP1 ? 'options-p1' : 'options-p2');
 
-            // Render HTML (mendukung tag <img> jika ada di JSON)
             containerBox.innerHTML = currentSoal.pertanyaan;
             optionsContainer.innerHTML = '';
-
             const btnClass = isP1 ? 'p1-btn' : 'p2-btn';
 
-            // Menggabungkan teks opsi dengan status benar/salah, lalu mengacaknya
             const opsiObj = currentSoal.opsi.map((teks, i) => ({ teks, isCorrect: i === currentSoal.jawaban_index }));
             const shuffledOpsi = acakSoal(opsiObj);
 
@@ -749,12 +703,7 @@
                 const btn = document.createElement('button');
                 btn.className = `btn-opsi ${btnClass} opsi-content border-2 rounded-2xl text-sm sm:text-xl lg:text-2xl font-bold p-2 sm:p-4 flex items-center justify-center shadow-md h-full w-full break-words relative overflow-hidden`;
                 
-                // Cegah event bubbling dari tombol ke handler zona (supaya tidak langsung skip ke soal selanjutnya saat ngetap opsi)
-                btn.onclick = (e) => {
-                    e.stopPropagation(); 
-                    cekJawaban(playerCode, opt.isCorrect, btn, e);
-                };
-                
+                btn.onclick = (e) => { e.stopPropagation(); cekJawaban(playerCode, opt.isCorrect, btn, e); };
                 btn.innerHTML = `<span class="text-center w-full relative z-10">${opt.teks}</span>`;
                 optionsContainer.appendChild(btn);
             });
@@ -762,16 +711,12 @@
 
         function cekJawaban(playerCode, isCorrect, btnElement, event) {
             const isP1 = playerCode === 'p1';
-            
-            // Cegah interaksi ganda jika masih dalam mode 'Tap to Continue'
             if ((isP1 && waitTapP1) || (!isP1 && waitTapP2)) return;
 
-            // Matikan semua tombol di sisi pemain tersebut
             const opsiContainer = document.getElementById(isP1 ? 'options-p1' : 'options-p2');
             const allBtns = opsiContainer.querySelectorAll('.btn-opsi');
             allBtns.forEach(b => b.disabled = true);
 
-            // Logika Benar / Salah
             if (isCorrect) {
                 if (isP1) skorP1 += 10; else skorP2 += 10;
                 btnElement.classList.add('btn-correct');
@@ -785,26 +730,20 @@
 
             document.getElementById('score-p1').innerText = skorP1;
             document.getElementById('score-p2').innerText = skorP2;
-
-            // Aktifkan mode Tap To Continue
             if(isP1) waitTapP1 = true; else waitTapP2 = true;
             document.getElementById(`overlay-${playerCode}`).classList.add('active');
         }
 
         function handleZoneClick(playerCode) {
-            // Fungsi ini dipanggil ketika user mengetuk sembarang area (termasuk overlay) di zona mereka
             const isP1 = playerCode === 'p1';
-            
             if (isP1 && waitTapP1) {
                 waitTapP1 = false;
                 document.getElementById('overlay-p1').classList.remove('active');
-                idxP1++;
-                tampilkanSoal('p1');
+                idxP1++; tampilkanSoal('p1');
             } else if (!isP1 && waitTapP2) {
                 waitTapP2 = false;
                 document.getElementById('overlay-p2').classList.remove('active');
-                idxP2++;
-                tampilkanSoal('p2');
+                idxP2++; tampilkanSoal('p2');
             }
         }
 
@@ -813,15 +752,9 @@
             updateTimerDisplay();
 
             timerId = setInterval(() => {
-                if(!isGameRunning) return; // Jeda otomatis saat modal konfirmasi batal terbuka
-                
-                sisaWaktu--;
-                updateTimerDisplay();
-
-                if (sisaWaktu <= 0) {
-                    clearInterval(timerId);
-                    selesaiGame();
-                }
+                if(!isGameRunning) return; 
+                sisaWaktu--; updateTimerDisplay();
+                if (sisaWaktu <= 0) { clearInterval(timerId); selesaiGame(); }
             }, 1000);
         }
 
@@ -832,15 +765,10 @@
         }
 
         function tanyaBatalGame() {
-            isGameRunning = false; // Jeda permainan
-            showConfirm("Yakin ingin membatalkan pertandingan yang sedang berlangsung?", 
-                () => { // JIKA YA
-                    clearInterval(timerId);
-                    kembaliKeMenu();
-                },
-                () => { // JIKA TIDAK
-                    isGameRunning = true; // Lanjutkan permainan
-                }
+            isGameRunning = false;
+            showConfirm("Yakin ingin membatalkan pertandingan?", 
+                () => { clearInterval(timerId); kembaliKeMenu(); },
+                () => { isGameRunning = true; }
             );
         }
 
@@ -849,11 +777,10 @@
             playSound('finish');
             document.getElementById('game-arena').classList.add('hidden');
             document.getElementById('result-panel').classList.remove('hidden');
-            exitFullScreen();
+            try { exitFullScreen(); } catch(e){}
 
             const name1 = localStorage.getItem('duelNamaP1');
             const name2 = localStorage.getItem('duelNamaP2');
-
             document.getElementById('result-name-p1').innerText = name1;
             document.getElementById('result-score-p1').innerText = skorP1;
             document.getElementById('result-name-p2').innerText = name2;
@@ -862,11 +789,9 @@
             let pemenang = "SERI!";
             if (skorP1 > skorP2) pemenang = name1 + " MENANG!";
             else if (skorP2 > skorP1) pemenang = name2 + " MENANG!";
-
             document.getElementById('winner-text').innerText = pemenang;
 
             simpanKeLeaderboard();
-            
             kirimKeGAS({
                 tingkat: document.getElementById('select-tingkat').value,
                 mapel: document.getElementById('select-mapel').value,
@@ -881,73 +806,134 @@
             document.getElementById('game-arena').classList.add('hidden');
             document.getElementById('result-panel').classList.add('hidden');
             document.getElementById('main-menu').classList.remove('hidden');
-            exitFullScreen();
+            try { exitFullScreen(); } catch(e){}
         }
 
         function simpanKeLeaderboard() {
-            const key = `leaderboard_${document.getElementById('select-tingkat').value}_${document.getElementById('select-mapel').value}`;
-            let lb = JSON.parse(localStorage.getItem(key) || "[]");
+            const tk = document.getElementById('select-tingkat').value;
+            const mp = document.getElementById('select-mapel').value;
+            const mt = document.getElementById('select-materi').value;
+            const key = `leaderboard_${tk}_${mp}`;
             
+            let lb = JSON.parse(localStorage.getItem(key) || "[]");
             const name1 = localStorage.getItem('duelNamaP1');
             const name2 = localStorage.getItem('duelNamaP2');
 
-            lb.push({ nama: name1, skor: skorP1, materi: document.getElementById('select-materi').value, date: new Date().toLocaleDateString() });
-            lb.push({ nama: name2, skor: skorP2, materi: document.getElementById('select-materi').value, date: new Date().toLocaleDateString() });
+            lb.push({ nama: name1, skor: skorP1, materi: mt, date: new Date().toLocaleDateString() });
+            lb.push({ nama: name2, skor: skorP2, materi: mt, date: new Date().toLocaleDateString() });
             
-            // Sort Descending & Keep top 10
             lb.sort((a,b) => b.skor - a.skor);
-            lb = lb.slice(0, 10);
-            
+            lb = lb.slice(0, 20); // Simpan top 20 per kategori mapel
             localStorage.setItem(key, JSON.stringify(lb));
         }
 
-        function renderLeaderboard() {
-            const tk = document.getElementById('select-tingkat').value;
-            const mp = document.getElementById('select-mapel').value;
-            const key = `leaderboard_${tk}_${mp}`;
-            
-            const lb = JSON.parse(localStorage.getItem(key) || "[]");
+        // Fitur: Menampilkan Semua Klasemen di Tab KLASEMEN
+        function renderLeaderboardAll() {
             const listEl = document.getElementById('leaderboard-list');
-            
-            if(lb.length === 0) {
-                listEl.innerHTML = `<p class="text-sm text-slate-500 italic">Belum ada data untuk ${tk} - ${mp}</p>`;
-                return;
+            listEl.innerHTML = '';
+            let hasData = false;
+
+            // Mengumpulkan semua kategori dari LocalStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('leaderboard_')) {
+                    hasData = true;
+                    const data = JSON.parse(localStorage.getItem(key));
+                    const parts = key.split('_');
+                    const categoryName = `${parts[1]} - ${parts[2]}`; // Tingkat - Mapel
+                    
+                    // Render Kategori Header
+                    let sectionHtml = `
+                    <div class="mb-6 bg-slate-800/80 rounded-xl border border-slate-600 overflow-hidden shadow-lg">
+                        <div class="bg-slate-700/80 px-4 py-2 border-b border-slate-600">
+                            <h4 class="font-black text-emerald-400 text-lg uppercase">${categoryName}</h4>
+                        </div>
+                        <div class="p-3 space-y-2">`;
+                    
+                    data.sort((a, b) => b.skor - a.skor);
+                    
+                    // Render Item (Max 10 per tampilan)
+                    data.slice(0, 10).forEach((item, index) => {
+                        let badge = "bg-slate-700/50 text-slate-300";
+                        if(index === 0) badge = "bg-yellow-600/30 border border-yellow-500/50 text-yellow-300 shadow-[0_0_10px_rgba(234,179,8,0.2)]";
+                        else if(index === 1) badge = "bg-slate-300/20 border border-slate-300/50 text-slate-200";
+                        else if(index === 2) badge = "bg-amber-700/30 border border-amber-600/50 text-amber-500";
+                        
+                        sectionHtml += `
+                        <div class="flex justify-between items-center p-3 rounded-lg ${badge} backdrop-blur-sm">
+                            <div class="flex items-center gap-4">
+                                <span class="font-black text-2xl opacity-60 w-8 text-center">#${index+1}</span>
+                                <div>
+                                    <p class="font-bold text-lg leading-tight">${item.nama}</p>
+                                    <p class="text-[11px] opacity-70 mt-1">${item.materi} &bull; ${item.date}</p>
+                                </div>
+                            </div>
+                            <div class="font-black text-3xl drop-shadow-md pr-2">${item.skor}</div>
+                        </div>`;
+                    });
+
+                    sectionHtml += `</div></div>`;
+                    listEl.innerHTML += sectionHtml;
+                }
             }
 
-            let html = '';
-            lb.forEach((item, index) => {
-                let badge = "bg-slate-700";
-                if(index === 0) badge = "bg-yellow-600/30 border border-yellow-500/50 text-yellow-300";
-                else if(index === 1) badge = "bg-slate-300/20 border border-slate-300/50 text-slate-200";
-                else if(index === 2) badge = "bg-amber-700/30 border border-amber-600/50 text-amber-500";
-                
-                html += `
-                <div class="flex justify-between items-center p-3 rounded-lg ${badge}">
-                    <div class="flex items-center gap-3">
-                        <span class="font-black text-xl opacity-50">#${index+1}</span>
-                        <div>
-                            <p class="font-bold">${item.nama}</p>
-                            <p class="text-xs opacity-70">${item.materi} (${item.date})</p>
-                        </div>
-                    </div>
-                    <div class="font-black text-2xl">${item.skor}</div>
-                </div>`;
-            });
-            listEl.innerHTML = html;
+            if (!hasData) {
+                listEl.innerHTML = `<div class="text-center mt-10 p-6 bg-slate-800/50 rounded-2xl border border-slate-700"><p class="text-slate-400 text-lg">Belum ada data klasemen yang tersimpan.</p><p class="text-sm mt-2 text-slate-500">Mulai mainkan game untuk mencetak skor!</p></div>`;
+            }
         }
 
-        function resetLeaderboard() {
-            showConfirm("Yakin ingin mereset klasemen untuk mapel ini?", () => {
-                const key = `leaderboard_${document.getElementById('select-tingkat').value}_${document.getElementById('select-mapel').value}`;
+        // Fitur: List Histori di Tab BANK SOAL
+        function renderHistoryList() {
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+            let hasData = false;
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('leaderboard_')) {
+                    hasData = true;
+                    const parts = key.split('_');
+                    const label = `${parts[1]} - ${parts[2]}`; // Tingkat - Mapel
+                    
+                    container.innerHTML += `
+                        <div class="flex justify-between items-center bg-slate-800/80 p-3 rounded-lg border border-slate-600 shadow-sm">
+                            <span class="text-emerald-300 font-bold">${label}</span>
+                            <button onclick="deleteHistory('${key}')" class="bg-red-900/50 hover:bg-red-600 text-red-200 hover:text-white px-4 py-1.5 rounded-md text-sm font-bold border border-red-700 transition">Hapus</button>
+                        </div>
+                    `;
+                }
+            }
+            if (!hasData) {
+                container.innerHTML = '<p class="text-sm text-slate-400 italic bg-slate-800/50 p-4 rounded-lg text-center border border-slate-700">Tidak ada histori klasemen tersimpan.</p>';
+            }
+        }
+
+        function deleteHistory(key) {
+            showConfirm("Yakin ingin menghapus klasemen untuk kategori ini secara permanen?", () => {
                 localStorage.removeItem(key);
-                renderLeaderboard();
-                showMessage("✅ Klasemen berhasil dihapus.");
+                renderHistoryList();
+                renderLeaderboardAll(); // Update klasemen tab
+                showMessage("✅ Histori kategori berhasil dihapus.");
+            });
+        }
+
+        function deleteAllHistory() {
+            showConfirm("PERINGATAN: Yakin ingin menghapus SEMUA data histori klasemen? Data tidak dapat dikembalikan.", () => {
+                const keysToDelete = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    if (localStorage.key(i).startsWith('leaderboard_')) {
+                        keysToDelete.push(localStorage.key(i));
+                    }
+                }
+                keysToDelete.forEach(k => localStorage.removeItem(k));
+                renderHistoryList();
+                renderLeaderboardAll();
+                showMessage("🗑️ Semua histori klasemen berhasil dibersihkan.");
             });
         }
 
         function kirimKeGAS(payload) {
             if (!GAS_URL || GAS_URL.includes("PASTE_DI_SINI")) return;
-            
             fetch(GAS_URL, {
                 method: 'POST',
                 mode: 'no-cors',
