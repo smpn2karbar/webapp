@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Previewer Soal CBT & LaTeX Matematika</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- MathJax Configuration and Script -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']]
+      },
+      options: {
+        ignoreHtmlClass: 'tex2jax_ignore',
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    .mjx-chtml { font-size: 105% !important; }
+    textarea { font-family: 'Fira Code', 'Courier New', monospace; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+  <header class="bg-slate-900 text-white shadow-lg py-3 px-6 flex flex-wrap justify-between items-center gap-4 sticky top-0 z-30">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-900 font-black text-xl shadow-md">
+        <i class="fa-solid font-mono">fx</i>
+      </div>
+      <div>
+        <h1 class="font-bold text-base md:text-lg leading-tight">Live Editor & Previewer Soal LaTeX</h1>
+        <p class="text-xs text-slate-400">Uji Tampilan Soal & Rumus Matematika CBT sebelum di-input ke Spreadsheet</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="copySheetRow()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-xl font-semibold transition flex items-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-copy"></i> Salin Baris Spreadsheet
+      </button>
+      <button onclick="resetEditor()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-xl font-medium transition">
+        <i class="fa-solid fa-rotate-left"></i> Reset
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-grow p-4 md:p-6 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT COLUMN: Editor & Form Controls -->
+    <section class="lg:col-span-6 flex flex-col gap-4">
+      
+      <!-- Presets Selector -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-emerald-600 mr-1"></i> Pilih Contoh Soal / Template
+        </label>
+        <select id="preset-select" onchange="loadPreset(this.value)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs bg-slate-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium">
+          <option value="pecahan">1. Pecahan & Operasi Dasar</option>
+          <option value="pangkat">2. Perpangkatan & Bentuk Akar</option>
+          <option value="persamaan">3. Persamaan Kuadrat & Matriks</option>
+          <option value="geometri">4. Geometri & Trigonometri</option>
+          <option value="tabel">5. Soal dengan Tabel HTML & LaTeX</option>
+        </select>
+      </div>
+
+      <!-- Metadata & Info Inputs -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">No. Soal</label>
+          <input type="number" id="inp-no" value="1" oninput="updatePreview()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Mata Pelajaran</label>
+          <input type="text" id="inp-mapel" value="Matematika" oninput="updatePreview()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Materi</label>
+          <input type="text" id="inp-materi" value="Pecahan" oninput="updatePreview()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Kunci Jawaban</label>
+          <select id="inp-kunci" onchange="updatePreview()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 font-bold text-emerald-700 bg-emerald-50">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Teks Soal Editor -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-2">
+        <div class="flex justify-between items-center">
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-file-pen text-slate-500"></i> Teks Soal (LaTeX / HTML)
+          </label>
+          <div class="flex gap-1 text-[11px]">
+            <button onclick="insertLatex('frac')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 border">Pecahan</button>
+            <button onclick="insertLatex('sqrt')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 border">Akar</button>
+            <button onclick="insertLatex('pow')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 border">Pangkat</button>
+          </div>
+        </div>
+        <textarea id="inp-soal" rows="5" oninput="updatePreviewDebounced()" class="w-full p-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none leading-relaxed" placeholder="Ketik teks soal di sini... Gunakan \( ... \) untuk rumus inline"></textarea>
+      </div>
+
+      <!-- Options Inputs -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+          <i class="fa-solid fa-list-check text-slate-500 mr-1"></i> Opsi Jawaban
+        </label>
+
+        <div class="grid grid-cols-1 gap-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center shrink-0">A</span>
+            <input type="text" id="inp-opsi-a" oninput="updatePreviewDebounced()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500" placeholder="Opsi A">
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">B</span>
+            <input type="text" id="inp-opsi-b" oninput="updatePreviewDebounced()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500" placeholder="Opsi B">
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">C</span>
+            <input type="text" id="inp-opsi-c" oninput="updatePreviewDebounced()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500" placeholder="Opsi C">
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">D</span>
+            <input type="text" id="inp-opsi-d" oninput="updatePreviewDebounced()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500" placeholder="Opsi D">
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: Real-time CBT Live Preview Card -->
+    <section class="lg:col-span-6 flex flex-col gap-4">
+      
+      <div class="bg-slate-900 text-white p-3 rounded-2xl flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-2 text-xs font-semibold">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>Pratinjau Tampilan Siswa (Live CBT)</span>
+        </div>
+        <span class="text-[11px] text-slate-400">Rendering MathJax 3.0</span>
+      </div>
+
+      <!-- CBT Card Simulator -->
+      <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 min-h-[380px] flex flex-col justify-between">
+        
+        <div class="space-y-4">
+          <!-- Question Header Badge -->
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+            <div class="flex items-center gap-2">
+              <span id="prev-badge-no" class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold">
+                Soal No. 1
+              </span>
+              <span id="prev-badge-materi" class="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded font-medium">
+                Pecahan
+              </span>
+            </div>
+            <span id="prev-badge-mapel" class="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+              Matematika
+            </span>
+          </div>
+
+          <!-- Question Body Render Area -->
+          <div id="prev-soal-box" class="text-slate-800 text-sm leading-relaxed font-medium tex2jax_process min-h-[80px] p-2 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+            <!-- Rendered Question Text -->
+          </div>
+
+          <!-- Options Render Area -->
+          <div id="prev-opsi-box" class="space-y-2.5 tex2jax_process pt-2">
+            <!-- Rendered Options -->
+          </div>
+        </div>
+
+        <!-- CBT Card Bottom Bar Simulation -->
+        <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
+          <span>Kunci Dijagokan: <strong id="prev-kunci-display" class="text-emerald-600 font-bold">A</strong></span>
+          <span class="text-[10px]">Aplikasi CBT Penilaian Harian</span>
+        </div>
+
+      </div>
+
+      <!-- Spreadsheet Row Data Output Box -->
+      <div class="bg-slate-900 text-slate-200 p-4 rounded-2xl shadow-sm border border-slate-800 space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-table-cells text-emerald-400"></i> Format Baris Google Spreadsheet
+          </label>
+          <button onclick="copySheetRow()" class="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold">
+            Salin Teks
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400">
+          Format kolom: <code class="text-emerald-300">No | Mapel | Materi | Tingkat | Soal | A | B | C | D | Jawaban</code>
+        </p>
+        <textarea id="out-tsv" readonly rows="2" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-[11px] font-mono text-slate-300 focus:outline-none select-all" onclick="this.select()"></textarea>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+    <span id="toast-msg">Pesan notifikasi</span>
+  </div>
+
+  <script>
+    // Presets database with LaTeX equations
+    const presets = {
+      pecahan: {
+        no: 1,
+        mapel: "Matematika",
+        materi: "Pecahan",
+        kunci: "A",
+        soal: "Hasil perhitungan dari operasi pecahan berikut adalah:\n\\[ \\frac{1}{2} + \\frac{3}{4} - \\frac{1}{3} \\]\nTentukan hasil paling sederhananya!",
+        opsiA: "\\( \\frac{11}{12} \\)",
+        opsiB: "\\( \\frac{9}{12} \\)",
+        opsiC: "\\( \\frac{7}{12} \\)",
+        opsiD: "\\( \\frac{5}{12} \\)"
+      },
+      pangkat: {
+        no: 2,
+        mapel: "Matematika",
+        materi: "Bentuk Pangkat & Akar",
+        kunci: "C",
+        soal: "Bentuk sederhana dari perkalian akar kuadrat \\( \\sqrt{75} + 2\\sqrt{12} - \\sqrt{27} \\) adalah...",
+        opsiA: "\\( 3\\sqrt{3} \\)",
+        opsiB: "\\( 4\\sqrt{3} \\)",
+        opsiC: "\\( 6\\sqrt{3} \\)",
+        opsiD: "\\( 8\\sqrt{3} \\)"
+      },
+      persamaan: {
+        no: 3,
+        mapel: "Matematika",
+        materi: "Persamaan Kuadrat",
+        kunci: "B",
+        soal: "Akar-akar dari persamaan kuadrat \\( x^2 - 5x + 6 = 0 \\) adalah \\( x_1 \\) dan \\( x_2 \\). Nilai dari \\( x_1^2 + x_2^2 \\) adalah...",
+        opsiA: "11",
+        opsiB: "13",
+        opsiC: "19",
+        opsiD: "25"
+      },
+      geometri: {
+        no: 4,
+        mapel: "Matematika",
+        materi: "Trigonometri",
+        kunci: "D",
+        soal: "Jika \\( \\sin \\theta = \\frac{3}{5} \\) untuk sudut lancip \\( \\theta \\), maka nilai dari \\( \\tan \\theta + \\cos \\theta \\) adalah...",
+        opsiA: "\\( \\frac{7}{5} \\)",
+        opsiB: "\\( \\frac{21}{20} \\)",
+        opsiC: "\\( \\frac{27}{20} \\)",
+        opsiD: "\\( \\frac{31}{20} \\)"
+      },
+      tabel: {
+        no: 5,
+        mapel: "Matematika",
+        materi: "Statistika",
+        kunci: "A",
+        soal: "Perhatikan tabel frekuensi data nilai matematika berikut:<br><table class='w-full text-xs text-center border-collapse border border-slate-300 my-2'><tr class='bg-slate-100 border-b border-slate-300'><th class='p-1 border-r'>Nilai</th><th class='p-1'>Frekuensi</th></tr><tr><td class='p-1 border-r border-b'>60 - 69</td><td class='p-1 border-b'>4</td></tr><tr><td class='p-1 border-r border-b'>70 - 79</td><td class='p-1 border-b'>10</td></tr><tr><td class='p-1 border-r border-b'>80 - 89</td><td class='p-1 border-b'>6</td></tr></table>Hitunglah nilai rata-rata (mean) dari data pada tabel di atas!",
+        opsiA: "75,5",
+        opsiB: "76,0",
+        opsiC: "74,8",
+        opsiD: "77,2"
+      }
+    };
+
+    let debounceTimer = null;
+
+    window.onload = function() {
+      loadPreset('pecahan');
+    };
+
+    function loadPreset(key) {
+      const p = presets[key];
+      if (!p) return;
+
+      document.getElementById('inp-no').value = p.no;
+      document.getElementById('inp-mapel').value = p.mapel;
+      document.getElementById('inp-materi').value = p.materi;
+      document.getElementById('inp-kunci').value = p.kunci;
+      document.getElementById('inp-soal').value = p.soal;
+      document.getElementById('inp-opsi-a').value = p.opsiA;
+      document.getElementById('inp-opsi-b').value = p.opsiB;
+      document.getElementById('inp-opsi-c').value = p.opsiC;
+      document.getElementById('inp-opsi-d').value = p.opsiD;
+
+      updatePreview();
+    }
+
+    function updatePreviewDebounced() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        updatePreview();
+      }, 300);
+    }
+
+    function updatePreview() {
+      const no = document.getElementById('inp-no').value || '1';
+      const mapel = document.getElementById('inp-mapel').value || 'Mata Pelajaran';
+      const materi = document.getElementById('inp-materi').value || 'Materi';
+      const kunci = document.getElementById('inp-kunci').value || 'A';
+
+      const soalText = document.getElementById('inp-soal').value || '<em>(Teks soal kosong)</em>';
+      const opsiA = document.getElementById('inp-opsi-a').value || '-';
+      const opsiB = document.getElementById('inp-opsi-b').value || '-';
+      const opsiC = document.getElementById('inp-opsi-c').value || '-';
+      const opsiD = document.getElementById('inp-opsi-d').value || '-';
+
+      // Update Badges
+      document.getElementById('prev-badge-no').innerText = `Soal No. ${no}`;
+      document.getElementById('prev-badge-materi').innerText = materi;
+      document.getElementById('prev-badge-mapel').innerText = mapel;
+      document.getElementById('prev-kunci-display').innerText = kunci;
+
+      // Update Question Content
+      const soalContainer = document.getElementById('prev-soal-box');
+      soalContainer.innerHTML = soalText.replace(/\n/g, '<br>');
+
+      // Update Options Content
+      const opsiContainer = document.getElementById('prev-opsi-box');
+      const listOpsi = [
+        { id: 'A', teks: opsiA },
+        { id: 'B', teks: opsiB },
+        { id: 'C', teks: opsiC },
+        { id: 'D', teks: opsiD }
+      ];
+
+      let htmlOpsi = '';
+      listOpsi.forEach((opt) => {
+        const isKunci = opt.id === kunci;
+        const bgBadge = isKunci ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-100 text-slate-600 border-slate-300';
+        const borderCard = isKunci ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200 bg-white';
+
+        htmlOpsi += `
+          <div class="flex items-center gap-3 p-3 rounded-xl border transition ${borderCard}">
+            <div class="w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold shrink-0 ${bgBadge}">
+              ${opt.id}
+            </div>
+            <div class="text-xs md:text-sm text-slate-800 flex-grow font-medium">${opt.teks}</div>
+          </div>
+        `;
+      });
+      opsiContainer.innerHTML = htmlOpsi;
+
+      // Update Tab-Separated Spreadsheet string
+      // Schema: No | Mapel | Materi | Tingkat Kesulitan | Soal | A | B | C | D | Jawaban
+      const cleanSoal = soalText.replace(/\t/g, ' ').replace(/\n/g, '<br>');
+      const tsvRow = `${no}\t${mapel}\t${materi}\tSedang\t${cleanSoal}\t${opsiA}\t${opsiB}\t${opsiC}\t${opsiD}\t${kunci}`;
+      document.getElementById('out-tsv').value = tsvRow;
+
+      // Trigger MathJax Reprocessing
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        MathJax.typesetPromise([soalContainer, opsiContainer]).catch(err => console.log('MathJax typeset error:', err));
+      }
+    }
+
+    function insertLatex(type) {
+      const textarea = document.getElementById('inp-soal');
+      let snippet = "";
+      if (type === 'frac') snippet = "\\( \\frac{a}{b} \\)";
+      if (type === 'sqrt') snippet = "\\( \\sqrt{x} \\)";
+      if (type === 'pow') snippet = "\\( x^2 \\)";
+
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const text = textarea.value;
+
+      textarea.value = text.substring(0, start) + snippet + text.substring(end);
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = start + snippet.length;
+
+      updatePreviewDebounced();
+    }
+
+    function copySheetRow() {
+      const tsvText = document.getElementById('out-tsv');
+      tsvText.select();
+      
+      try {
+        document.execCommand('copy');
+        showToast("Baris berhasil disalin! Tinggal tempel (paste) di Spreadsheet.", "success");
+      } catch (err) {
+        showToast("Gagal menyalin otomatis. Silakan salin teks secara manual.", "error");
+      }
+    }
+
+    function resetEditor() {
+      document.getElementById('inp-soal').value = "";
+      document.getElementById('inp-opsi-a').value = "";
+      document.getElementById('inp-opsi-b').value = "";
+      document.getElementById('inp-opsi-c').value = "";
+      document.getElementById('inp-opsi-d').value = "";
+      updatePreview();
+      showToast("Editor telah di-reset", "info");
+    }
+
+    function showToast(msg, type = "success") {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.innerText = msg;
+      
+      if (type === 'success') {
+        toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
+      } else if (type === 'error') {
+        toastIcon.className = "fa-solid fa-circle-xmark text-rose-400 text-base";
+      } else {
+        toastIcon.className = "fa-solid fa-circle-info text-blue-400 text-base";
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
